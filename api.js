@@ -11,6 +11,8 @@ async function describe(homey, device) {
     category: category.id,
     categoryName: localize(category.name, homey.i18n.getLanguage()),
     icon: category.icon,
+    emoji: category.emoji,
+    installDate: device.getInstallDate(),
     tasks: states,
   };
 }
@@ -31,6 +33,12 @@ module.exports = {
   async setTasks({ homey, params, body }) {
     const device = homey.app.getDeviceById(params.id);
     await device.setTasks(body && body.tasks);
+    return describe(homey, device);
+  },
+
+  async updateItem({ homey, params, body }) {
+    const device = homey.app.getDeviceById(params.id);
+    if (body && 'installDate' in body) await device.setInstallDate(body.installDate);
     return describe(homey, device);
   },
 
@@ -56,6 +64,7 @@ module.exports = {
         id: device.getData().id,
         name: device.getName(),
         category: device.getStoreValue('category'),
+        installDate: device.getInstallDate(),
         tasks: device.getTasks(),
       })),
     };
@@ -75,6 +84,7 @@ module.exports = {
         continue;
       }
       await device.setTasks(item.tasks || []);
+      if (item.installDate) await device.setInstallDate(item.installDate);
       restored.push(device.getName());
     }
     if (data.settings) {

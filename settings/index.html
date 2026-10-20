@@ -103,6 +103,16 @@
     return d;
   }
 
+  function installSelects(date) {
+    const y = date ? date.slice(0, 4) : '';
+    const m = date ? date.slice(5, 7) : '';
+    const thisYear = new Date().getFullYear();
+    const years = Array.from({ length: 50 }, (_, k) => String(thisYear - k));
+    const months = Array.from({ length: 12 }, (_, k) => String(k + 1).padStart(2, '0'));
+    return `<select class="inst-year"><option value="">${esc(t('settings.install_unknown'))}</option>${years.map(v => `<option ${v === y ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <select class="inst-month"><option value="">-</option>${months.map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>`;
+  }
+
   function render() {
     if (!items.length) { $('items').innerHTML = `<p class="ha-meta">${esc(t('settings.no_items'))}</p>`; return; }
     $('items').innerHTML = items.map(item => {
@@ -131,7 +141,12 @@
       }).join('');
       const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
       return `<div class="ha-item" data-item="${item.id}">
-        <h3>${esc(item.name)} <small>${esc(item.categoryName)}</small></h3>
+        <h3>${esc(item.emoji || '')} ${esc(item.name)} <small>${esc(item.categoryName)}</small></h3>
+        <div class="ha-row ha-meta" data-install="${item.id}">
+          ${esc(t('settings.install'))}:
+          ${installSelects(item.installDate)}
+          <button class="ha-btn" data-act="install">${esc(t('settings.install_save'))}</button>
+        </div>
         ${tasks}
         <div class="ha-task" data-item="${item.id}" data-task="new">
           <div class="ha-row">
@@ -157,6 +172,18 @@
   async function onClick(ev) {
     const btn = ev.target.closest('[data-act]');
     if (!btn) return;
+    if (btn.dataset.act === 'install') {
+      const row = btn.closest('[data-install]');
+      const year = row.querySelector('.inst-year').value;
+      const month = row.querySelector('.inst-month').value || '01';
+      try {
+        const updated = await api('PUT', `/devices/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null });
+        items = items.map(i => (i.id === updated.id ? updated : i));
+        render();
+        H.alert(t('settings.saved'));
+      } catch (err) { H.alert(err.message || String(err)); }
+      return;
+    }
     const box = btn.closest('[data-task]');
     const item = items.find(i => i.id === box.dataset.item);
     const taskId = box.dataset.task;

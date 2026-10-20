@@ -57,6 +57,7 @@ class MaintenanceItemDevice extends Homey.Device {
     const task = {
       id: input.id || prev.id || crypto.randomUUID(),
       key: input.key || prev.key || null,
+      basis: (input.basis || prev.basis) === 'install' ? 'install' : 'last',
       name,
       type,
       every: Math.max(1, Math.round(Number(input.every) || prev.every || 1)),
@@ -121,6 +122,31 @@ class MaintenanceItemDevice extends Homey.Device {
     for (const state of states.filter(s => severity(s.status) >= severity('due'))) {
       await this.markDone(state.id);
     }
+  }
+
+  getInstallDate() {
+    const value = this.getStoreValue('installDate');
+    return isDateString(value) ? value : null;
+  }
+
+  // Installation date of the item. Tasks counted from installation (e.g. 'replace') follow it until they are done once.
+  async setInstallDate(date) {
+    return this._exclusive(async () => {
+      const today = this.today();
+      let installDate = isDateString(date) ? date : null;
+      if (installDate && daysBetween(installDate, today) < 0) installDate = today;
+      await this.setStoreValue('installDate', installDate);
+      if (installDate) {
+        const tasks = this.getTasks();
+        for (const task of tasks.filter(tk => tk.basis === 'install' && !(tk.history || []).length)) {
+          task.lastDone = installDate;
+          task.notified = 'ok';
+          task.dueSince = null;
+        }
+        await this.setStoreValue('tasks', tasks);
+      }
+      return this._evaluate();
+    });
   }
 
   async snooze(taskId, days) {

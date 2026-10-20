@@ -27,21 +27,60 @@
   },
   "pair": {
     "title": "Onderdeel toevoegen",
-    "category": "Soort",
+    "step": "Stap __n__ van 4",
+    "s1_title": "Wat wil je bijhouden?",
+    "s2_title": "Gegevens",
+    "s3_title": "Onderhoudstaken",
+    "s4_title": "Overzicht",
     "name": "Naam",
     "name_placeholder": "bijv. Rookmelder overloop",
-    "tasks": "Taken",
-    "tasks_hint": "Vink aan wat je wilt bijhouden. Termijnen en 'laatst gedaan' kun je hier of later in de app-instellingen aanpassen.",
-    "every": "elke",
-    "last_done": "laatst gedaan",
-    "no_tasks": "Geen voorbeeldtaken; voeg na het toevoegen eigen taken toe in de app-instellingen.",
+    "install": "Geïnstalleerd / aangeschaft",
+    "install_hint": "Staat vaak op het typeplaatje of de achterkant. Gebruikt voor taken als 'vervangen'.",
+    "unknown": "Weet ik niet",
+    "year": "Jaar",
+    "month": "Maand (optioneel)",
+    "tasks_hint": "Vink aan wat je wilt bijhouden en pas de termijn aan.",
+    "kind": "Soort termijn",
+    "kind_date": "Op datum",
+    "kind_counter": "Teller (via flow ophogen)",
+    "every": "Elke",
+    "lead": "Melding vooraf",
+    "lead_days": "dagen",
+    "threshold": "Grens",
+    "lead_percent": "Melding vooraf bij % van grens",
+    "last": "Laatst gedaan",
+    "last_install": "Bij installatie",
+    "last_today": "Vandaag / weet ik niet",
+    "last_date": "Andere datum…",
+    "add_custom": "+ Eigen taak",
+    "custom_name": "Naam van de taak",
+    "remove": "Verwijder",
+    "first_due": "Eerst nodig",
+    "no_tasks_selected": "Geen taken gekozen. Je kunt later in de app-instellingen taken toevoegen.",
+    "next": "Volgende",
+    "back": "Terug",
     "add": "Toevoegen",
     "units": {
       "days": "dagen",
       "weeks": "weken",
       "months": "maanden",
       "years": "jaar"
-    }
+    },
+    "months": [
+      "januari",
+      "februari",
+      "maart",
+      "april",
+      "mei",
+      "juni",
+      "juli",
+      "augustus",
+      "september",
+      "oktober",
+      "november",
+      "december"
+    ],
+    "now": "nu"
   },
   "settings": {
     "title": "Huisarts",
@@ -90,6 +129,9 @@
       "months": "maanden",
       "years": "jaar"
     },
-    "history": "Eerder gedaan"
+    "history": "Eerder gedaan",
+    "install": "Geïnstalleerd",
+    "install_unknown": "onbekend",
+    "install_save": "Bewaar"
   }
 }

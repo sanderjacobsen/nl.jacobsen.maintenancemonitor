@@ -55,6 +55,10 @@
     "importData": {
       "method": "POST",
       "path": "/import"
+    },
+    "updateItem": {
+      "method": "PUT",
+      "path": "/devices/:id"
     }
   },
   "flow": {

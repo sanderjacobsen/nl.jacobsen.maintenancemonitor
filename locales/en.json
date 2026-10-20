@@ -27,21 +27,60 @@
   },
   "pair": {
     "title": "Add item",
-    "category": "Type",
+    "step": "Step __n__ of 4",
+    "s1_title": "What do you want to keep track of?",
+    "s2_title": "Details",
+    "s3_title": "Maintenance tasks",
+    "s4_title": "Overview",
     "name": "Name",
     "name_placeholder": "e.g. Smoke detector hallway",
-    "tasks": "Tasks",
-    "tasks_hint": "Tick what you want to track. Intervals and 'last done' can be changed here or later in the app settings.",
-    "every": "every",
-    "last_done": "last done",
-    "no_tasks": "No suggested tasks; add your own tasks in the app settings afterwards.",
+    "install": "Installed / purchased",
+    "install_hint": "Often on the type plate or the back. Used for tasks like 'replace'.",
+    "unknown": "Don't know",
+    "year": "Year",
+    "month": "Month (optional)",
+    "tasks_hint": "Tick what you want to track and adjust the interval.",
+    "kind": "Interval type",
+    "kind_date": "By date",
+    "kind_counter": "Counter (increased by a flow)",
+    "every": "Every",
+    "lead": "Notify in advance",
+    "lead_days": "days",
+    "threshold": "Limit",
+    "lead_percent": "Notify in advance at % of limit",
+    "last": "Last done",
+    "last_install": "At installation",
+    "last_today": "Today / don't know",
+    "last_date": "Other date…",
+    "add_custom": "+ Custom task",
+    "custom_name": "Task name",
+    "remove": "Remove",
+    "first_due": "First due",
+    "no_tasks_selected": "No tasks selected. You can add tasks later in the app settings.",
+    "next": "Next",
+    "back": "Back",
     "add": "Add",
     "units": {
       "days": "days",
       "weeks": "weeks",
       "months": "months",
       "years": "years"
-    }
+    },
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "now": "now"
   },
   "settings": {
     "title": "Huisarts",
@@ -90,6 +129,9 @@
       "months": "months",
       "years": "years"
     },
-    "history": "Done before"
+    "history": "Done before",
+    "install": "Installed",
+    "install_unknown": "unknown",
+    "install_save": "Save"
   }
 }
