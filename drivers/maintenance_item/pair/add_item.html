@@ -8,18 +8,20 @@
   .ha .homey-title { margin-top: 2px; }
   .ha-hint { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: 6px 0 0; line-height: 20px; }
   .hidden { display: none !important; }
+  .ha-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
+    -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
   /* Homey's styleguide has no date field: give it the same look as its other inputs. */
   input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
     background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
     font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
 
   /* Step 1: tiles like Homey's device tiles */
-  .ha-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: var(--homey-su-2); }
+  .ha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; margin-top: var(--homey-su-2); }
   .ha-tile { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light);
-    padding: 10px; min-height: 108px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+    padding: 10px; aspect-ratio: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
     -webkit-tap-highlight-color: transparent; transition: box-shadow var(--homey-duration-fast); }
-  .ha-tile svg { width: 40px; height: 40px; }
-  .ha-tile .name { font-size: var(--homey-font-size-small); line-height: 18px; color: var(--homey-color-text); hyphens: manual; overflow-wrap: anywhere; }
+  .ha-tile .name { font-size: var(--homey-font-size-small); line-height: 18px; color: var(--homey-color-text); hyphens: manual; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .ha-tile.sel { box-shadow: 0 0 0 2px var(--homey-color-blue), var(--homey-box-shadow-light); }
 
   .ha-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -42,7 +44,7 @@
   /* Step 4 */
   .ha-card { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light); margin-top: 12px; overflow: hidden; }
   .ha-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
-  .ha-head svg { width: 44px; height: 44px; flex: 0 0 auto; }
+  .ha-head .ha-icon { width: 44px; height: 44px; }
   .ha-head .name { font-size: var(--homey-font-size-medium); font-weight: var(--homey-font-weight-medium); line-height: 26px; }
   .ha-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--homey-color-line); }
   .ha-line .t { font-weight: var(--homey-font-weight-medium); }
@@ -159,7 +161,7 @@
 
   function renderCats() {
     $('cats').innerHTML = templates.map(c => `<div class="ha-tile ${cat && cat.id === c.id ? 'sel' : ''}" data-id="${c.id}">
-      ${c.svg}<div class="name">${esc(softHyphen(c.name))}</div></div>`).join('');
+      <span class="ha-icon" style="--icon:url('${c.iconUri}');"></span><div class="name">${esc(softHyphen(c.name))}</div></div>`).join('');
   }
 
   function lastText(tk) {
@@ -224,7 +226,7 @@
   function renderSummary() {
     const chosen = tasks.filter(tk => tk.use && String(tk.name).trim());
     const inst = installDate();
-    let html = `<div class="ha-card"><div class="ha-head">${cat.svg}<div><div class="name">${esc($('name').value)}</div>
+    let html = `<div class="ha-card"><div class="ha-head"><span class="ha-icon" style="--icon:url('${cat.iconUri}');"></span><div><div class="name">${esc($('name').value)}</div>
       <div class="ha-step">${esc(tr('pair.install'))}: ${inst ? esc(fmt(inst, { month: 'long', year: 'numeric' })) : esc(tr('pair.unknown').toLowerCase())}</div></div></div>`;
     if (!chosen.length) html += `<div class="ha-line"><span class="s">${esc(tr('pair.no_tasks_selected'))}</span></div>`;
     html += chosen.map(tk => {

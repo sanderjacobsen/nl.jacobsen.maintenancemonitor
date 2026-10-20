@@ -13,8 +13,8 @@
     "nl": "Onderhoud nodig"
   },
   "insightsTitleFalse": {
-    "en": "Maintenance up to date",
-    "nl": "Onderhoud bijgewerkt"
+    "en": "No maintenance needed",
+    "nl": "Geen onderhoud nodig"
   },
   "icon": "/assets/capabilities/alarm.svg"
 }

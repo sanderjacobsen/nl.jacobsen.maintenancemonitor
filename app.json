@@ -356,8 +356,8 @@
       {
         "id": "has_open_tasks",
         "title": {
-          "en": "Has !{{|no }}open tasks",
-          "nl": "Heeft !{{|geen }}openstaande taken"
+          "en": "!{{Has|Has no}} open tasks",
+          "nl": "!{{Heeft|Heeft geen}} openstaande taken"
         },
         "args": [
           {
@@ -372,19 +372,19 @@
           }
         ],
         "titleFormatted": {
-          "en": "[[device]] has !{{|no }}open tasks",
-          "nl": "[[device]] heeft !{{|geen }}openstaande taken"
+          "en": "[[device]] !{{has|has no}} open tasks",
+          "nl": "[[device]] !{{heeft|heeft geen}} openstaande taken"
         }
       },
       {
         "id": "task_due_within",
         "title": {
-          "en": "Task is due within [[days]] days",
-          "nl": "Taak is binnen [[days]] dagen nodig"
+          "en": "Task !{{is|is not}} due within … days",
+          "nl": "Taak !{{is|is niet}} binnen … dagen nodig"
         },
         "titleFormatted": {
-          "en": "[[task]] of [[device]] is !{{|not }}due within [[days]] days",
-          "nl": "[[task]] van [[device]] is !{{|niet }}binnen [[days]] dagen nodig"
+          "en": "[[task]] of [[device]] !{{is|is not}} due within [[days]] days",
+          "nl": "[[task]] van [[device]] !{{is|is niet}} binnen [[days]] dagen nodig"
         },
         "args": [
           {
@@ -494,7 +494,7 @@
         },
         "titleFormatted": {
           "en": "Postpone [[task]] of [[device]] by [[days]] days",
-          "nl": "Stel [[task]] van [[device]] [[days]] dagen uit"
+          "nl": "Stel [[task]] van [[device]] uit met [[days]] dagen"
         },
         "args": [
           {
@@ -648,8 +648,8 @@
         "nl": "Onderhoud nodig"
       },
       "insightsTitleFalse": {
-        "en": "Maintenance up to date",
-        "nl": "Onderhoud bijgewerkt"
+        "en": "No maintenance needed",
+        "nl": "Geen onderhoud nodig"
       },
       "icon": "/assets/capabilities/alarm.svg"
     },

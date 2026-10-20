@@ -6,6 +6,8 @@
   <style>
     /* Only layout; colours, fonts, buttons and form fields come from Homey's own styleguide (homey.css). */
     .hidden { display: none !important; }
+    .ha-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
+    -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
   /* Homey's styleguide has no date field: give it the same look as its other inputs. */
   input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
     background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
@@ -16,7 +18,7 @@
     .ha-sub { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; }
 
     .ha-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
-    .ha-head svg { width: 44px; height: 44px; flex: 0 0 auto; }
+    .ha-head .ha-icon { width: 44px; height: 44px; }
     .ha-head .name { font-size: var(--homey-font-size-medium); font-weight: var(--homey-font-weight-medium); line-height: 26px; }
     .ha-head .ha-state { margin-left: auto; }
 
@@ -180,7 +182,7 @@
       }).join('');
       const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
       return `<div class="ha-card" data-item="${item.id}">
-        <div class="ha-head">${item.svg || ''}<div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
+        <div class="ha-head"><span class="ha-icon" style="--icon:url('${item.iconUri}');"></span><div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
         ${installRow(item)}
         ${tasks}
         <div class="ha-task" data-item="${item.id}" data-task="new">

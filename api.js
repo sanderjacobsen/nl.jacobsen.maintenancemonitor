@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  getTemplates, getCategory, getIconSvg, localize,
+  getTemplates, getCategory, getIconUri, localize,
 } = require('./lib/templates');
 
 async function describe(homey, device) {
@@ -13,7 +13,7 @@ async function describe(homey, device) {
     category: category.id,
     categoryName: localize(category.name, homey.i18n.getLanguage()),
     icon: category.icon,
-    svg: getIconSvg(category.icon),
+    iconUri: getIconUri(category.icon),
     installDate: device.getInstallDate(),
     tasks: states,
   };
