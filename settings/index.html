@@ -1,106 +1,104 @@
 <!doctype html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
-    .ha-item { margin: 18px 0; padding: 12px; border: 1px solid #e3e3e3; border-radius: 10px; }
-    .ha-item h3 { margin: 0 0 8px; font-size: 16px; }
-    .ha-item h3 small { color: #888; font-weight: normal; }
-    .ha-task { padding: 8px 0; border-top: 1px solid #f0f0f0; }
-    .ha-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-    .ha-name { flex: 1 1 200px; font-weight: 500; }
-    .ha-meta { font-size: 13px; color: #666; margin: 2px 0 4px; }
-    .ha-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; color: #fff; }
-    .ha-ok { background: #2E8B6E; } .ha-soon { background: #E3A21A; } .ha-due { background: #E06C1F; } .ha-overdue { background: #C62828; }
-    .ha-btn { padding: 3px 9px; font-size: 13px; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; cursor: pointer; }
-    .ha-btn.primary { background: #2E8B6E; border-color: #2E8B6E; color: #fff; }
-    .ha-edit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 6px; }
-    .ha-edit label { font-size: 12px; color: #666; display: block; }
-    .ha-edit input, .ha-edit select { width: 100%; box-sizing: border-box; }
-    .ha-edit .full { grid-column: 1 / -1; }
-    input[type=date] { padding: 2px 4px; }
-    textarea { width: 100%; box-sizing: border-box; min-height: 90px; font-family: monospace; font-size: 12px; }
+    :root { --ha-text: #1c1c1e; --ha-sub: #6e6e73; --ha-line: #e5e5ea; --ha-fill: #f2f2f7; --ha-blue: #2f7bf5; --ha-radius: 14px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ha-text); font-size: 16px; margin: 0; padding: 4px 16px 40px; }
+    * { box-sizing: border-box; }
+    h1 { font-size: 26px; font-weight: 700; margin: 8px 0 4px; letter-spacing: -.3px; }
+    h2 { font-size: 13px; font-weight: 600; color: var(--ha-sub); text-transform: uppercase; letter-spacing: .4px; margin: 24px 4px 8px; }
+    .sub { font-size: 14px; color: var(--ha-sub); line-height: 1.4; }
+    .hidden { display: none !important; }
+
+    .group { background: #fff; border: 1px solid var(--ha-line); border-radius: var(--ha-radius); overflow: hidden; margin-bottom: 12px; }
+    .row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 52px; border-top: 1px solid var(--ha-line); }
+    .row:first-child { border-top: none; }
+    .row .lbl { flex: 1 1 auto; min-width: 0; }
+    .ctl { display: flex; gap: 6px; align-items: center; flex: 0 1 auto; }
+    .input, .select { font: inherit; font-size: 16px; color: var(--ha-text); background: var(--ha-fill); border: none; border-radius: 10px; min-height: 40px; padding: 8px 12px; outline: none; }
+    .input:focus, .select:focus { box-shadow: 0 0 0 2px var(--ha-blue); }
+    .input.wide { width: 100%; }
+    .input.num { width: 70px; text-align: center; }
+    .select { -webkit-appearance: none; appearance: none; padding-right: 30px; min-width: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center; background-size: 18px; }
+    .unit { font-size: 15px; color: var(--ha-sub); }
+
+    .switch { position: relative; width: 51px; height: 31px; flex: 0 0 auto; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch span { position: absolute; inset: 0; background: #e3e3e8; border-radius: 31px; transition: .2s; }
+    .switch span::before { content: ""; position: absolute; width: 27px; height: 27px; left: 2px; top: 2px; background: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: .2s; }
+    .switch input:checked + span { background: #34c759; }
+    .switch input:checked + span::before { transform: translateX(20px); }
+
+    .seg { display: flex; background: var(--ha-fill); border-radius: 9px; padding: 2px; }
+    .seg button { font: inherit; font-size: 14px; border: none; background: none; padding: 6px 10px; border-radius: 7px; color: var(--ha-text); cursor: pointer; }
+    .seg button.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); font-weight: 600; }
+
+    .item-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
+    .item-head svg { width: 40px; height: 40px; flex: 0 0 auto; }
+    .item-head .name { font-size: 18px; font-weight: 700; }
+    .item-head .cat { font-size: 13px; color: var(--ha-sub); }
+
+    .task { padding: 12px 14px; border-top: 1px solid var(--ha-line); }
+    .task .line { display: flex; align-items: flex-start; gap: 10px; }
+    .task .title { font-weight: 600; flex: 1; min-width: 0; }
+    .task .meta { font-size: 13px; color: var(--ha-sub); margin-top: 3px; line-height: 1.4; }
+    .task .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .pill { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 10px; white-space: nowrap; }
+    .pill.ok { background: #e3f5ea; color: #1e7a45; } .pill.soon { background: #fff3d6; color: #9a6a00; }
+    .pill.due { background: #fdebd8; color: #b45f12; } .pill.overdue { background: #fde2e1; color: #c62828; }
+    .btn { font: inherit; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; padding: 8px 14px; cursor: pointer; background: var(--ha-fill); color: var(--ha-blue); }
+    .btn.primary { background: linear-gradient(90deg, #3a7bfd, #56c2f7); color: #fff; }
+    .btn.danger { color: #d93025; }
+    .edit { margin-top: 10px; border: 1px solid var(--ha-line); border-radius: 12px; overflow: hidden; background: #fbfbfd; }
+    .add { width: 100%; border: none; border-top: 1px solid var(--ha-line); background: none; padding: 14px; font: inherit; color: var(--ha-blue); text-align: left; }
+    .add .select { width: 100%; }
+    textarea { width: 100%; min-height: 110px; font-family: ui-monospace, monospace; font-size: 12px; border: none; background: var(--ha-fill); border-radius: 10px; padding: 10px; }
   </style>
 </head>
 <body>
-  <h1 class="homey-title" data-i18n="settings.title"></h1>
-  <p class="homey-subtitle" data-i18n="settings.intro"></p>
+  <h1 data-i18n="settings.title"></h1>
+  <p class="sub" data-i18n="settings.intro"></p>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.notifications"></legend>
-    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_soon" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_soon"></span></label>
-    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_due" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_due"></span></label>
-    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_overdue" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_overdue"></span></label>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="overdue_after_days" data-i18n="settings.overdue_after"></label>
-      <input class="homey-form-input" type="number" id="overdue_after_days" min="1" max="365" />
-    </div>
-  </fieldset>
+  <h2 data-i18n="settings.items"></h2>
+  <div id="items"></div>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.items"></legend>
-    <div id="items"></div>
-  </fieldset>
+  <h2 data-i18n="settings.notifications"></h2>
+  <div class="group">
+    <div class="row"><span class="lbl" data-i18n="settings.notify_soon"></span><label class="switch"><input type="checkbox" id="notify_soon" /><span></span></label></div>
+    <div class="row"><span class="lbl" data-i18n="settings.notify_due"></span><label class="switch"><input type="checkbox" id="notify_due" /><span></span></label></div>
+    <div class="row"><span class="lbl" data-i18n="settings.notify_overdue"></span><label class="switch"><input type="checkbox" id="notify_overdue" /><span></span></label></div>
+    <div class="row"><span class="lbl" data-i18n="settings.overdue_after"></span><div class="ctl"><input class="input num" type="number" inputmode="numeric" id="overdue_after_days" min="1" max="365" /></div></div>
+  </div>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.backup"></legend>
-    <button class="ha-btn" id="export" data-i18n="settings.export"></button>
-    <p class="ha-meta" data-i18n="settings.import_hint"></p>
-    <textarea id="backup"></textarea>
-    <button class="ha-btn" id="import" data-i18n="settings.import"></button>
-  </fieldset>
+  <h2 data-i18n="settings.backup"></h2>
+  <div class="group">
+    <div class="row"><span class="lbl sub" data-i18n="settings.import_hint"></span></div>
+    <div class="row"><textarea id="backup"></textarea></div>
+    <div class="row"><button class="btn" id="export" data-i18n="settings.export"></button><button class="btn" id="import" data-i18n="settings.import"></button></div>
+  </div>
 
 <script>
-  let H; let items = []; let templates = []; let editing = null; // editing = { itemId, taskId|'new', draft }
+  let H; let items = []; let templates = []; let editing = null; // { itemId, taskId | 'new', draft }
   const UNITS = ['days', 'weeks', 'months', 'years'];
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const t = (key, vars) => H.__(key, vars);
-  const today = () => new Date().toISOString().slice(0, 10);
-  const api = (method, path, body) => new Promise((resolve, reject) =>
-    H.api(method, path, body || null, (err, res) => (err ? reject(err) : resolve(res))));
+  const pad = n => String(n).padStart(2, '0');
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const fmt = (date, opts) => new Date(`${date}T12:00:00`).toLocaleDateString(undefined, opts || { day: 'numeric', month: 'short', year: 'numeric' });
+  const api = (method, path, body) => new Promise((resolve, reject) => H.api(method, path, body || null, (err, res) => (err ? reject(err) : resolve(res))));
 
-  function intervalText(task) {
-    if (task.type === 'counter') return `${t('settings.counter')} ${Math.round(task.counter * 100) / 100} / ${task.threshold}`;
-    return `${t('settings.every')} ${task.every} ${t('settings.units.' + task.unit)}`;
-  }
-
-  function nextText(task) {
-    if (task.type === 'counter') return `${Math.round((task.progress || 0) * 100)}%`;
+  function metaText(task) {
+    if (task.type === 'counter') {
+      return `${t('settings.type_counter')}: ${Math.round(task.counter * 100) / 100} / ${task.threshold} (${Math.round((task.progress || 0) * 100)}%)`;
+    }
     const d = task.days;
     const when = d > 0 ? t('device.in_days', { days: d }) : d === 0 ? t('device.today') : t('device.days_late', { days: -d });
-    return `${task.dueDate} (${when})`;
-  }
-
-  function editForm(item, draft) {
-    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === draft.unit ? 'selected' : ''}>${esc(t('settings.units.' + u))}</option>`).join('');
-    const isCounter = draft.type === 'counter';
-    return `<div class="ha-edit">
-      <div class="full"><label>${esc(t('settings.name'))}</label><input id="e_name" value="${esc(draft.name)}" maxlength="80" /></div>
-      <div><label>${esc(t('settings.type'))}</label><select id="e_type">
-        <option value="date" ${!isCounter ? 'selected' : ''}>${esc(t('settings.type_date'))}</option>
-        <option value="counter" ${isCounter ? 'selected' : ''}>${esc(t('settings.type_counter'))}</option></select></div>
-      ${isCounter ? `
-        <div><label>${esc(t('settings.threshold'))}</label><input id="e_threshold" type="number" min="1" value="${draft.threshold ?? 100}" /></div>
-        <div><label>${esc(t('settings.counter'))}</label><input id="e_counter" type="number" min="0" value="${draft.counter ?? 0}" /></div>
-        <div><label>${esc(t('settings.lead_percent'))}</label><input id="e_leadPercent" type="number" min="0" max="100" value="${draft.leadPercent ?? 10}" /></div>`
-      : `
-        <div><label>${esc(t('settings.every'))}</label><input id="e_every" type="number" min="1" value="${draft.every ?? 1}" /></div>
-        <div><label>&nbsp;</label><select id="e_unit">${unitOpts}</select></div>
-        <div><label>${esc(t('settings.lead'))}</label><input id="e_leadDays" type="number" min="0" value="${draft.leadDays ?? 7}" /></div>`}
-      <div><label>${esc(t('settings.last_done'))}</label><input id="e_lastDone" type="date" max="${today()}" value="${esc(draft.lastDone || today())}" /></div>
-      <div class="full"><label>${esc(t('settings.note'))}</label><input id="e_note" value="${esc(draft.note || '')}" maxlength="500" /></div>
-      <div class="full"><button class="ha-btn primary" data-act="save">${esc(t('settings.save'))}</button>
-        <button class="ha-btn" data-act="cancel">${esc(t('settings.cancel'))}</button></div>
-    </div>`;
-  }
-
-  function readDraft() {
-    const val = id => ($(id) ? $(id).value : undefined);
-    const d = { ...editing.draft, name: val('e_name'), type: val('e_type'), lastDone: val('e_lastDone'), note: val('e_note') };
-    if (d.type === 'counter') Object.assign(d, { threshold: Number(val('e_threshold') ?? d.threshold ?? 100), counter: Number(val('e_counter') ?? d.counter ?? 0), leadPercent: Number(val('e_leadPercent') ?? d.leadPercent ?? 10) });
-    else Object.assign(d, { every: Number(val('e_every') ?? d.every ?? 1), unit: val('e_unit') ?? d.unit ?? 'months', leadDays: Number(val('e_leadDays') ?? d.leadDays ?? 7) });
-    return d;
+    return `${t('settings.every')} ${task.every} ${t('settings.units.' + task.unit)} · ${t('settings.last_done').toLowerCase()} ${fmt(task.lastDone)} · ${t('settings.next').toLowerCase()} ${fmt(task.dueDate)} (${when})`;
   }
 
   function installSelects(date) {
@@ -108,97 +106,107 @@
     const m = date ? date.slice(5, 7) : '';
     const thisYear = new Date().getFullYear();
     const years = Array.from({ length: 50 }, (_, k) => String(thisYear - k));
-    const months = Array.from({ length: 12 }, (_, k) => String(k + 1).padStart(2, '0'));
-    return `<select class="inst-year"><option value="">${esc(t('settings.install_unknown'))}</option>${years.map(v => `<option ${v === y ? 'selected' : ''}>${v}</option>`).join('')}</select>
-      <select class="inst-month"><option value="">-</option>${months.map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>`;
+    return `<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;width:100%">
+      <select class="select inst-year"><option value="">${esc(t('pair.year'))}</option>${years.map(v => `<option ${v === y ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <select class="select inst-month"><option value="">${esc(t('pair.month').replace(/ \(.*\)/, ''))}</option>${Array.from({ length: 12 }, (_, k) => pad(k + 1)).map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>
+      <button class="btn" data-act="install">${esc(t('settings.install_save'))}</button></div>`;
+  }
+
+  function editForm(draft) {
+    const counter = draft.type === 'counter';
+    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === draft.unit ? 'selected' : ''}>${esc(t('settings.units.' + u))}</option>`).join('');
+    return `<div class="edit">
+      <div class="row"><input class="input wide" id="e_name" value="${esc(draft.name)}" placeholder="${esc(t('settings.name'))}" maxlength="80" /></div>
+      <div class="row"><span class="lbl">${esc(t('settings.type'))}</span><div class="seg">
+        <button data-type="date" class="${!counter ? 'on' : ''}">${esc(t('settings.type_date'))}</button>
+        <button data-type="counter" class="${counter ? 'on' : ''}">${esc(t('settings.type_counter'))}</button></div></div>
+      ${counter ? `
+        <div class="row"><span class="lbl">${esc(t('settings.threshold'))}</span><div class="ctl"><input class="input num" style="width:100px" type="number" inputmode="decimal" id="e_threshold" min="1" value="${draft.threshold ?? 100}" /></div></div>
+        <div class="row"><span class="lbl">${esc(t('settings.counter'))}</span><div class="ctl"><input class="input num" style="width:100px" type="number" inputmode="decimal" id="e_counter" min="0" value="${draft.counter ?? 0}" /></div></div>
+        <div class="row"><span class="lbl">${esc(t('settings.lead_percent'))}</span><div class="ctl"><input class="input num" type="number" inputmode="numeric" id="e_leadPercent" min="0" max="100" value="${draft.leadPercent ?? 10}" /><span class="unit">%</span></div></div>`
+      : `
+        <div class="row"><span class="lbl">${esc(t('settings.every'))}</span><div class="ctl"><input class="input num" type="number" inputmode="numeric" id="e_every" min="1" value="${draft.every ?? 1}" /><select class="select" id="e_unit">${unitOpts}</select></div></div>
+        <div class="row"><span class="lbl">${esc(t('settings.lead'))}</span><div class="ctl"><input class="input num" type="number" inputmode="numeric" id="e_leadDays" min="0" value="${draft.leadDays ?? 7}" /></div></div>
+        <div class="row"><span class="lbl">${esc(t('settings.last_done'))}</span><div class="ctl"><input class="input" type="date" id="e_lastDone" max="${today()}" value="${esc(draft.lastDone || today())}" /></div></div>`}
+      <div class="row"><input class="input wide" id="e_note" value="${esc(draft.note || '')}" placeholder="${esc(t('settings.note'))}" maxlength="500" /></div>
+      <div class="row" style="flex-wrap:wrap"><button class="btn primary" data-act="save">${esc(t('settings.save'))}</button><button class="btn" data-act="cancel">${esc(t('settings.cancel'))}</button>
+        ${editing && editing.taskId !== 'new' ? `<button class="btn danger" style="margin-left:auto" data-act="delete">${esc(t('settings.delete'))}</button>` : ''}</div>
+    </div>`;
+  }
+
+  function readDraft() {
+    const v = id => ($(id) ? $(id).value : undefined);
+    const d = { ...editing.draft, name: v('e_name') ?? editing.draft.name, note: v('e_note') ?? editing.draft.note };
+    if (d.type === 'counter') {
+      Object.assign(d, { threshold: Number(v('e_threshold') ?? d.threshold ?? 100), counter: Number(v('e_counter') ?? d.counter ?? 0), leadPercent: Number(v('e_leadPercent') ?? d.leadPercent ?? 10) });
+    } else {
+      Object.assign(d, { every: Number(v('e_every') ?? d.every ?? 1), unit: v('e_unit') ?? d.unit ?? 'months', leadDays: Number(v('e_leadDays') ?? d.leadDays ?? 7), lastDone: v('e_lastDone') ?? d.lastDone });
+    }
+    return d;
   }
 
   function render() {
-    if (!items.length) { $('items').innerHTML = `<p class="ha-meta">${esc(t('settings.no_items'))}</p>`; return; }
+    if (!items.length) { $('items').innerHTML = `<div class="group"><div class="row sub">${esc(t('settings.no_items'))}</div></div>`; return; }
     $('items').innerHTML = items.map(item => {
       const cat = templates.find(c => c.id === item.category);
       const used = new Set(item.tasks.map(tk => tk.key).filter(Boolean));
       const suggestions = (cat ? cat.tasks : []).filter(tk => !used.has(tk.key));
       const tasks = item.tasks.map(task => {
         const isEditing = editing && editing.itemId === item.id && editing.taskId === task.id;
-        return `<div class="ha-task" data-item="${item.id}" data-task="${task.id}">
-          <div class="ha-row">
-            <span class="ha-name">${esc(task.name)}</span>
-            <span class="ha-badge ha-${task.status}">${esc(t('status.' + task.status))}</span>
-          </div>
-          <div class="ha-meta">${esc(intervalText(task))} · ${esc(t('settings.last_done'))} ${esc(task.lastDone)} · ${esc(t('settings.next'))} ${esc(nextText(task))}
-            ${task.note ? ' · ' + esc(task.note) : ''}
-            ${task.history && task.history.length > 1 ? `<br>${esc(t('settings.history'))}: ${task.history.slice(1, 6).map(esc).join(', ')}` : ''}</div>
-          <div class="ha-row">
-            <button class="ha-btn primary" data-act="done">${esc(t('settings.done'))}</button>
-            <input type="date" class="done-date" max="${today()}" value="${today()}" />
-            <button class="ha-btn" data-act="snooze">${esc(t('settings.snooze'))}</button>
-            <button class="ha-btn" data-act="edit">${esc(t('settings.edit'))}</button>
-            <button class="ha-btn" data-act="delete">${esc(t('settings.delete'))}</button>
-          </div>
-          ${isEditing ? editForm(item, editing.draft) : ''}
+        return `<div class="task" data-item="${item.id}" data-task="${task.id}">
+          <div class="line"><span class="title">${esc(task.name)}</span><span class="pill ${task.status}">${esc(t('status.' + task.status))}</span></div>
+          <div class="meta">${esc(metaText(task))}${task.note ? `<br>${esc(task.note)}` : ''}${task.history && task.history.length > 1 ? `<br>${esc(t('settings.history'))}: ${task.history.slice(1, 6).map(d => esc(fmt(d))).join(', ')}` : ''}</div>
+          ${isEditing ? editForm(editing.draft) : `<div class="actions">
+            <button class="btn primary" data-act="done">✓ ${esc(t('settings.done'))}</button>
+            <button class="btn" data-act="snooze">${esc(t('settings.snooze'))}</button>
+            <button class="btn" data-act="edit">${esc(t('settings.edit'))}</button></div>`}
         </div>`;
       }).join('');
       const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
-      return `<div class="ha-item" data-item="${item.id}">
-        <h3>${esc(item.emoji || '')} ${esc(item.name)} <small>${esc(item.categoryName)}</small></h3>
-        <div class="ha-row ha-meta" data-install="${item.id}">
-          ${esc(t('settings.install'))}:
-          ${installSelects(item.installDate)}
-          <button class="ha-btn" data-act="install">${esc(t('settings.install_save'))}</button>
-        </div>
+      return `<div class="group" data-item="${item.id}">
+        <div class="item-head">${item.svg || ''}<div><div class="name">${esc(item.name)}</div><div class="cat">${esc(item.categoryName)}</div></div></div>
+        <div class="row" data-install="${item.id}" style="flex-wrap:wrap"><span class="lbl sub" style="flex-basis:100%">${esc(t('settings.install'))}</span>${installSelects(item.installDate)}</div>
         ${tasks}
-        <div class="ha-task" data-item="${item.id}" data-task="new">
-          <div class="ha-row">
-            <select class="add-select">
-              <option value="">${esc(t('settings.add_task'))}…</option>
-              ${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}
-              <option value="custom">${esc(t('settings.custom'))}</option>
-            </select>
-          </div>
-          ${adding ? editForm(item, editing.draft) : ''}
+        <div class="task" data-item="${item.id}" data-task="new">
+          ${adding ? editForm(editing.draft) : `<select class="select add-select" style="width:100%">
+            <option value="">+ ${esc(t('settings.add_task'))}</option>
+            ${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}
+            <option value="custom">${esc(t('settings.custom'))}</option></select>`}
         </div>
       </div>`;
     }).join('');
   }
 
+  function replaceItem(updated) { items = items.map(i => (i.id === updated.id ? updated : i)); }
+
   async function save(item, tasks) {
-    const updated = await api('PUT', `/devices/${item.id}/tasks`, { tasks });
-    items = items.map(i => (i.id === updated.id ? updated : i));
+    replaceItem(await api('PUT', `/devices/${item.id}/tasks`, { tasks }));
     editing = null;
     render();
   }
 
   async function onClick(ev) {
+    const typeBtn = ev.target.closest('[data-type]');
+    if (typeBtn && editing) { editing.draft = { ...readDraft(), type: typeBtn.dataset.type }; render(); return; }
     const btn = ev.target.closest('[data-act]');
     if (!btn) return;
-    if (btn.dataset.act === 'install') {
-      const row = btn.closest('[data-install]');
-      const year = row.querySelector('.inst-year').value;
-      const month = row.querySelector('.inst-month').value || '01';
-      try {
-        const updated = await api('PUT', `/devices/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null });
-        items = items.map(i => (i.id === updated.id ? updated : i));
+    try {
+      if (btn.dataset.act === 'install') {
+        const row = btn.closest('[data-install]');
+        const year = row.querySelector('.inst-year').value;
+        const month = row.querySelector('.inst-month').value || '01';
+        replaceItem(await api('PUT', `/devices/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null }));
         render();
         H.alert(t('settings.saved'));
-      } catch (err) { H.alert(err.message || String(err)); }
-      return;
-    }
-    const box = btn.closest('[data-task]');
-    const item = items.find(i => i.id === box.dataset.item);
-    const taskId = box.dataset.task;
-    const task = item.tasks.find(tk => tk.id === taskId);
-    try {
+        return;
+      }
+      const box = btn.closest('[data-task]');
+      const item = items.find(i => i.id === box.dataset.item);
+      const taskId = box.dataset.task;
+      const task = item.tasks.find(tk => tk.id === taskId);
       switch (btn.dataset.act) {
-        case 'done': {
-          const date = box.querySelector('.done-date').value || today();
-          const updated = await api('POST', `/devices/${item.id}/tasks/${taskId}/done`, { date });
-          items = items.map(i => (i.id === updated.id ? updated : i)); render(); break;
-        }
-        case 'snooze': {
-          const updated = await api('POST', `/devices/${item.id}/tasks/${taskId}/snooze`, { days: 7 });
-          items = items.map(i => (i.id === updated.id ? updated : i)); render(); break;
-        }
+        case 'done': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/done`, { date: today() })); render(); break;
+        case 'snooze': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/snooze`, { days: 7 })); render(); break;
         case 'edit': editing = { itemId: item.id, taskId, draft: { ...task } }; render(); break;
         case 'cancel': editing = null; render(); break;
         case 'delete':
@@ -206,6 +214,7 @@
           await save(item, item.tasks.filter(tk => tk.id !== taskId)); break;
         case 'save': {
           const draft = readDraft();
+          if (!String(draft.name || '').trim()) { H.alert(t('settings.name')); break; }
           const tasks = editing.taskId === 'new' ? [...item.tasks, draft] : item.tasks.map(tk => (tk.id === editing.taskId ? { ...tk, ...draft } : tk));
           await save(item, tasks); break;
         }
@@ -216,22 +225,16 @@
 
   function onChange(ev) {
     const el = ev.target;
-    const box = el.closest('[data-task]');
-    if (!box) return;
-    if (el.classList.contains('add-select') && el.value) {
-      const item = items.find(i => i.id === box.dataset.item);
-      let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today() };
-      if (el.value.startsWith('tpl:')) {
-        const cat = templates.find(c => c.id === item.category);
-        const tpl = cat.tasks.find(tk => tk.key === el.value.slice(4));
-        draft = { ...draft, ...tpl };
-      }
-      editing = { itemId: item.id, taskId: 'new', draft };
-      render();
-    } else if (el.id === 'e_type' && editing) {
-      editing.draft = { ...readDraft(), type: el.value };
-      render();
+    if (!el.classList.contains('add-select') || !el.value) return;
+    const item = items.find(i => i.id === el.closest('[data-item]').dataset.item);
+    let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today() };
+    if (el.value.startsWith('tpl:')) {
+      const cat = templates.find(c => c.id === item.category);
+      draft = { ...draft, ...cat.tasks.find(tk => tk.key === el.value.slice(4)) };
+      if (draft.basis === 'install' && item.installDate) draft.lastDone = item.installDate;
     }
+    editing = { itemId: item.id, taskId: 'new', draft };
+    render();
   }
 
   async function load() {
@@ -243,14 +246,12 @@
   function onHomeyReady(Homey) {
     H = Homey;
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-
     for (const key of ['notify_soon', 'notify_due', 'notify_overdue']) {
       H.get(key, (err, value) => { $(key).checked = value !== false; });
       $(key).addEventListener('change', () => H.set(key, $(key).checked));
     }
     H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
-
     $('items').addEventListener('click', onClick);
     $('items').addEventListener('change', onChange);
     $('export').addEventListener('click', async () => {
@@ -263,7 +264,6 @@
         await load();
       } catch (err) { H.alert(err.message || String(err)); }
     });
-
     load().catch(err => H.alert(err.message || String(err))).finally(() => H.ready());
   }
 </script>

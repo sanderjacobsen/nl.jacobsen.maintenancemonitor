@@ -1,61 +1,120 @@
 <style>
-  .ha-steps { font-size: 13px; color: #888; margin-bottom: 4px; }
-  .ha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
-  .ha-tile { border: 1px solid #ddd; border-radius: 10px; padding: 10px 4px; text-align: center; cursor: pointer; background: #fff; font-size: 13px; }
-  .ha-tile .e { font-size: 26px; display: block; margin-bottom: 4px; }
-  .ha-tile.sel { border-color: #2E8B6E; box-shadow: 0 0 0 2px #2E8B6E inset; }
-  .ha-card { border: 1px solid #e3e3e3; border-radius: 10px; padding: 10px; margin: 8px 0; }
-  .ha-card.off { opacity: .55; }
-  .ha-card .head { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-  .ha-card .head input[type=text] { flex: 1; }
-  .ha-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 8px; }
-  .ha-fields label { font-size: 12px; color: #666; display: block; }
-  .ha-fields .full { grid-column: 1 / -1; }
-  .ha-fields input, .ha-fields select { width: 100%; box-sizing: border-box; }
-  .ha-inline { display: flex; gap: 6px; }
-  .ha-small { font-size: 13px; color: #666; }
-  .ha-nav { display: flex; gap: 8px; margin-top: 14px; }
-  .ha-nav button { flex: 1; }
-  .ha-sum { padding: 6px 0; border-bottom: 1px solid #eee; }
-  .ha-link { background: none; border: none; color: #2E8B6E; padding: 6px 0; cursor: pointer; font-size: 14px; }
-  .hidden { display: none; }
+  :root {
+    --ha-text: #1c1c1e; --ha-sub: #6e6e73; --ha-line: #e5e5ea; --ha-fill: #f2f2f7;
+    --ha-blue: #2f7bf5; --ha-orange: #f08c2e; --ha-radius: 14px;
+  }
+  .ha { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ha-text); font-size: 16px; padding-bottom: 96px; }
+  .ha * { box-sizing: border-box; }
+  .ha-progress { display: flex; gap: 6px; margin: 4px 0 6px; }
+  .ha-progress span { flex: 1; height: 4px; border-radius: 2px; background: var(--ha-line); }
+  .ha-progress span.on { background: var(--ha-blue); }
+  .ha-steptext { font-size: 13px; color: var(--ha-sub); }
+  .ha h1 { font-size: 26px; font-weight: 700; margin: 2px 0 16px; letter-spacing: -.3px; }
+  .ha-hint { font-size: 14px; color: var(--ha-sub); margin: -6px 0 14px; line-height: 1.4; }
+  .hidden { display: none !important; }
+
+  /* step 1: tiles like Homey device tiles */
+  .ha-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .ha-tile { background: #fff; border: 1px solid var(--ha-line); border-radius: 16px; padding: 12px 10px 10px; min-height: 104px;
+    display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .ha-tile svg { width: 38px; height: 38px; }
+  .ha-tile .name { font-size: 13px; font-weight: 600; line-height: 1.25; hyphens: manual; overflow-wrap: anywhere; }
+  .ha-tile.sel { border: 2px solid var(--ha-blue); padding: 11px 9px 9px; }
+
+  /* grouped list rows */
+  .ha-group { background: #fff; border: 1px solid var(--ha-line); border-radius: var(--ha-radius); overflow: hidden; margin-bottom: 14px; }
+  .ha-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 52px; border-top: 1px solid var(--ha-line); }
+  .ha-row:first-child { border-top: none; }
+  .ha-row > label, .ha-row > .lbl { flex: 1 1 auto; font-size: 16px; }
+  .ha-row .ctl { display: flex; gap: 6px; align-items: center; flex: 0 1 auto; }
+  .ha-input, .ha-select { font: inherit; font-size: 16px; color: var(--ha-text); background: var(--ha-fill); border: none; border-radius: 10px;
+    min-height: 40px; padding: 8px 12px; outline: none; }
+  .ha-input:focus, .ha-select:focus { box-shadow: 0 0 0 2px var(--ha-blue); }
+  .ha-input.wide { width: 100%; }
+  .ha-input.num { width: 64px; text-align: center; }
+  .ha-select { -webkit-appearance: none; appearance: none; padding-right: 30px; line-height: 1.3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center; background-size: 18px; }
+  .ha-unit { font-size: 15px; color: var(--ha-sub); }
+
+  /* step 3: task cards */
+  .ha-task { background: #fff; border: 1px solid var(--ha-line); border-radius: var(--ha-radius); margin-bottom: 10px; overflow: hidden; }
+  .ha-task .top { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .ha-task .txt { flex: 1; min-width: 0; }
+  .ha-task .title { font-weight: 600; font-size: 16px; }
+  .ha-task .sum { font-size: 13px; color: var(--ha-sub); margin-top: 2px; line-height: 1.35; }
+  .ha-task.off .title, .ha-task.off .sum { color: #aeaeb2; }
+  .ha-task .edit { font-size: 14px; color: var(--ha-blue); background: none; border: none; padding: 0 14px 12px; cursor: pointer; }
+  .ha-task .body { border-top: 1px solid var(--ha-line); background: #fbfbfd; }
+  .ha-task .body .ha-row { background: transparent; }
+  .ha-task input.title-input { font-weight: 600; }
+
+  .ha-switch { position: relative; width: 51px; height: 31px; flex: 0 0 auto; }
+  .ha-switch input { opacity: 0; width: 0; height: 0; }
+  .ha-switch span { position: absolute; inset: 0; background: #e3e3e8; border-radius: 31px; transition: .2s; }
+  .ha-switch span::before { content: ""; position: absolute; width: 27px; height: 27px; left: 2px; top: 2px; background: #fff; border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: .2s; }
+  .ha-switch input:checked + span { background: #34c759; }
+  .ha-switch input:checked + span::before { transform: translateX(20px); }
+
+  .ha-seg { display: flex; background: var(--ha-fill); border-radius: 9px; padding: 2px; }
+  .ha-seg button { font: inherit; font-size: 14px; border: none; background: none; padding: 6px 10px; border-radius: 7px; color: var(--ha-text); cursor: pointer; }
+  .ha-seg button.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); font-weight: 600; }
+
+  .ha-add { width: 100%; border: 1.5px dashed #c7c7cc; border-radius: var(--ha-radius); background: none; padding: 14px; font: inherit;
+    font-size: 16px; color: var(--ha-blue); cursor: pointer; }
+
+  /* step 4 */
+  .ha-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
+  .ha-head svg { width: 40px; height: 40px; flex: 0 0 auto; }
+  .ha-head .name { font-size: 18px; font-weight: 700; }
+  .ha-pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #fdebd8; color: #b45f12; }
+
+  /* bottom navigation */
+  .ha-nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,.96); border-top: 1px solid var(--ha-line); }
+  .ha-nav button { flex: 1; font: inherit; font-size: 17px; font-weight: 600; border-radius: 14px; min-height: 50px; border: none; cursor: pointer; }
+  .ha-nav .back { background: var(--ha-fill); color: var(--ha-blue); }
+  .ha-nav .next { background: linear-gradient(90deg, #3a7bfd, #56c2f7); color: #fff; }
+  .ha-nav .next:disabled { opacity: .45; }
 </style>
 
-<header class="homey-header">
-  <div class="ha-steps" id="steps"></div>
-  <h1 class="homey-title" id="title"></h1>
-</header>
+<div class="ha">
+  <div class="ha-progress" id="progress"><span></span><span></span><span></span><span></span></div>
+  <div class="ha-steptext" id="steps"></div>
+  <h1 id="title"></h1>
 
-<div id="step1"><div class="ha-grid" id="cats"></div></div>
+  <div id="step1"><div class="ha-grid" id="cats"></div></div>
 
-<div id="step2" class="hidden">
-  <form class="homey-form" onsubmit="return false;">
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="name" data-i18n="pair.name"></label>
-      <input class="homey-form-input" id="name" type="text" maxlength="60" />
+  <div id="step2" class="hidden">
+    <div class="ha-group">
+      <div class="ha-row"><span class="lbl" data-i18n="pair.name"></span></div>
+      <div class="ha-row" style="border-top:none;padding-top:0"><input class="ha-input wide" id="name" type="text" maxlength="60" /></div>
     </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" data-i18n="pair.install"></label>
-      <div class="ha-inline">
-        <select class="homey-form-select" id="year"></select>
-        <select class="homey-form-select" id="month"></select>
+    <div class="ha-group">
+      <div class="ha-row"><span class="lbl" data-i18n="pair.install"></span></div>
+      <div class="ha-row" style="border-top:none;padding-top:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+          <select class="ha-select" id="year" style="min-width:0;width:100%"></select>
+          <select class="ha-select" id="month" style="min-width:0;width:100%"></select>
+        </div>
       </div>
-      <p class="ha-small" data-i18n="pair.install_hint"></p>
     </div>
-  </form>
+    <p class="ha-hint" data-i18n="pair.install_hint"></p>
+  </div>
+
+  <div id="step3" class="hidden">
+    <p class="ha-hint" data-i18n="pair.tasks_hint"></p>
+    <div id="tasks"></div>
+    <button class="ha-add" id="addCustom" data-i18n="pair.add_custom"></button>
+  </div>
+
+  <div id="step4" class="hidden"><div id="summary"></div></div>
 </div>
 
-<div id="step3" class="hidden">
-  <p class="ha-small" data-i18n="pair.tasks_hint"></p>
-  <div id="tasks"></div>
-  <button class="ha-link" id="addCustom" data-i18n="pair.add_custom"></button>
-</div>
-
-<div id="step4" class="hidden"><div id="summary"></div></div>
-
-<div class="ha-nav">
-  <button class="homey-button-secondary" id="back" data-i18n="pair.back"></button>
-  <button class="homey-button-primary" id="next" data-i18n="pair.next"></button>
+<div class="ha-nav" id="nav">
+  <button class="back" id="back" data-i18n="pair.back"></button>
+  <button class="next" id="next" data-i18n="pair.next"></button>
 </div>
 
 <script>
@@ -70,17 +129,15 @@
   let templates = [];
   let cat = null;
   let step = 1;
-  let tasks = []; // working copy: { use, key, name, type, every, unit, leadDays, threshold, leadPercent, basis, last: 'install'|'today'|'date', lastDate, custom }
+  let tasks = [];
 
   // ---- date helpers (same rules as lib/schedule.js) ----
   function addInterval(date, every, unit) {
     const [y, m, d] = date.split('-').map(Number);
     if (unit === 'days' || unit === 'weeks') {
-      const dt = new Date(Date.UTC(y, m - 1, d) + (unit === 'weeks' ? 7 : 1) * every * 86400000);
-      return dt.toISOString().slice(0, 10);
+      return new Date(Date.UTC(y, m - 1, d) + (unit === 'weeks' ? 7 : 1) * every * 86400000).toISOString().slice(0, 10);
     }
-    const months = unit === 'years' ? every * 12 : every;
-    const target = new Date(Date.UTC(y, m - 1 + months, 1));
+    const target = new Date(Date.UTC(y, m - 1 + (unit === 'years' ? every * 12 : every), 1));
     const last = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
     target.setUTCDate(Math.min(d, last));
     return target.toISOString().slice(0, 10);
@@ -88,8 +145,7 @@
   function installDate() {
     const y = $('year').value;
     if (!y) return null;
-    const m = $('month').value || '01';
-    const date = `${y}-${m}-01`;
+    const date = `${y}-${$('month').value || '01'}-01`;
     return date > today ? today : date;
   }
   function lastDoneOf(tk) {
@@ -97,89 +153,117 @@
     if (tk.last === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(tk.lastDate || '') && tk.lastDate <= today) return tk.lastDate;
     return today;
   }
-  function formatDate(date) {
-    return new Date(`${date}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
-  }
+  const fmt = (date, opts) => new Date(`${date}T12:00:00`).toLocaleDateString(undefined, opts || { day: 'numeric', month: 'long', year: 'numeric' });
+  const unitText = (n, unit) => `${n} ${tr('pair.units.' + unit)}`;
 
-  // ---- steps ----
+  // Break long Dutch compound words at a sensible place in the small tiles.
+  const BREAKS = { Rookmelder: 'Rook­melder', Wasmachine: 'Was­machine', Koffiezetapparaat: 'Koffiezet­apparaat', Robotstofzuiger: 'Robot­stofzuiger',
+    Waterontharder: 'Water­ontharder', Vloerverwarming: 'Vloer­verwarming', Zonnepanelen: 'Zonne­panelen', Drinkfontein: 'Drink­fontein',
+    Vaatwasser: 'Vaat­wasser', Afzuigkap: 'Afzuig­kap', 'warmtepomp': 'warmte­pomp', Ventilator: 'Venti­lator', ventilatie: 'venti­latie', Mechanische: 'Mecha­nische' };
+  const softHyphen = name => name.split(' ').map(w => BREAKS[w] || w).join(' ');
+
+  // ---- rendering ----
   function show() {
     for (let i = 1; i <= 4; i++) $(`step${i}`).classList.toggle('hidden', i !== step);
+    [...$('progress').children].forEach((el, i) => el.classList.toggle('on', i < step));
     $('steps').textContent = tr('pair.step', { n: step });
     $('title').textContent = tr(`pair.s${step}_title`);
-    $('back').classList.toggle('hidden', step === 1);
+    $('nav').classList.toggle('hidden', step === 1);
     $('next').textContent = tr(step === 4 ? 'pair.add' : 'pair.next');
     $('next').disabled = step === 1 && !cat;
     if (step === 3) renderTasks();
     if (step === 4) renderSummary();
+    window.scrollTo(0, 0);
   }
 
   function renderCats() {
     $('cats').innerHTML = templates.map(c => `<div class="ha-tile ${cat && cat.id === c.id ? 'sel' : ''}" data-id="${c.id}">
-      <span class="e">${c.emoji || '🔧'}</span>${esc(c.name)}</div>`).join('');
+      ${c.svg}<div class="name">${esc(softHyphen(c.name))}</div></div>`).join('');
   }
 
+  function lastText(tk) {
+    if (tk.last === 'install' && installDate()) return `${tr('pair.last_install').toLowerCase()} (${fmt(installDate(), { month: 'short', year: 'numeric' })})`;
+    if (tk.last === 'date') return fmt(lastDoneOf(tk));
+    return tr('pair.last_today').toLowerCase();
+  }
+
+  function summaryOf(tk) {
+    if (tk.type === 'counter') return `${tr('pair.kind_counter')} · ${tr('pair.threshold').toLowerCase()} ${tk.threshold}`;
+    return `${tr('pair.every')} ${unitText(tk.every, tk.unit)} · ${tr('pair.lead').toLowerCase()} ${tk.leadDays} ${tr('pair.lead_days')} · ${tr('pair.last').toLowerCase()}: ${lastText(tk)}`;
+  }
+
+  function taskCard(tk, i) {
+    const counter = tk.type === 'counter';
+    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === tk.unit ? 'selected' : ''}>${esc(tr('pair.units.' + u))}</option>`).join('');
+    const lastOpts = [
+      installDate() ? ['install', tr('pair.last_install')] : null,
+      ['today', tr('pair.last_today')],
+      ['date', tr('pair.last_date')],
+    ].filter(Boolean).map(([v, l]) => `<option value="${v}" ${(tk.last === v || (v === 'today' && tk.last === 'install' && !installDate())) ? 'selected' : ''}>${esc(l)}</option>`).join('');
+
+    const body = !tk.open || !tk.use ? '' : `<div class="body">
+      ${tk.custom ? `<div class="ha-row"><input class="ha-input wide title-input" data-f="name" placeholder="${esc(tr('pair.custom_name'))}" value="${esc(tk.name)}" /></div>` : ''}
+      <div class="ha-row"><span class="lbl">${esc(tr('pair.kind'))}</span>
+        <div class="ha-seg"><button data-type="date" class="${!counter ? 'on' : ''}">${esc(tr('pair.kind_date'))}</button>
+        <button data-type="counter" class="${counter ? 'on' : ''}">${esc(tr('settings.type_counter'))}</button></div></div>
+      ${counter ? `
+        <div class="ha-row"><span class="lbl">${esc(tr('pair.threshold'))}</span><div class="ctl"><input class="ha-input num" type="number" inputmode="numeric" min="1" data-f="threshold" value="${tk.threshold}" style="width:96px" /></div></div>
+        <div class="ha-row"><span class="lbl">${esc(tr('pair.lead_percent'))}</span><div class="ctl"><input class="ha-input num" type="number" inputmode="numeric" min="0" max="100" data-f="leadPercent" value="${tk.leadPercent}" /><span class="ha-unit">%</span></div></div>`
+      : `
+        <div class="ha-row"><span class="lbl">${esc(tr('pair.every'))}</span><div class="ctl"><input class="ha-input num" type="number" inputmode="numeric" min="1" data-f="every" value="${tk.every}" />
+          <select class="ha-select" data-f="unit">${unitOpts}</select></div></div>
+        <div class="ha-row"><span class="lbl">${esc(tr('pair.lead'))}</span><div class="ctl"><input class="ha-input num" type="number" inputmode="numeric" min="0" data-f="leadDays" value="${tk.leadDays}" /><span class="ha-unit">${esc(tr('pair.lead_days'))}</span></div></div>
+        <div class="ha-row"><span class="lbl">${esc(tr('pair.last'))}</span><div class="ctl"><select class="ha-select" data-f="last">${lastOpts}</select></div></div>
+        ${tk.last === 'date' ? `<div class="ha-row"><input class="ha-input wide" type="date" data-f="lastDate" max="${today}" value="${esc(tk.lastDate)}" /></div>` : ''}`}
+      ${tk.custom ? `<div class="ha-row"><button class="edit" style="padding:0;color:#d93025" data-remove="${i}">${esc(tr('pair.remove'))}</button></div>` : ''}
+    </div>`;
+
+    return `<div class="ha-task ${tk.use ? '' : 'off'}" data-i="${i}">
+      <div class="top">
+        <div class="txt"><div class="title">${esc(tk.name || tr('pair.custom_name'))}</div><div class="sum">${esc(summaryOf(tk))}</div></div>
+        <label class="ha-switch"><input type="checkbox" data-f="use" ${tk.use ? 'checked' : ''} /><span></span></label>
+      </div>
+      ${tk.use && !tk.open ? `<button class="edit" data-open="${i}">${esc(tr('settings.edit'))} ›</button>` : ''}
+      ${body}
+    </div>`;
+  }
+
+  function renderTasks() { $('tasks').innerHTML = tasks.map(taskCard).join(''); }
+
+  function renderSummary() {
+    const chosen = tasks.filter(tk => tk.use && String(tk.name).trim());
+    const inst = installDate();
+    let html = `<div class="ha-group"><div class="ha-head">${cat.svg}<div><div class="name">${esc($('name').value)}</div>
+      <div class="ha-steptext">${esc(tr('pair.install'))}: ${inst ? esc(fmt(inst, { month: 'long', year: 'numeric' })) : esc(tr('pair.unknown'))}</div></div></div></div>`;
+    if (!chosen.length) html += `<p class="ha-hint">${esc(tr('pair.no_tasks_selected'))}</p>`;
+    else {
+      html += `<div class="ha-group">${chosen.map(tk => {
+        let right;
+        if (tk.type === 'counter') right = `<span class="ha-unit">${esc(tr('pair.threshold'))} ${tk.threshold}</span>`;
+        else {
+          const d = addInterval(lastDoneOf(tk), Number(tk.every) || 1, tk.unit);
+          right = d <= today ? `<span class="ha-pill">${esc(tr('pair.now'))}</span>` : `<span class="ha-unit">${esc(fmt(d))}</span>`;
+        }
+        return `<div class="ha-row"><div class="lbl"><div style="font-weight:600">${esc(tk.name)}</div>
+          <div class="ha-steptext">${esc(tk.type === 'counter' ? tr('pair.kind_counter') : `${tr('pair.every')} ${unitText(tk.every, tk.unit)}`)}</div></div>
+          <div class="ctl" style="flex-direction:column;align-items:flex-end"><span class="ha-steptext">${esc(tr('pair.first_due'))}</span>${right}</div></div>`;
+      }).join('')}</div>`;
+    }
+    $('summary').innerHTML = html;
+  }
+
+  // ---- actions ----
   function pickCategory(id) {
-    const changed = !cat || cat.id !== id;
-    cat = templates.find(c => c.id === id);
-    if (changed) {
+    if (!cat || cat.id !== id) {
+      cat = templates.find(c => c.id === id);
       $('name').value = cat.name;
       tasks = cat.tasks.map(tk => ({
-        ...tk, use: true, threshold: 100, leadPercent: 10, last: tk.basis === 'install' ? 'install' : 'today', lastDate: today,
+        ...tk, use: true, open: false, threshold: 100, leadPercent: 10, last: tk.basis === 'install' ? 'install' : 'today', lastDate: today,
       }));
     }
     renderCats();
     step = 2;
     show();
-  }
-
-  function taskCard(tk, i) {
-    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === tk.unit ? 'selected' : ''}>${esc(tr('pair.units.' + u))}</option>`).join('');
-    const counter = tk.type === 'counter';
-    return `<div class="ha-card ${tk.use ? '' : 'off'}" data-i="${i}">
-      <div class="head">
-        <input type="checkbox" data-f="use" ${tk.use ? 'checked' : ''} />
-        ${tk.custom ? `<input type="text" class="homey-form-input" data-f="name" placeholder="${esc(tr('pair.custom_name'))}" value="${esc(tk.name)}" />` : `<span>${esc(tk.name)}</span>`}
-      </div>
-      ${tk.use ? `<div class="ha-fields">
-        <div class="full"><label>${esc(tr('pair.kind'))}</label>
-          <select data-f="type"><option value="date" ${!counter ? 'selected' : ''}>${esc(tr('pair.kind_date'))}</option>
-          <option value="counter" ${counter ? 'selected' : ''}>${esc(tr('pair.kind_counter'))}</option></select></div>
-        ${counter ? `
-          <div><label>${esc(tr('pair.threshold'))}</label><input type="number" min="1" data-f="threshold" value="${tk.threshold}" /></div>
-          <div><label>${esc(tr('pair.lead_percent'))}</label><input type="number" min="0" max="100" data-f="leadPercent" value="${tk.leadPercent}" /></div>`
-        : `
-          <div><label>${esc(tr('pair.every'))}</label><input type="number" min="1" data-f="every" value="${tk.every}" /></div>
-          <div><label>&nbsp;</label><select data-f="unit">${unitOpts}</select></div>
-          <div><label>${esc(tr('pair.lead'))} (${esc(tr('pair.lead_days'))})</label><input type="number" min="0" data-f="leadDays" value="${tk.leadDays}" /></div>
-          <div><label>${esc(tr('pair.last'))}</label><select data-f="last">
-            ${installDate() ? `<option value="install" ${tk.last === 'install' ? 'selected' : ''}>${esc(tr('pair.last_install'))}</option>` : ''}
-            <option value="today" ${tk.last === 'today' || (tk.last === 'install' && !installDate()) ? 'selected' : ''}>${esc(tr('pair.last_today'))}</option>
-            <option value="date" ${tk.last === 'date' ? 'selected' : ''}>${esc(tr('pair.last_date'))}</option></select></div>
-          ${tk.last === 'date' ? `<div class="full"><input type="date" data-f="lastDate" max="${today}" value="${esc(tk.lastDate)}" /></div>` : ''}`}
-        ${tk.custom ? `<div class="full"><button class="ha-link" data-remove="${i}">${esc(tr('pair.remove'))}</button></div>` : ''}
-      </div>` : ''}
-    </div>`;
-  }
-
-  function renderTasks() {
-    $('tasks').innerHTML = tasks.map(taskCard).join('');
-  }
-
-  function renderSummary() {
-    const chosen = tasks.filter(tk => tk.use && String(tk.name).trim());
-    const inst = installDate();
-    let html = `<p><strong>${cat.emoji || ''} ${esc($('name').value)}</strong><br><span class="ha-small">${esc(tr('pair.install'))}: ${inst ? esc(formatDate(inst)) : esc(tr('pair.unknown'))}</span></p>`;
-    if (!chosen.length) html += `<p class="ha-small">${esc(tr('pair.no_tasks_selected'))}</p>`;
-    html += chosen.map(tk => {
-      let due;
-      if (tk.type === 'counter') due = `${esc(tr('pair.threshold'))}: ${tk.threshold}`;
-      else {
-        const d = addInterval(lastDoneOf(tk), Number(tk.every) || 1, tk.unit);
-        due = `${esc(tr('pair.first_due'))}: ${d <= today ? `<strong>${esc(tr('pair.now'))}</strong>` : esc(formatDate(d))}`;
-      }
-      return `<div class="ha-sum">${esc(tk.name)}<br><span class="ha-small">${due}</span></div>`;
-    }).join('');
-    $('summary').innerHTML = html;
   }
 
   async function finish() {
@@ -188,10 +272,10 @@
       name: String(tk.name).trim(),
       type: tk.type,
       basis: tk.basis === 'install' ? 'install' : 'last',
-      every: Number(tk.every) || 1,
+      every: Math.max(1, Number(tk.every) || 1),
       unit: tk.unit,
-      leadDays: Number(tk.leadDays) || 0,
-      threshold: Number(tk.threshold) || 100,
+      leadDays: Math.max(0, Number(tk.leadDays) || 0),
+      threshold: Math.max(1, Number(tk.threshold) || 100),
       leadPercent: Number(tk.leadPercent) || 10,
       lastDone: lastDoneOf(tk),
     }));
@@ -215,28 +299,33 @@
   });
 
   $('tasks').addEventListener('input', ev => {
-    const card = ev.target.closest('.ha-card');
+    const card = ev.target.closest('.ha-task');
     const f = ev.target.dataset.f;
     if (!card || !f || ev.target.type === 'checkbox' || ev.target.tagName === 'SELECT') return;
-    tasks[Number(card.dataset.i)][f] = ev.target.value; // typing: keep focus, no re-render
+    const tk = tasks[Number(card.dataset.i)];
+    tk[f] = ev.target.value; // typing: keep focus, update the summary line only
+    card.querySelector('.sum').textContent = summaryOf(tk);
+    if (f === 'name') card.querySelector('.title').textContent = tk.name || tr('pair.custom_name');
   });
   $('tasks').addEventListener('change', ev => {
-    const card = ev.target.closest('.ha-card');
+    const card = ev.target.closest('.ha-task');
     const f = ev.target.dataset.f;
     if (!card || !f) return;
     const tk = tasks[Number(card.dataset.i)];
     tk[f] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value;
-    if (['use', 'type', 'last'].includes(f)) renderTasks();
+    if (['use', 'last', 'unit', 'lastDate'].includes(f)) renderTasks();
   });
   $('tasks').addEventListener('click', ev => {
-    const btn = ev.target.closest('[data-remove]');
-    if (!btn) return;
-    tasks.splice(Number(btn.dataset.remove), 1);
-    renderTasks();
+    const open = ev.target.closest('[data-open]');
+    const type = ev.target.closest('[data-type]');
+    const remove = ev.target.closest('[data-remove]');
+    if (open) { tasks[Number(open.dataset.open)].open = true; renderTasks(); }
+    if (type) { tasks[Number(type.closest('.ha-task').dataset.i)].type = type.dataset.type; renderTasks(); }
+    if (remove) { tasks.splice(Number(remove.dataset.remove), 1); renderTasks(); }
   });
   $('addCustom').addEventListener('click', () => {
     tasks.push({
-      custom: true, use: true, key: null, name: '', type: 'date', every: 3, unit: 'months', leadDays: 7,
+      custom: true, use: true, open: true, key: null, name: '', type: 'date', every: 3, unit: 'months', leadDays: 7,
       threshold: 100, leadPercent: 10, basis: 'last', last: 'today', lastDate: today,
     });
     renderTasks();
@@ -254,7 +343,7 @@
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.dataset.i18n); });
     $('name').placeholder = tr('pair.name_placeholder');
     const thisYear = now.getFullYear();
-    $('year').innerHTML = `<option value="">${esc(tr('pair.unknown'))}</option>`
+    $('year').innerHTML = `<option value="">${esc(tr('pair.year'))}: ${esc(tr('pair.unknown').toLowerCase())}</option>`
       + Array.from({ length: 50 }, (_, k) => thisYear - k).map(y => `<option value="${y}">${y}</option>`).join('');
     $('month').innerHTML = `<option value="">${esc(tr('pair.month'))}</option>`
       + Array.from({ length: 12 }, (_, k) => `<option value="${pad(k + 1)}">${esc(new Date(2026, k, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('');

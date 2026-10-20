@@ -1,6 +1,8 @@
 'use strict';
 
-const { getTemplates, getCategory, localize } = require('./lib/templates');
+const {
+  getTemplates, getCategory, getIconSvg, localize,
+} = require('./lib/templates');
 
 async function describe(homey, device) {
   const states = await device.evaluate();
@@ -11,7 +13,7 @@ async function describe(homey, device) {
     category: category.id,
     categoryName: localize(category.name, homey.i18n.getLanguage()),
     icon: category.icon,
-    emoji: category.emoji,
+    svg: getIconSvg(category.icon),
     installDate: device.getInstallDate(),
     tasks: states,
   };
