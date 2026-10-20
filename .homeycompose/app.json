@@ -1,0 +1,59 @@
+{
+  "id": "nl.jacobsen.huisarts",
+  "brandColor": "#2E8B6E",
+  "version": "0.1.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "name": {
+    "en": "Huisarts",
+    "nl": "Huisarts"
+  },
+  "description": {
+    "en": "Keep track of all maintenance in and around your home — and get a reminder when it is due.",
+    "nl": "Houd al het onderhoud in en om je huis bij — en krijg een seintje als het tijd is."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [],
+  "author": {
+    "name": "Sander Jacobsen"
+  },
+  "contributors": {
+    "developers": [
+      {
+        "name": "Sander Jacobsen"
+      }
+    ]
+  },
+  "api": {
+    "getDevices": {
+      "method": "GET",
+      "path": "/devices"
+    },
+    "getTemplates": {
+      "method": "GET",
+      "path": "/templates"
+    },
+    "setTasks": {
+      "method": "PUT",
+      "path": "/devices/:id/tasks"
+    },
+    "markDone": {
+      "method": "POST",
+      "path": "/devices/:id/tasks/:taskId/done"
+    },
+    "snooze": {
+      "method": "POST",
+      "path": "/devices/:id/tasks/:taskId/snooze"
+    },
+    "exportData": {
+      "method": "GET",
+      "path": "/export"
+    },
+    "importData": {
+      "method": "POST",
+      "path": "/import"
+    }
+  }
+}

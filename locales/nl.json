@@ -1,0 +1,95 @@
+{
+  "status": {
+    "ok": "in orde",
+    "soon": "binnenkort",
+    "due": "nu nodig",
+    "overdue": "te laat"
+  },
+  "device": {
+    "no_tasks": "Geen taken",
+    "in_days": "over __days__ d",
+    "today": "vandaag",
+    "days_late": "__days__ d te laat"
+  },
+  "notify": {
+    "soon": "🩺 __item__: __task__ is over __days__ dagen nodig.",
+    "due": "🩺 __item__: tijd voor __task__.",
+    "overdue": "🩺 __item__: __task__ is __days__ dagen te laat.",
+    "soon_counter": "🩺 __item__: __task__ is bijna nodig.",
+    "due_counter": "🩺 __item__: tijd voor __task__.",
+    "overdue_counter": "🩺 __item__: __task__ is al een tijd nodig."
+  },
+  "errors": {
+    "task_not_found": "Taak niet gevonden",
+    "item_not_found": "Onderdeel niet gevonden",
+    "not_a_counter": "Deze taak heeft geen teller",
+    "name_required": "Geef het onderdeel een naam"
+  },
+  "pair": {
+    "title": "Onderdeel toevoegen",
+    "category": "Soort",
+    "name": "Naam",
+    "name_placeholder": "bijv. Rookmelder overloop",
+    "tasks": "Taken",
+    "tasks_hint": "Vink aan wat je wilt bijhouden. Termijnen en 'laatst gedaan' kun je hier of later in de app-instellingen aanpassen.",
+    "every": "elke",
+    "last_done": "laatst gedaan",
+    "no_tasks": "Geen voorbeeldtaken; voeg na het toevoegen eigen taken toe in de app-instellingen.",
+    "add": "Toevoegen",
+    "units": {
+      "days": "dagen",
+      "weeks": "weken",
+      "months": "maanden",
+      "years": "jaar"
+    }
+  },
+  "settings": {
+    "title": "Huisarts",
+    "intro": "Onderdelen voeg je toe via Apparaat toevoegen > Huisarts. Hier beheer je de taken.",
+    "notifications": "Meldingen",
+    "notify_soon": "Melding als een taak binnenkort nodig is",
+    "notify_due": "Melding als een taak nodig is",
+    "notify_overdue": "Melding als een taak te laat is",
+    "overdue_after": "Te laat na (dagen over de datum)",
+    "items": "Onderdelen",
+    "no_items": "Nog geen onderdelen. Voeg ze toe via Apparaat toevoegen > Huisarts.",
+    "task": "Taak",
+    "interval": "Termijn",
+    "last_done": "Laatst gedaan",
+    "next": "Volgende",
+    "status": "Status",
+    "done": "Gedaan",
+    "snooze": "+7 dagen",
+    "edit": "Wijzig",
+    "delete": "Verwijder",
+    "save": "Opslaan",
+    "cancel": "Annuleer",
+    "add_task": "Taak toevoegen",
+    "from_template": "Voorbeeldtaak…",
+    "custom": "Eigen taak",
+    "type": "Soort",
+    "type_date": "Op datum",
+    "type_counter": "Teller",
+    "every": "Elke",
+    "lead": "Vooraf melden (dagen)",
+    "threshold": "Grens",
+    "counter": "Stand",
+    "lead_percent": "Vooraf melden (% van grens)",
+    "name": "Naam",
+    "note": "Notitie",
+    "confirm_delete": "Taak verwijderen?",
+    "saved": "Opgeslagen",
+    "backup": "Reservekopie",
+    "export": "Exporteren",
+    "import": "Importeren",
+    "import_hint": "Plak hier een eerder geëxporteerde reservekopie (JSON). Taken worden teruggezet op onderdelen met dezelfde naam.",
+    "import_done": "Teruggezet: __restored__. Niet gevonden: __missing__.",
+    "units": {
+      "days": "dagen",
+      "weeks": "weken",
+      "months": "maanden",
+      "years": "jaar"
+    },
+    "history": "Eerder gedaan"
+  }
+}

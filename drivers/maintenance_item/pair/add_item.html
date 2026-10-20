@@ -1,0 +1,90 @@
+<style>
+  .ha-task { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .ha-task label.name { flex: 1 1 100%; font-weight: 500; }
+  .ha-task input[type=number] { width: 64px; }
+  .ha-task input[type=date] { width: 150px; }
+  .ha-small { font-size: 13px; color: #666; }
+</style>
+
+<header class="homey-header">
+  <h1 class="homey-title" data-i18n="pair.title"></h1>
+</header>
+
+<form class="homey-form" onsubmit="return false;">
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="category" data-i18n="pair.category"></label>
+    <select class="homey-form-select" id="category"></select>
+  </div>
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="name" data-i18n="pair.name"></label>
+    <input class="homey-form-input" id="name" type="text" maxlength="60" />
+  </div>
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="pair.tasks"></legend>
+    <p class="ha-small" data-i18n="pair.tasks_hint"></p>
+    <div id="tasks"></div>
+  </fieldset>
+  <button class="homey-button-primary-full" id="add" data-i18n="pair.add"></button>
+</form>
+
+<script>
+  let templates = [];
+  let nameTouched = false;
+  const UNITS = ['days', 'weeks', 'months', 'years'];
+  const today = new Date().toISOString().slice(0, 10);
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function renderTasks() {
+    const cat = templates.find(c => c.id === $('category').value);
+    if (!nameTouched) $('name').value = cat.name;
+    if (!cat.tasks.length) {
+      $('tasks').innerHTML = `<p class="ha-small">${esc(Homey.__('pair.no_tasks'))}</p>`;
+      return;
+    }
+    $('tasks').innerHTML = cat.tasks.map((t, i) => `
+      <div class="ha-task" data-i="${i}">
+        <label class="name"><input type="checkbox" class="use" checked /> ${esc(t.name)}</label>
+        <span>${esc(Homey.__('pair.every'))}</span>
+        <input type="number" class="every homey-form-input" min="1" value="${t.every}" />
+        <select class="unit homey-form-select">${UNITS.map(u => `<option value="${u}" ${u === t.unit ? 'selected' : ''}>${esc(Homey.__('pair.units.' + u))}</option>`).join('')}</select>
+        <span>${esc(Homey.__('pair.last_done'))}</span>
+        <input type="date" class="last homey-form-input" max="${today}" value="${today}" />
+      </div>`).join('');
+  }
+
+  async function add() {
+    const cat = templates.find(c => c.id === $('category').value);
+    const tasks = [...document.querySelectorAll('.ha-task')]
+      .filter(row => row.querySelector('.use').checked)
+      .map(row => {
+        const t = cat.tasks[Number(row.dataset.i)];
+        return {
+          key: t.key, name: t.name, type: 'date', leadDays: t.leadDays,
+          every: Number(row.querySelector('.every').value) || t.every,
+          unit: row.querySelector('.unit').value,
+          lastDone: row.querySelector('.last').value || today,
+        };
+      });
+    $('add').disabled = true;
+    try {
+      const device = await Homey.emit('createItem', { name: $('name').value, category: cat.id, tasks });
+      await Homey.createDevice(device);
+      Homey.done();
+    } catch (err) {
+      Homey.alert(err.message || String(err));
+      $('add').disabled = false;
+    }
+  }
+
+  (async () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = Homey.__(el.dataset.i18n); });
+    $('name').placeholder = Homey.__('pair.name_placeholder');
+    templates = await Homey.emit('getTemplates');
+    $('category').innerHTML = templates.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    $('category').addEventListener('change', renderTasks);
+    $('name').addEventListener('input', () => { nameTouched = true; });
+    $('add').addEventListener('click', add);
+    renderTasks();
+  })();
+</script>

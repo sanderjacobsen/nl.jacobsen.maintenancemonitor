@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Maintenance needed",
+    "nl": "Onderhoud nodig"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Maintenance needed",
+    "nl": "Onderhoud nodig"
+  },
+  "insightsTitleFalse": {
+    "en": "Maintenance up to date",
+    "nl": "Onderhoud bijgewerkt"
+  },
+  "icon": "/assets/capabilities/alarm.svg"
+}

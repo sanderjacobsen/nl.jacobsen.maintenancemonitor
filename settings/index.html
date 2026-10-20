@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    .ha-item { margin: 18px 0; padding: 12px; border: 1px solid #e3e3e3; border-radius: 10px; }
+    .ha-item h3 { margin: 0 0 8px; font-size: 16px; }
+    .ha-item h3 small { color: #888; font-weight: normal; }
+    .ha-task { padding: 8px 0; border-top: 1px solid #f0f0f0; }
+    .ha-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .ha-name { flex: 1 1 200px; font-weight: 500; }
+    .ha-meta { font-size: 13px; color: #666; margin: 2px 0 4px; }
+    .ha-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; color: #fff; }
+    .ha-ok { background: #2E8B6E; } .ha-soon { background: #E3A21A; } .ha-due { background: #E06C1F; } .ha-overdue { background: #C62828; }
+    .ha-btn { padding: 3px 9px; font-size: 13px; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; cursor: pointer; }
+    .ha-btn.primary { background: #2E8B6E; border-color: #2E8B6E; color: #fff; }
+    .ha-edit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 6px; }
+    .ha-edit label { font-size: 12px; color: #666; display: block; }
+    .ha-edit input, .ha-edit select { width: 100%; box-sizing: border-box; }
+    .ha-edit .full { grid-column: 1 / -1; }
+    input[type=date] { padding: 2px 4px; }
+    textarea { width: 100%; box-sizing: border-box; min-height: 90px; font-family: monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1 class="homey-title" data-i18n="settings.title"></h1>
+  <p class="homey-subtitle" data-i18n="settings.intro"></p>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.notifications"></legend>
+    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_soon" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_soon"></span></label>
+    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_due" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_due"></span></label>
+    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_overdue" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_overdue"></span></label>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="overdue_after_days" data-i18n="settings.overdue_after"></label>
+      <input class="homey-form-input" type="number" id="overdue_after_days" min="1" max="365" />
+    </div>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.items"></legend>
+    <div id="items"></div>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.backup"></legend>
+    <button class="ha-btn" id="export" data-i18n="settings.export"></button>
+    <p class="ha-meta" data-i18n="settings.import_hint"></p>
+    <textarea id="backup"></textarea>
+    <button class="ha-btn" id="import" data-i18n="settings.import"></button>
+  </fieldset>
+
+<script>
+  let H; let items = []; let templates = []; let editing = null; // editing = { itemId, taskId|'new', draft }
+  const UNITS = ['days', 'weeks', 'months', 'years'];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const t = (key, vars) => H.__(key, vars);
+  const today = () => new Date().toISOString().slice(0, 10);
+  const api = (method, path, body) => new Promise((resolve, reject) =>
+    H.api(method, path, body || null, (err, res) => (err ? reject(err) : resolve(res))));
+
+  function intervalText(task) {
+    if (task.type === 'counter') return `${t('settings.counter')} ${Math.round(task.counter * 100) / 100} / ${task.threshold}`;
+    return `${t('settings.every')} ${task.every} ${t('settings.units.' + task.unit)}`;
+  }
+
+  function nextText(task) {
+    if (task.type === 'counter') return `${Math.round((task.progress || 0) * 100)}%`;
+    const d = task.days;
+    const when = d > 0 ? t('device.in_days', { days: d }) : d === 0 ? t('device.today') : t('device.days_late', { days: -d });
+    return `${task.dueDate} (${when})`;
+  }
+
+  function editForm(item, draft) {
+    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === draft.unit ? 'selected' : ''}>${esc(t('settings.units.' + u))}</option>`).join('');
+    const isCounter = draft.type === 'counter';
+    return `<div class="ha-edit">
+      <div class="full"><label>${esc(t('settings.name'))}</label><input id="e_name" value="${esc(draft.name)}" maxlength="80" /></div>
+      <div><label>${esc(t('settings.type'))}</label><select id="e_type">
+        <option value="date" ${!isCounter ? 'selected' : ''}>${esc(t('settings.type_date'))}</option>
+        <option value="counter" ${isCounter ? 'selected' : ''}>${esc(t('settings.type_counter'))}</option></select></div>
+      ${isCounter ? `
+        <div><label>${esc(t('settings.threshold'))}</label><input id="e_threshold" type="number" min="1" value="${draft.threshold ?? 100}" /></div>
+        <div><label>${esc(t('settings.counter'))}</label><input id="e_counter" type="number" min="0" value="${draft.counter ?? 0}" /></div>
+        <div><label>${esc(t('settings.lead_percent'))}</label><input id="e_leadPercent" type="number" min="0" max="100" value="${draft.leadPercent ?? 10}" /></div>`
+      : `
+        <div><label>${esc(t('settings.every'))}</label><input id="e_every" type="number" min="1" value="${draft.every ?? 1}" /></div>
+        <div><label>&nbsp;</label><select id="e_unit">${unitOpts}</select></div>
+        <div><label>${esc(t('settings.lead'))}</label><input id="e_leadDays" type="number" min="0" value="${draft.leadDays ?? 7}" /></div>`}
+      <div><label>${esc(t('settings.last_done'))}</label><input id="e_lastDone" type="date" max="${today()}" value="${esc(draft.lastDone || today())}" /></div>
+      <div class="full"><label>${esc(t('settings.note'))}</label><input id="e_note" value="${esc(draft.note || '')}" maxlength="500" /></div>
+      <div class="full"><button class="ha-btn primary" data-act="save">${esc(t('settings.save'))}</button>
+        <button class="ha-btn" data-act="cancel">${esc(t('settings.cancel'))}</button></div>
+    </div>`;
+  }
+
+  function readDraft() {
+    const val = id => ($(id) ? $(id).value : undefined);
+    const d = { ...editing.draft, name: val('e_name'), type: val('e_type'), lastDone: val('e_lastDone'), note: val('e_note') };
+    if (d.type === 'counter') Object.assign(d, { threshold: Number(val('e_threshold') ?? d.threshold ?? 100), counter: Number(val('e_counter') ?? d.counter ?? 0), leadPercent: Number(val('e_leadPercent') ?? d.leadPercent ?? 10) });
+    else Object.assign(d, { every: Number(val('e_every') ?? d.every ?? 1), unit: val('e_unit') ?? d.unit ?? 'months', leadDays: Number(val('e_leadDays') ?? d.leadDays ?? 7) });
+    return d;
+  }
+
+  function render() {
+    if (!items.length) { $('items').innerHTML = `<p class="ha-meta">${esc(t('settings.no_items'))}</p>`; return; }
+    $('items').innerHTML = items.map(item => {
+      const cat = templates.find(c => c.id === item.category);
+      const used = new Set(item.tasks.map(tk => tk.key).filter(Boolean));
+      const suggestions = (cat ? cat.tasks : []).filter(tk => !used.has(tk.key));
+      const tasks = item.tasks.map(task => {
+        const isEditing = editing && editing.itemId === item.id && editing.taskId === task.id;
+        return `<div class="ha-task" data-item="${item.id}" data-task="${task.id}">
+          <div class="ha-row">
+            <span class="ha-name">${esc(task.name)}</span>
+            <span class="ha-badge ha-${task.status}">${esc(t('status.' + task.status))}</span>
+          </div>
+          <div class="ha-meta">${esc(intervalText(task))} · ${esc(t('settings.last_done'))} ${esc(task.lastDone)} · ${esc(t('settings.next'))} ${esc(nextText(task))}
+            ${task.note ? ' · ' + esc(task.note) : ''}
+            ${task.history && task.history.length > 1 ? `<br>${esc(t('settings.history'))}: ${task.history.slice(1, 6).map(esc).join(', ')}` : ''}</div>
+          <div class="ha-row">
+            <button class="ha-btn primary" data-act="done">${esc(t('settings.done'))}</button>
+            <input type="date" class="done-date" max="${today()}" value="${today()}" />
+            <button class="ha-btn" data-act="snooze">${esc(t('settings.snooze'))}</button>
+            <button class="ha-btn" data-act="edit">${esc(t('settings.edit'))}</button>
+            <button class="ha-btn" data-act="delete">${esc(t('settings.delete'))}</button>
+          </div>
+          ${isEditing ? editForm(item, editing.draft) : ''}
+        </div>`;
+      }).join('');
+      const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
+      return `<div class="ha-item" data-item="${item.id}">
+        <h3>${esc(item.name)} <small>${esc(item.categoryName)}</small></h3>
+        ${tasks}
+        <div class="ha-task" data-item="${item.id}" data-task="new">
+          <div class="ha-row">
+            <select class="add-select">
+              <option value="">${esc(t('settings.add_task'))}…</option>
+              ${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}
+              <option value="custom">${esc(t('settings.custom'))}</option>
+            </select>
+          </div>
+          ${adding ? editForm(item, editing.draft) : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function save(item, tasks) {
+    const updated = await api('PUT', `/devices/${item.id}/tasks`, { tasks });
+    items = items.map(i => (i.id === updated.id ? updated : i));
+    editing = null;
+    render();
+  }
+
+  async function onClick(ev) {
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const box = btn.closest('[data-task]');
+    const item = items.find(i => i.id === box.dataset.item);
+    const taskId = box.dataset.task;
+    const task = item.tasks.find(tk => tk.id === taskId);
+    try {
+      switch (btn.dataset.act) {
+        case 'done': {
+          const date = box.querySelector('.done-date').value || today();
+          const updated = await api('POST', `/devices/${item.id}/tasks/${taskId}/done`, { date });
+          items = items.map(i => (i.id === updated.id ? updated : i)); render(); break;
+        }
+        case 'snooze': {
+          const updated = await api('POST', `/devices/${item.id}/tasks/${taskId}/snooze`, { days: 7 });
+          items = items.map(i => (i.id === updated.id ? updated : i)); render(); break;
+        }
+        case 'edit': editing = { itemId: item.id, taskId, draft: { ...task } }; render(); break;
+        case 'cancel': editing = null; render(); break;
+        case 'delete':
+          if (!(await new Promise(res => H.confirm(t('settings.confirm_delete'), null, (e, ok) => res(!e && ok))))) break;
+          await save(item, item.tasks.filter(tk => tk.id !== taskId)); break;
+        case 'save': {
+          const draft = readDraft();
+          const tasks = editing.taskId === 'new' ? [...item.tasks, draft] : item.tasks.map(tk => (tk.id === editing.taskId ? { ...tk, ...draft } : tk));
+          await save(item, tasks); break;
+        }
+        default:
+      }
+    } catch (err) { H.alert(err.message || String(err)); }
+  }
+
+  function onChange(ev) {
+    const el = ev.target;
+    const box = el.closest('[data-task]');
+    if (!box) return;
+    if (el.classList.contains('add-select') && el.value) {
+      const item = items.find(i => i.id === box.dataset.item);
+      let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today() };
+      if (el.value.startsWith('tpl:')) {
+        const cat = templates.find(c => c.id === item.category);
+        const tpl = cat.tasks.find(tk => tk.key === el.value.slice(4));
+        draft = { ...draft, ...tpl };
+      }
+      editing = { itemId: item.id, taskId: 'new', draft };
+      render();
+    } else if (el.id === 'e_type' && editing) {
+      editing.draft = { ...readDraft(), type: el.value };
+      render();
+    }
+  }
+
+  async function load() {
+    templates = await api('GET', '/templates');
+    items = await api('GET', '/devices');
+    render();
+  }
+
+  function onHomeyReady(Homey) {
+    H = Homey;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+
+    for (const key of ['notify_soon', 'notify_due', 'notify_overdue']) {
+      H.get(key, (err, value) => { $(key).checked = value !== false; });
+      $(key).addEventListener('change', () => H.set(key, $(key).checked));
+    }
+    H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
+    $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
+
+    $('items').addEventListener('click', onClick);
+    $('items').addEventListener('change', onChange);
+    $('export').addEventListener('click', async () => {
+      try { $('backup').value = JSON.stringify(await api('GET', '/export'), null, 2); } catch (err) { H.alert(err.message || String(err)); }
+    });
+    $('import').addEventListener('click', async () => {
+      try {
+        const res = await api('POST', '/import', { data: JSON.parse($('backup').value) });
+        H.alert(t('settings.import_done', { restored: res.restored.join(', ') || '-', missing: res.missing.join(', ') || '-' }));
+        await load();
+      } catch (err) { H.alert(err.message || String(err)); }
+    });
+
+    load().catch(err => H.alert(err.message || String(err))).finally(() => H.ready());
+  }
+</script>
+</body>
+</html>

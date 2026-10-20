@@ -1,0 +1,49 @@
+{
+  "title": {
+    "en": "A maintenance task is overdue",
+    "nl": "Een onderhoudstaak is te laat"
+  },
+  "hint": {
+    "en": "Days = days past the due date.",
+    "nl": "Dagen = aantal dagen over de datum."
+  },
+  "tokens": [
+    {
+      "name": "item",
+      "type": "string",
+      "title": {
+        "en": "Item",
+        "nl": "Onderdeel"
+      },
+      "example": {
+        "en": "Air conditioner",
+        "nl": "Airco slaapkamer"
+      }
+    },
+    {
+      "name": "task",
+      "type": "string",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "example": {
+        "en": "Clean filters",
+        "nl": "Filters schoonmaken"
+      }
+    },
+    {
+      "name": "days",
+      "type": "number",
+      "title": {
+        "en": "Days",
+        "nl": "Dagen"
+      },
+      "example": 7
+    }
+  ],
+  "titleFormatted": {
+    "en": "A maintenance task is overdue",
+    "nl": "Een onderhoudstaak is te laat"
+  }
+}

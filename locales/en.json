@@ -1,0 +1,95 @@
+{
+  "status": {
+    "ok": "ok",
+    "soon": "soon",
+    "due": "due",
+    "overdue": "overdue"
+  },
+  "device": {
+    "no_tasks": "No tasks",
+    "in_days": "in __days__ d",
+    "today": "today",
+    "days_late": "__days__ d late"
+  },
+  "notify": {
+    "soon": "🩺 __item__: __task__ is due in __days__ days.",
+    "due": "🩺 __item__: time for __task__.",
+    "overdue": "🩺 __item__: __task__ is __days__ days overdue.",
+    "soon_counter": "🩺 __item__: __task__ is almost due.",
+    "due_counter": "🩺 __item__: time for __task__.",
+    "overdue_counter": "🩺 __item__: __task__ has been due for a while."
+  },
+  "errors": {
+    "task_not_found": "Task not found",
+    "item_not_found": "Item not found",
+    "not_a_counter": "This task has no counter",
+    "name_required": "Please enter a name"
+  },
+  "pair": {
+    "title": "Add item",
+    "category": "Type",
+    "name": "Name",
+    "name_placeholder": "e.g. Smoke detector hallway",
+    "tasks": "Tasks",
+    "tasks_hint": "Tick what you want to track. Intervals and 'last done' can be changed here or later in the app settings.",
+    "every": "every",
+    "last_done": "last done",
+    "no_tasks": "No suggested tasks; add your own tasks in the app settings afterwards.",
+    "add": "Add",
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years"
+    }
+  },
+  "settings": {
+    "title": "Huisarts",
+    "intro": "Add items via Add device > Huisarts. Manage their tasks here.",
+    "notifications": "Notifications",
+    "notify_soon": "Notify when a task is due soon",
+    "notify_due": "Notify when a task is due",
+    "notify_overdue": "Notify when a task is overdue",
+    "overdue_after": "Overdue after (days past due date)",
+    "items": "Items",
+    "no_items": "No items yet. Add them via Add device > Huisarts.",
+    "task": "Task",
+    "interval": "Interval",
+    "last_done": "Last done",
+    "next": "Next",
+    "status": "Status",
+    "done": "Done",
+    "snooze": "+7 days",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add_task": "Add task",
+    "from_template": "Suggested task…",
+    "custom": "Custom task",
+    "type": "Type",
+    "type_date": "By date",
+    "type_counter": "Counter",
+    "every": "Every",
+    "lead": "Notify in advance (days)",
+    "threshold": "Limit",
+    "counter": "Count",
+    "lead_percent": "Notify in advance (% of limit)",
+    "name": "Name",
+    "note": "Note",
+    "confirm_delete": "Delete task?",
+    "saved": "Saved",
+    "backup": "Backup",
+    "export": "Export",
+    "import": "Import",
+    "import_hint": "Paste a previously exported backup (JSON). Tasks are restored onto items with the same name.",
+    "import_done": "Restored: __restored__. Not found: __missing__.",
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years"
+    },
+    "history": "Done before"
+  }
+}

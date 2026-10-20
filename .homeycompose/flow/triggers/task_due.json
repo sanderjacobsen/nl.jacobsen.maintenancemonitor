@@ -1,0 +1,49 @@
+{
+  "title": {
+    "en": "A maintenance task is due",
+    "nl": "Een onderhoudstaak is nodig"
+  },
+  "hint": {
+    "en": "Fires once when a task becomes due.",
+    "nl": "Gaat één keer af als een taak nodig wordt."
+  },
+  "tokens": [
+    {
+      "name": "item",
+      "type": "string",
+      "title": {
+        "en": "Item",
+        "nl": "Onderdeel"
+      },
+      "example": {
+        "en": "Air conditioner",
+        "nl": "Airco slaapkamer"
+      }
+    },
+    {
+      "name": "task",
+      "type": "string",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "example": {
+        "en": "Clean filters",
+        "nl": "Filters schoonmaken"
+      }
+    },
+    {
+      "name": "days",
+      "type": "number",
+      "title": {
+        "en": "Days",
+        "nl": "Dagen"
+      },
+      "example": 7
+    }
+  ],
+  "titleFormatted": {
+    "en": "A maintenance task is due",
+    "nl": "Een onderhoudstaak is nodig"
+  }
+}
