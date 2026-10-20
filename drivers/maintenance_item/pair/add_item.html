@@ -79,6 +79,11 @@
         </div>
         <p class="ha-hint" data-i18n="pair.install_hint"></p>
       </div>
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="link" data-i18n="usage.link"></label>
+        <select class="homey-form-select" id="link"></select>
+        <p class="ha-hint" data-i18n="usage.link_hint"></p>
+      </div>
     </div>
   </div>
 
@@ -109,6 +114,42 @@
   let cat = null;
   let step = 1;
   let tasks = [];
+  let homeyDevices = null; // other Homey devices that can be linked (loaded in the background)
+
+  const linked = () => (homeyDevices || []).find(d => d.id === $('link').value) || null;
+  const capOf = (dev, id) => (dev ? dev.capabilities.find(c => c.id === id) : null);
+
+  // Best guess of how to detect "running" for a linked device: power above X W, otherwise on/off.
+  function autoSource(dev, tk) {
+    const metric = (tk.usage && tk.usage.metric) || 'hours';
+    if (!dev) return { metric };
+    if (metric === 'counter') {
+      const c = dev.capabilities.find(x => x.type === 'number' && x.id.startsWith('meter_')) || dev.capabilities.find(x => x.type === 'number');
+      return { metric, srcCap: c ? c.id : '', units: c ? c.units : '' };
+    }
+    if (capOf(dev, 'measure_power')) return { metric, srcCap: 'measure_power', op: 'gt', cmpValue: (tk.usage && tk.usage.watts) || 10 };
+    const b = capOf(dev, 'onoff') || dev.capabilities.find(x => x.type === 'boolean');
+    return { metric, srcCap: b ? b.id : '', op: 'true', cmpValue: '' };
+  }
+
+  // Linking changes the suggested interval types: tasks with a usage suggestion switch to "by usage" (and back).
+  function applyLink() {
+    const dev = linked();
+    for (const tk of tasks) {
+      if (dev && tk.usage && tk.type !== 'counter') {
+        Object.assign(tk, { type: 'usage', combine: true, threshold: tk.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(dev, tk));
+      } else if (!dev && tk.type === 'usage') {
+        tk.type = 'date';
+      }
+    }
+  }
+
+  function unitLabel(tk) {
+    if (tk.metric === 'hours') return tr('usage.unit_hours');
+    if (tk.metric === 'cycles') return tr('usage.unit_cycles');
+    const c = capOf(linked(), tk.srcCap);
+    return (c && c.units) || '';
+  }
 
   // ---- date helpers (same rules as lib/schedule.js) ----
   function addInterval(date, every, unit) {
@@ -134,6 +175,11 @@
   }
   const fmt = (date, opts) => new Date(`${date}T12:00:00`).toLocaleDateString(undefined, opts || { day: 'numeric', month: 'long', year: 'numeric' });
   const unitText = (n, unit) => `${n} ${tr('pair.units.' + unit)}`;
+  // "Elke maand" / "Elke 3 maanden" (lowercase when used inside a sentence)
+  const everyText = (n, unit, lower) => {
+    const txt = Number(n) === 1 ? tr('pair.every_one.' + unit) : `${tr('pair.every')} ${unitText(n, unit)}`;
+    return lower ? txt.charAt(0).toLowerCase() + txt.slice(1) : txt;
+  };
 
   // Break long Dutch compound words at a sensible place in the small tiles.
   const BREAKS = {
@@ -171,8 +217,12 @@
   }
 
   function summaryOf(tk) {
+    if (tk.type === 'usage') {
+      const what = tr('usage.metric_' + (tk.metric || 'hours'));
+      return `${what} · ${tr('usage.threshold').toLowerCase()} ${tk.threshold} ${unitLabel(tk)}${tk.combine ? ` · ${tr('usage.or_date')}: ${everyText(tk.every, tk.unit, true)}` : ''}`;
+    }
     if (tk.type === 'counter') return `${tr('pair.kind_counter')} · ${tr('pair.threshold').toLowerCase()} ${tk.threshold}`;
-    return `${tr('pair.every')} ${unitText(tk.every, tk.unit)} · ${tr('pair.lead').toLowerCase()} ${tk.leadDays} ${tr('pair.lead_days')} · ${tr('pair.last').toLowerCase()}: ${lastText(tk)}`;
+    return `${everyText(tk.every, tk.unit)} · ${tr('pair.lead').toLowerCase()} ${tk.leadDays} ${tr('pair.lead_days')} · ${tr('pair.last').toLowerCase()}: ${lastText(tk)}`;
   }
 
   function taskCard(tk, i) {
@@ -191,8 +241,9 @@
       <label class="homey-form-label" for="${id}k">${esc(tr('pair.kind'))}</label>
       <select class="homey-form-select" id="${id}k" data-f="type">
         <option value="date" ${!counter ? 'selected' : ''}>${esc(tr('pair.kind_date'))}</option>
-        <option value="counter" ${counter ? 'selected' : ''}>${esc(tr('pair.kind_counter'))}</option></select>
-      ${counter ? `
+        <option value="counter" ${counter ? 'selected' : ''}>${esc(tr('pair.kind_counter'))}</option>
+        ${linked() ? `<option value="usage" ${tk.type === 'usage' ? 'selected' : ''}>${esc(tr('usage.kind_usage'))}</option>` : ''}</select>
+      ${tk.type === 'usage' ? usageEditor(tk, id) : counter ? `
         <label class="homey-form-label" for="${id}g">${esc(tr('pair.threshold'))}</label>
         <input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}g" data-f="threshold" value="${tk.threshold}" />
         <label class="homey-form-label" for="${id}p">${esc(tr('pair.lead_percent'))}</label>
@@ -221,6 +272,64 @@
     </div>`;
   }
 
+  function dateFields(tk, id) {
+    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === tk.unit ? 'selected' : ''}>${esc(tr('pair.units.' + u))}</option>`).join('');
+    const lastOpts = [
+      installDate() ? ['install', tr('pair.last_install')] : null,
+      ['today', tr('pair.last_today')],
+      ['date', tr('pair.last_date')],
+    ].filter(Boolean).map(([v, l]) => `<option value="${v}" ${(tk.last === v || (v === 'today' && tk.last === 'install' && !installDate())) ? 'selected' : ''}>${esc(l)}</option>`).join('');
+    return `<label class="homey-form-label" for="${id}e">${esc(tr('pair.every'))}</label>
+      <div class="ha-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}e" data-f="every" value="${tk.every}" />
+        <select class="homey-form-select" data-f="unit">${unitOpts}</select></div>
+      <label class="homey-form-label" for="${id}l">${esc(tr('pair.lead'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}l" data-f="leadDays" value="${tk.leadDays}" /><span>${esc(tr('pair.lead_days'))}</span></div>
+      <label class="homey-form-label" for="${id}d">${esc(tr('pair.last'))}</label>
+      <select class="homey-form-select" id="${id}d" data-f="last">${lastOpts}</select>
+      ${tk.last === 'date' ? `<input class="homey-form-input" style="margin-top:8px" type="date" data-f="lastDate" max="${today}" value="${esc(tk.lastDate)}" />` : ''}`;
+  }
+
+  function usageEditor(tk, id) {
+    const dev = linked();
+    const metric = tk.metric || 'hours';
+    const metricOpts = ['hours', 'cycles', 'counter'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(tr('usage.metric_' + m))}</option>`).join('');
+    let source;
+    if (metric === 'counter') {
+      const caps = dev.capabilities.filter(c => c.type === 'number');
+      source = `<label class="homey-form-label" for="${id}c">${esc(tr('usage.counter_cap'))}</label>
+        <select class="homey-form-select" id="${id}c" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === tk.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>`;
+    } else {
+      const caps = dev.capabilities.filter(c => ['boolean', 'number', 'enum', 'string'].includes(c.type));
+      const cap = capOf(dev, tk.srcCap) || caps[0];
+      let cond = '';
+      if (cap && cap.type === 'number') {
+        cond = `<div class="ha-inline days" style="margin-top:8px"><span>${esc(tr('usage.greater_than'))}</span><input class="homey-form-input" type="number" inputmode="decimal" data-f="cmpValue" value="${esc(tk.cmpValue ?? 10)}" style="width:90px" /><span>${esc(cap.units || '')}</span></div>`;
+      } else if (cap && (cap.type === 'enum' || cap.type === 'string')) {
+        const values = cap.values || (cap.value !== null && cap.value !== undefined ? [{ id: String(cap.value), title: String(cap.value) }] : []);
+        cond = values.length && cap.type === 'enum'
+          ? `<select class="homey-form-select" style="margin-top:8px" data-f="cmpValue"><option value="">${esc(tr('usage.equals'))}…</option>${values.map(v => `<option value="${esc(v.id)}" ${String(v.id) === String(tk.cmpValue) ? 'selected' : ''}>${esc(tr('usage.equals'))} ${esc(v.title)}</option>`).join('')}</select>`
+          : `<input class="homey-form-input" style="margin-top:8px" type="text" data-f="cmpValue" placeholder="${esc(tr('usage.equals'))}…" value="${esc(tk.cmpValue ?? '')}" />`;
+      }
+      source = `<label class="homey-form-label" for="${id}c">${esc(tr('usage.running_when'))}</label>
+        <select class="homey-form-select" id="${id}c" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}${c.type === 'boolean' ? ` ${esc(tr('usage.is_on'))}` : ''}</option>`).join('')}</select>
+        ${cond}
+        <label class="homey-form-label" for="${id}o">${esc(tr('usage.off_delay'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}o" data-f="offDelayMin" value="${tk.offDelayMin ?? 3}" /><span>${esc(tr('usage.minutes'))}</span></div>
+        ${metric === 'cycles' ? `<label class="homey-form-label" for="${id}m">${esc(tr('usage.min_run'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}m" data-f="minRunMin" value="${tk.minRunMin ?? 1}" /><span>${esc(tr('usage.minutes'))}</span></div>` : ''}`;
+    }
+    return `<label class="homey-form-label" for="${id}w">${esc(tr('usage.metric'))}</label>
+      <select class="homey-form-select" id="${id}w" data-f="metric">${metricOpts}</select>
+      ${source}
+      <label class="homey-form-label" for="${id}t">${esc(tr('usage.threshold'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" id="${id}t" data-f="threshold" value="${tk.threshold}" style="width:110px" /><span>${esc(unitLabel(tk))}</span></div>
+      <label class="homey-form-label" for="${id}p">${esc(tr('usage.lead_percent'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>
+      <label class="homey-form-checkbox" style="margin-top:14px"><input class="homey-form-checkbox-input" type="checkbox" data-f="combine" ${tk.combine ? 'checked' : ''} />
+        <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(tr('usage.also_date'))}</span></label>
+      ${tk.combine ? dateFields(tk, id) : ''}`;
+  }
+
   function renderTasks() { $('tasks').innerHTML = tasks.map(taskCard).join(''); }
 
   function renderSummary() {
@@ -231,12 +340,15 @@
     if (!chosen.length) html += `<div class="ha-line"><span class="s">${esc(tr('pair.no_tasks_selected'))}</span></div>`;
     html += chosen.map(tk => {
       let due;
-      if (tk.type === 'counter') due = `<b>${esc(tr('pair.threshold'))} ${tk.threshold}</b>`;
+      if (tk.type === 'counter' || tk.type === 'usage') {
+        due = `<b>${esc(tr('usage.threshold'))} ${tk.threshold} ${esc(tk.type === 'usage' ? unitLabel(tk) : '')}</b>`;
+        if (tk.type === 'usage' && tk.combine) due += `<b>${esc(tr('usage.or_date').split(' ')[0])} ${esc(fmt(addInterval(lastDoneOf(tk), Number(tk.every) || 1, tk.unit)))}</b>`;
+      }
       else {
         const d = addInterval(lastDoneOf(tk), Number(tk.every) || 1, tk.unit);
         due = d <= today ? `<b class="now">${esc(tr('pair.now'))}</b>` : `<b>${esc(fmt(d))}</b>`;
       }
-      const sub = tk.type === 'counter' ? tr('pair.kind_counter') : `${tr('pair.every')} ${unitText(tk.every, tk.unit)}`;
+      const sub = tk.type === 'counter' ? tr('pair.kind_counter') : tk.type === 'usage' ? summaryOf(tk) : everyText(tk.every, tk.unit);
       return `<div class="ha-line"><div><div class="t">${esc(tk.name)}</div><div class="s">${esc(sub)}</div></div>
         <div class="r">${esc(tr('pair.first_due'))}${due}</div></div>`;
     }).join('');
@@ -269,11 +381,21 @@
       threshold: Math.max(1, Number(tk.threshold) || 100),
       leadPercent: Number(tk.leadPercent) || 10,
       lastDone: lastDoneOf(tk),
-    }));
+      combine: tk.type === 'usage' ? Boolean(tk.combine) : false,
+      source: tk.type === 'usage' ? {
+        capability: tk.srcCap,
+        metric: tk.metric || 'hours',
+        condition: { op: tk.op || 'true', value: tk.cmpValue },
+        offDelayMin: Number(tk.offDelayMin ?? 3),
+        minRunMin: Number(tk.minRunMin ?? 1),
+        units: unitLabel(tk),
+      } : null,
+    })).filter(tk => tk.type !== 'usage' || tk.source.capability);
     $('next').classList.add('is-loading');
     try {
       const device = await Homey.emit('createItem', {
         name: $('name').value, category: cat.id, installDate: installDate(), tasks: chosen,
+        link: linked() ? { id: linked().id, name: linked().name } : null,
       });
       await Homey.createDevice(device);
       Homey.done();
@@ -303,7 +425,10 @@
     if (!card || !f) return;
     const tk = tasks[Number(card.dataset.i)];
     tk[f] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value;
-    if (['use', 'type', 'last', 'unit', 'lastDate'].includes(f)) renderTasks();
+    if (f === 'type' && tk.type === 'usage') Object.assign(tk, { combine: tk.combine ?? true, threshold: (tk.usage && tk.usage.threshold) || tk.threshold }, tk.srcCap ? {} : autoSource(linked(), tk));
+    if (f === 'metric') Object.assign(tk, autoSource(linked(), { usage: { metric: tk.metric, watts: tk.cmpValue } }));
+    if (f === 'srcCap') { const c = capOf(linked(), tk.srcCap); tk.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; tk.cmpValue = tk.op === 'gt' ? 10 : ''; }
+    if (['use', 'type', 'last', 'unit', 'lastDate', 'metric', 'srcCap', 'combine'].includes(f)) renderTasks();
   });
   $('tasks').addEventListener('click', ev => {
     const open = ev.target.closest('[data-open]');
@@ -318,6 +443,7 @@
     });
     renderTasks();
   });
+  $('link').addEventListener('change', () => applyLink());
   $('back').addEventListener('click', () => { step = Math.max(1, step - 1); show(); });
   $('next').addEventListener('click', () => {
     if (step === 2 && !$('name').value.trim()) { Homey.alert(tr('errors.name_required')); return; }
@@ -334,6 +460,12 @@
       + Array.from({ length: 50 }, (_, k) => thisYear - k).map(y => `<option value="${y}">${y}</option>`).join('');
     $('month').innerHTML = `<option value="">${esc(tr('pair.month'))}</option>`
       + Array.from({ length: 12 }, (_, k) => `<option value="${pad(k + 1)}">${esc(new Date(2026, k, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('');
+    $('link').innerHTML = `<option value="">${esc(tr('usage.link_loading'))}</option>`;
+    Homey.emit('getHomeyDevices').then(list => {
+      homeyDevices = list;
+      $('link').innerHTML = `<option value="">${esc(tr('usage.link_none'))}</option>`
+        + list.map(d => `<option value="${esc(d.id)}">${esc(d.name)}${d.zone ? ` · ${esc(d.zone)}` : ''}</option>`).join('');
+    }).catch(() => { $('link').innerHTML = `<option value="">${esc(tr('usage.link_none'))}</option>`; });
     templates = await Homey.emit('getTemplates');
     renderCats();
     show();

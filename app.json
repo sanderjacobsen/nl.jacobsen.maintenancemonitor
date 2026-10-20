@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.jacobsen.huisarts",
   "brandColor": "#2E8B6E",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -16,7 +16,9 @@
   "category": [
     "tools"
   ],
-  "permissions": [],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "author": {
     "name": "Sander Jacobsen"
   },
@@ -59,6 +61,10 @@
     "updateItem": {
       "method": "PUT",
       "path": "/devices/:id"
+    },
+    "getHomeyDevices": {
+      "method": "GET",
+      "path": "/homey-devices"
     }
   },
   "flow": {
@@ -632,6 +638,72 @@
       "id": "maintenance_item"
     }
   ],
+  "widgets": {
+    "maintenance": {
+      "name": {
+        "en": "Maintenance",
+        "nl": "Onderhoud"
+      },
+      "height": 240,
+      "transparent": false,
+      "settings": [
+        {
+          "id": "show",
+          "type": "dropdown",
+          "title": {
+            "en": "Show",
+            "nl": "Toon"
+          },
+          "value": "soon",
+          "values": [
+            {
+              "id": "open",
+              "title": {
+                "en": "Only due and overdue tasks",
+                "nl": "Alleen nodige en te late taken"
+              }
+            },
+            {
+              "id": "soon",
+              "title": {
+                "en": "Also tasks due soon",
+                "nl": "Ook taken die binnenkort nodig zijn"
+              }
+            },
+            {
+              "id": "all",
+              "title": {
+                "en": "All tasks",
+                "nl": "Alle taken"
+              }
+            }
+          ]
+        },
+        {
+          "id": "max",
+          "type": "number",
+          "title": {
+            "en": "Maximum number of tasks",
+            "nl": "Maximaal aantal taken"
+          },
+          "value": 6,
+          "min": 1,
+          "max": 30
+        }
+      ],
+      "api": {
+        "getTasks": {
+          "method": "GET",
+          "path": "/"
+        },
+        "markDone": {
+          "method": "POST",
+          "path": "/done"
+        }
+      },
+      "id": "maintenance"
+    }
+  },
   "capabilities": {
     "alarm_maintenance": {
       "type": "boolean",

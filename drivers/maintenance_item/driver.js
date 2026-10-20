@@ -49,9 +49,10 @@ class MaintenanceItemDriver extends Homey.Driver {
 
   async onPair(session) {
     session.setHandler('getTemplates', async () => getTemplates(this.homey.i18n.getLanguage()));
+    session.setHandler('getHomeyDevices', async () => this.homey.app.getHomeyDevices());
 
     session.setHandler('createItem', async ({
-      name, category, tasks, installDate,
+      name, category, tasks, installDate, link,
     }) => {
       const cleanName = String(name || '').trim().slice(0, 60);
       if (!cleanName) throw new Error(this.homey.__('errors.name_required'));
@@ -63,6 +64,7 @@ class MaintenanceItemDriver extends Homey.Driver {
         store: {
           category: cat.id,
           installDate: /^\d{4}-\d{2}-\d{2}$/.test(installDate || '') ? installDate : null,
+          link: link && link.id ? { id: String(link.id), name: String(link.name || '') } : null,
           tasks: Array.isArray(tasks) ? tasks : [],
         },
       };

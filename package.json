@@ -4,11 +4,14 @@
   "description": "Huisarts: keep track of maintenance in and around your home (Homey app)",
   "main": "app.js",
   "scripts": {
-    "test": "node test/schedule.test.js"
+    "test": "node test/schedule.test.js && node test/usage.test.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "author": "Sander Jacobsen",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "homey-api": "^3.21.0"
+  }
 }

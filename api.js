@@ -15,6 +15,7 @@ async function describe(homey, device) {
     icon: category.icon,
     iconUri: getIconUri(category.icon),
     installDate: device.getInstallDate(),
+    link: device.getLink(),
     tasks: states,
   };
 }
@@ -38,9 +39,14 @@ module.exports = {
     return describe(homey, device);
   },
 
+  async getHomeyDevices({ homey }) {
+    return homey.app.getHomeyDevices();
+  },
+
   async updateItem({ homey, params, body }) {
     const device = homey.app.getDeviceById(params.id);
     if (body && 'installDate' in body) await device.setInstallDate(body.installDate);
+    if (body && 'link' in body) await device.setLink(body.link);
     return describe(homey, device);
   },
 
@@ -67,6 +73,7 @@ module.exports = {
         name: device.getName(),
         category: device.getStoreValue('category'),
         installDate: device.getInstallDate(),
+        link: device.getLink(),
         tasks: device.getTasks(),
       })),
     };
@@ -87,6 +94,7 @@ module.exports = {
       }
       await device.setTasks(item.tasks || []);
       if (item.installDate) await device.setInstallDate(item.installDate);
+      if (item.link) await device.setLink(item.link);
       restored.push(device.getName());
     }
     if (data.settings) {

@@ -38,7 +38,7 @@
     "install_hint": "Staat vaak op het typeplaatje of de achterkant. Gebruikt voor taken als 'vervangen'.",
     "unknown": "Weet ik niet",
     "year": "Jaar",
-    "month": "Maand (optioneel)",
+    "month": "Maand",
     "tasks_hint": "Vink aan wat je wilt bijhouden en pas de termijn aan.",
     "kind": "Soort termijn",
     "kind_date": "Op datum",
@@ -80,7 +80,13 @@
       "november",
       "december"
     ],
-    "now": "nu"
+    "now": "nu",
+    "every_one": {
+      "days": "Elke dag",
+      "weeks": "Elke week",
+      "months": "Elke maand",
+      "years": "Elk jaar"
+    }
   },
   "settings": {
     "title": "Huisarts",
@@ -133,5 +139,40 @@
     "install": "Geïnstalleerd",
     "install_unknown": "onbekend",
     "install_save": "Bewaar"
+  },
+  "usage": {
+    "link": "Koppelen aan Homey-apparaat",
+    "link_none": "Niet koppelen",
+    "link_hint": "Optioneel. Dan kan Huisarts het gebruik meten, zoals draaiuren of het aantal wasbeurten.",
+    "link_loading": "Apparaten laden…",
+    "linked_to": "Gekoppeld aan",
+    "save": "Bewaar",
+    "kind_usage": "Op gebruik (gekoppeld apparaat)",
+    "metric": "Wat tellen",
+    "metric_hours": "Draaiuren",
+    "metric_cycles": "Aantal keer aan",
+    "metric_counter": "Teller van het apparaat",
+    "running_when": "Telt als aan wanneer",
+    "is_on": "aan / ja is",
+    "greater_than": "groter is dan",
+    "equals": "gelijk is aan",
+    "off_delay": "Pas uit na stilstand van",
+    "min_run": "Korter aan dan dit telt niet",
+    "minutes": "min",
+    "counter_cap": "Welke teller",
+    "threshold": "Na",
+    "lead_percent": "Melding vooraf bij",
+    "also_date": "Ook op datum (wat eerst komt)",
+    "unit_hours": "uur",
+    "unit_cycles": "keer",
+    "no_link": "Koppel eerst een Homey-apparaat aan dit onderdeel.",
+    "progress": "__amount__ van __threshold__ __unit__",
+    "or_date": "of op datum"
+  },
+  "widget": {
+    "title": "Onderhoud",
+    "empty": "Alles is bijgewerkt 👍",
+    "done": "Gedaan",
+    "more": "+ __n__ meer"
   }
 }

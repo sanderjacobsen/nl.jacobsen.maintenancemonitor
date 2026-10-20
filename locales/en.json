@@ -38,7 +38,7 @@
     "install_hint": "Often on the type plate or the back. Used for tasks like 'replace'.",
     "unknown": "Don't know",
     "year": "Year",
-    "month": "Month (optional)",
+    "month": "Month",
     "tasks_hint": "Tick what you want to track and adjust the interval.",
     "kind": "Interval type",
     "kind_date": "By date",
@@ -80,7 +80,13 @@
       "November",
       "December"
     ],
-    "now": "now"
+    "now": "now",
+    "every_one": {
+      "days": "Every day",
+      "weeks": "Every week",
+      "months": "Every month",
+      "years": "Every year"
+    }
   },
   "settings": {
     "title": "Huisarts",
@@ -133,5 +139,40 @@
     "install": "Installed",
     "install_unknown": "unknown",
     "install_save": "Save"
+  },
+  "usage": {
+    "link": "Link to a Homey device",
+    "link_none": "Don't link",
+    "link_hint": "Optional. Huisarts can then measure usage, like running hours or the number of washes.",
+    "link_loading": "Loading devices…",
+    "linked_to": "Linked to",
+    "save": "Save",
+    "kind_usage": "By usage (linked device)",
+    "metric": "What to count",
+    "metric_hours": "Running hours",
+    "metric_cycles": "Number of runs",
+    "metric_counter": "Device counter",
+    "running_when": "Counts as running when",
+    "is_on": "is on / yes",
+    "greater_than": "is greater than",
+    "equals": "equals",
+    "off_delay": "Only off after standing still for",
+    "min_run": "Runs shorter than this don't count",
+    "minutes": "min",
+    "counter_cap": "Which counter",
+    "threshold": "After",
+    "lead_percent": "Notify in advance at",
+    "also_date": "Also by date (whichever comes first)",
+    "unit_hours": "hours",
+    "unit_cycles": "times",
+    "no_link": "Link a Homey device to this item first.",
+    "progress": "__amount__ of __threshold__ __unit__",
+    "or_date": "or by date"
+  },
+  "widget": {
+    "title": "Maintenance",
+    "empty": "Everything is up to date 👍",
+    "done": "Done",
+    "more": "+ __n__ more"
   }
 }

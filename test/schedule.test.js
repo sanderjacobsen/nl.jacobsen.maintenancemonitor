@@ -25,4 +25,13 @@ assert.strictEqual(evaluateTask({ ...counter, counter: 95 }, '2026-10-20').statu
 assert.strictEqual(evaluateTask({ ...counter, counter: 100 }, '2026-10-20').status, 'due');
 assert.strictEqual(evaluateTask({ ...counter, counter: 120, dueSince: '2026-10-01' }, '2026-10-20').status, 'overdue');
 
+const usage = { type: 'usage', threshold: 250, usage: 0, leadPercent: 10, every: 3, unit: 'months', leadDays: 7, lastDone: '2026-10-20' };
+assert.strictEqual(evaluateTask({ ...usage, usage: 100 }, '2026-11-01').status, 'ok');
+assert.strictEqual(evaluateTask({ ...usage, usage: 240 }, '2026-11-01').status, 'soon');
+assert.strictEqual(evaluateTask({ ...usage, usage: 260 }, '2026-11-01').status, 'due');
+assert.strictEqual(evaluateTask({ ...usage, usage: 10, combine: true }, '2027-01-20').status, 'due');
+assert.strictEqual(evaluateTask({ ...usage, usage: 260, combine: true }, '2026-11-01').status, 'due');
+assert.strictEqual(evaluateTask({ ...usage, usage: 10, combine: true }, '2026-11-01').days, 80);
+assert.strictEqual(evaluateTask({ ...usage, usage: 10 }, '2027-05-01').status, 'ok');
+
 console.log('schedule tests ok');

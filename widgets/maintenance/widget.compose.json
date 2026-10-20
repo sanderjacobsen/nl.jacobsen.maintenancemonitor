@@ -1,0 +1,63 @@
+{
+  "name": {
+    "en": "Maintenance",
+    "nl": "Onderhoud"
+  },
+  "height": 240,
+  "transparent": false,
+  "settings": [
+    {
+      "id": "show",
+      "type": "dropdown",
+      "title": {
+        "en": "Show",
+        "nl": "Toon"
+      },
+      "value": "soon",
+      "values": [
+        {
+          "id": "open",
+          "title": {
+            "en": "Only due and overdue tasks",
+            "nl": "Alleen nodige en te late taken"
+          }
+        },
+        {
+          "id": "soon",
+          "title": {
+            "en": "Also tasks due soon",
+            "nl": "Ook taken die binnenkort nodig zijn"
+          }
+        },
+        {
+          "id": "all",
+          "title": {
+            "en": "All tasks",
+            "nl": "Alle taken"
+          }
+        }
+      ]
+    },
+    {
+      "id": "max",
+      "type": "number",
+      "title": {
+        "en": "Maximum number of tasks",
+        "nl": "Maximaal aantal taken"
+      },
+      "value": 6,
+      "min": 1,
+      "max": 30
+    }
+  ],
+  "api": {
+    "getTasks": {
+      "method": "GET",
+      "path": "/"
+    },
+    "markDone": {
+      "method": "POST",
+      "path": "/done"
+    }
+  }
+}

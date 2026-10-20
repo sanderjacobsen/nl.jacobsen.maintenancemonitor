@@ -1,7 +1,7 @@
 {
   "id": "nl.jacobsen.huisarts",
   "brandColor": "#2E8B6E",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -15,7 +15,9 @@
   "category": [
     "tools"
   ],
-  "permissions": [],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "author": {
     "name": "Sander Jacobsen"
   },
@@ -58,6 +60,10 @@
     "updateItem": {
       "method": "PUT",
       "path": "/devices/:id"
+    },
+    "getHomeyDevices": {
+      "method": "GET",
+      "path": "/homey-devices"
     }
   }
 }

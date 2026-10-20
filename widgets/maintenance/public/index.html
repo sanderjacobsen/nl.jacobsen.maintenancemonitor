@@ -1,0 +1,79 @@
+<html>
+<head>
+  <style>
+    /* Layout only; colours and fonts come from Homey's widget styleguide. */
+    body { margin: 0; }
+    .ha-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+    .ha-head .t { font-weight: var(--homey-font-weight-medium, 500); }
+    .ha-head .c { font-size: 13px; color: var(--homey-text-color-light, #939496); }
+    .ha-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--homey-line-color, rgba(128,128,128,.18)); }
+    .ha-row:first-of-type { border-top: none; }
+    .ha-icon { flex: 0 0 auto; width: 30px; height: 30px; background-color: var(--homey-text-color, currentColor);
+      -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+    .ha-txt { flex: 1; min-width: 0; }
+    .ha-task { font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ha-sub { font-size: 12px; line-height: 16px; color: var(--homey-text-color-light, #939496); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ha-state { flex: 0 0 auto; width: 20px; height: 20px; }
+    .ha-done { flex: 0 0 auto; }
+    .ha-empty { padding: 12px 0; text-align: center; color: var(--homey-text-color-light, #939496); font-size: 14px; }
+    .ha-more { font-size: 12px; color: var(--homey-text-color-light, #939496); padding-top: 6px; }
+  </style>
+</head>
+<body class="homey-widget">
+  <div class="ha-head"><span class="t" id="title"></span><span class="c" id="count"></span></div>
+  <div id="list"></div>
+
+  <script type="text/javascript">
+    const ORDER = ['ok', 'soon', 'due', 'overdue'];
+    const STATE_ICON = {
+      ok: '<circle cx="12" cy="12" r="11" fill="#3fc700"/><path d="m7 12.3 3.2 3.2L17 8.7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+      soon: '<circle cx="12" cy="12" r="11" fill="#f5a623"/><path d="M12 6.8V12l3.4 2.2" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+      due: '<circle cx="12" cy="12" r="11" fill="#ff7a00"/><path d="M12 6.5v7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.4" fill="#fff"/>',
+      overdue: '<circle cx="12" cy="12" r="11" fill="#d81c1d"/><path d="M12 6.5v7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.4" fill="#fff"/>',
+    };
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let H;
+    const t = (k, v) => H.__(k, v);
+
+    function when(task) {
+      if (task.days === null || task.days === undefined) return `${Math.round((task.progress || 0) * 100)}%`;
+      if (task.days > 0) return t('device.in_days', { days: task.days });
+      if (task.days === 0) return t('device.today');
+      return t('device.days_late', { days: -task.days });
+    }
+
+    async function load() {
+      const settings = H.getSettings() || {};
+      const minLevel = { open: 2, soon: 1, all: 0 }[settings.show || 'soon'];
+      const max = Number(settings.max) || 6;
+      const all = await H.api('GET', '/');
+      const tasks = all.filter(tk => ORDER.indexOf(tk.status) >= minLevel);
+      const open = all.filter(tk => ORDER.indexOf(tk.status) >= 2).length;
+      document.getElementById('title').textContent = t('widget.title');
+      document.getElementById('count').textContent = open ? `${open} ${t('status.due')}` : '';
+      document.getElementById('list').innerHTML = !tasks.length
+        ? `<div class="ha-empty">${esc(t('widget.empty'))}</div>`
+        : tasks.slice(0, max).map(tk => `<div class="ha-row">
+            <span class="ha-icon" style="--icon:url('${tk.iconUri}')"></span>
+            <div class="ha-txt"><div class="ha-task">${esc(tk.task)}</div><div class="ha-sub">${esc(tk.item)} · ${esc(when(tk))}</div></div>
+            <svg class="ha-state" viewBox="0 0 24 24"><title>${esc(t('status.' + tk.status))}</title>${STATE_ICON[tk.status]}</svg>
+            ${ORDER.indexOf(tk.status) >= 2 ? `<button class="homey-button-secondary-small-shadow ha-done" data-item="${tk.itemId}" data-task="${tk.taskId}">${esc(t('widget.done'))}</button>` : ''}
+          </div>`).join('') + (tasks.length > max ? `<div class="ha-more">${esc(t('widget.more', { n: tasks.length - max }))}</div>` : '');
+      H.ready({ height: document.body.scrollHeight });
+    }
+
+    function onHomeyReady(Homey) {
+      H = Homey;
+      document.getElementById('list').addEventListener('click', async ev => {
+        const btn = ev.target.closest('.ha-done');
+        if (!btn) return;
+        btn.classList.add('is-loading');
+        try { await H.api('POST', '/done', { itemId: btn.dataset.item, taskId: btn.dataset.task }); } catch (err) { console.error(err); }
+        await load();
+      });
+      load().catch(err => { console.error(err); H.ready(); });
+      setInterval(() => load().catch(() => {}), 10 * 60 * 1000);
+    }
+  </script>
+</body>
+</html>

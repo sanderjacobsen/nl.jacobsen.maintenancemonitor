@@ -7,11 +7,11 @@
     /* Only layout; colours, fonts, buttons and form fields come from Homey's own styleguide (homey.css). */
     .hidden { display: none !important; }
     .ha-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
-    -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
-  /* Homey's styleguide has no date field: give it the same look as its other inputs. */
-  input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
-    background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
-    font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
+      -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
+    /* Homey's styleguide has no date field: give it the same look as its other inputs. */
+    input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
+      background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
+      font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
     .ha-section { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: var(--homey-su-3) 2px var(--homey-su-1); }
     .ha-card { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light); margin-bottom: 12px; overflow: hidden; }
     .ha-pad { padding: 12px 14px; }
@@ -22,19 +22,22 @@
     .ha-head .name { font-size: var(--homey-font-size-medium); font-weight: var(--homey-font-weight-medium); line-height: 26px; }
     .ha-head .ha-state { margin-left: auto; }
 
-    .ha-install { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
-    .ha-install .homey-form-select { width: calc(100% - 2px); }
+    .ha-grid3 { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
+    .ha-grid2 { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .ha-grid3 .homey-form-select, .ha-grid2 .homey-form-select { width: calc(100% - 2px); }
 
     .ha-task { padding: 12px 14px; border-top: 1px solid var(--homey-color-line); }
     .ha-task .line { display: flex; align-items: flex-start; gap: 10px; }
     .ha-task .title { font-weight: var(--homey-font-weight-medium); flex: 1; min-width: 0; padding-top: 2px; }
     .ha-task .meta { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; margin-top: 2px; }
+    .ha-bar { height: 4px; border-radius: 2px; background: var(--homey-color-mono-05); margin-top: 6px; overflow: hidden; }
+    .ha-bar span { display: block; height: 100%; background: var(--homey-color-blue); }
     .ha-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .ha-actions .ha-right { margin-left: auto; }
 
     /* status icons (instead of text) */
     .ha-state { width: 24px; height: 24px; flex: 0 0 auto; }
-    .ha-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; border-top: 1px solid var(--homey-color-line); }
+    .ha-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; }
     .ha-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); }
     .ha-legend .ha-state { width: 18px; height: 18px; }
 
@@ -74,8 +77,10 @@
   </div>
 
 <script>
-  let H; let items = []; let templates = []; let editing = null; // { itemId, taskId | 'new', draft }
+  let H; let items = []; let templates = []; let homeyDevices = null;
+  let editing = null; // { itemId, taskId | 'new', draft }
   const UNITS = ['days', 'weeks', 'months', 'years'];
+  const ORDER = ['ok', 'soon', 'due', 'overdue'];
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const t = (key, vars) => H.__(key, vars);
@@ -83,7 +88,12 @@
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
   const fmt = (date, opts) => new Date(`${date}T12:00:00`).toLocaleDateString(undefined, opts || { day: 'numeric', month: 'short', year: 'numeric' });
   const api = (method, path, body) => new Promise((resolve, reject) => H.api(method, path, body || null, (err, res) => (err ? reject(err) : resolve(res))));
-  const ORDER = ['ok', 'soon', 'due', 'overdue'];
+  const icon = uri => `<span class="ha-icon" style="--icon:url('${uri}')"></span>`;
+  const round = n => Math.round((Number(n) || 0) * 10) / 10;
+  const everyText = (n, unit, lower) => {
+    const txt = Number(n) === 1 ? t('pair.every_one.' + unit) : `${t('pair.every')} ${n} ${t('pair.units.' + unit)}`;
+    return lower ? txt.charAt(0).toLowerCase() + txt.slice(1) : txt;
+  };
 
   // Status icons: round badges in Homey's colours.
   const STATE_ICON = {
@@ -94,15 +104,45 @@
   };
   const stateIcon = status => `<svg class="ha-state" viewBox="0 0 24 24" role="img" aria-label="${esc(t('status.' + status))}"><title>${esc(t('status.' + status))}</title>${STATE_ICON[status]}</svg>`;
 
-  function metaText(task) {
-    if (task.type === 'counter') {
-      return `${t('settings.type_counter')}: ${Math.round(task.counter * 100) / 100} / ${task.threshold} (${Math.round((task.progress || 0) * 100)}%)`;
+  // ---------- linked devices ----------
+  const linkedDevice = item => (item.link && homeyDevices ? homeyDevices.find(d => d.id === item.link.id) || null : null);
+  const capOf = (dev, id) => (dev ? dev.capabilities.find(c => c.id === id) : null);
+
+  function usageUnit(task, dev) {
+    const metric = task.metric || (task.source && task.source.metric) || 'hours';
+    if (metric === 'hours') return t('usage.unit_hours');
+    if (metric === 'cycles') return t('usage.unit_cycles');
+    const capId = task.srcCap || (task.source && task.source.capability);
+    const c = capOf(dev, capId);
+    return (c && c.units) || (task.source && task.source.units) || '';
+  }
+
+  function autoSource(dev, metric, watts) {
+    if (!dev) return { metric };
+    if (metric === 'counter') {
+      const c = dev.capabilities.find(x => x.type === 'number' && x.id.startsWith('meter_')) || dev.capabilities.find(x => x.type === 'number');
+      return { metric, srcCap: c ? c.id : '' };
+    }
+    if (capOf(dev, 'measure_power')) return { metric, srcCap: 'measure_power', op: 'gt', cmpValue: watts || 10 };
+    const b = capOf(dev, 'onoff') || dev.capabilities.find(x => x.type === 'boolean');
+    return { metric, srcCap: b ? b.id : '', op: 'true', cmpValue: '' };
+  }
+
+  // ---------- texts ----------
+  function metaText(task, dev) {
+    if (task.type === 'counter' || task.type === 'usage') {
+      const what = task.type === 'counter' ? t('settings.type_counter') : t('usage.metric_' + ((task.source && task.source.metric) || 'hours'));
+      const unit = task.type === 'usage' ? ` ${usageUnit(task, dev)}` : '';
+      let txt = `${what}: ${round(task.type === 'counter' ? task.counter : task.usage)} / ${task.threshold}${unit} (${Math.round((task.progress || 0) * 100)}%)`;
+      if (task.type === 'usage' && task.combine && task.dueDate) txt += ` · ${t('usage.or_date')}: ${fmt(task.dueDate)}`;
+      return txt;
     }
     const d = task.days;
     const when = d > 0 ? t('device.in_days', { days: d }) : d === 0 ? t('device.today') : t('device.days_late', { days: -d });
-    return `${t('settings.every')} ${task.every} ${t('settings.units.' + task.unit)} · ${t('settings.last_done').toLowerCase()} ${fmt(task.lastDone)} · ${t('settings.next').toLowerCase()} ${fmt(task.dueDate)} (${when})`;
+    return `${everyText(task.every, task.unit)} · ${t('settings.last_done').toLowerCase()} ${fmt(task.lastDone)} · ${t('settings.next').toLowerCase()} ${fmt(task.dueDate)} (${when})`;
   }
 
+  // ---------- item rows ----------
   function installRow(item) {
     const y = item.installDate ? item.installDate.slice(0, 4) : '';
     const m = item.installDate ? item.installDate.slice(5, 7) : '';
@@ -110,39 +150,123 @@
     const years = Array.from({ length: 50 }, (_, k) => String(thisYear - k));
     return `<div class="ha-task" data-install="${item.id}">
       <label class="homey-form-label" style="margin-top:0">${esc(t('settings.install'))}</label>
-      <div class="ha-install">
+      <div class="ha-grid3">
         <select class="homey-form-select inst-year"><option value="">${esc(t('pair.year'))}</option>${years.map(v => `<option ${v === y ? 'selected' : ''}>${v}</option>`).join('')}</select>
-        <select class="homey-form-select inst-month"><option value="">${esc(t('pair.month').replace(/ \(.*\)/, ''))}</option>${Array.from({ length: 12 }, (_, k) => pad(k + 1)).map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>
+        <select class="homey-form-select inst-month"><option value="">${esc(t('pair.month'))}</option>${Array.from({ length: 12 }, (_, k) => pad(k + 1)).map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>
         <button class="homey-button-secondary-small-shadow" data-act="install">${esc(t('settings.install_save'))}</button>
       </div></div>`;
   }
 
-  function editForm(draft) {
-    const counter = draft.type === 'counter';
-    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === draft.unit ? 'selected' : ''}>${esc(t('settings.units.' + u))}</option>`).join('');
+  function linkRow(item) {
+    const opts = homeyDevices
+      ? homeyDevices.map(d => `<option value="${esc(d.id)}" ${item.link && item.link.id === d.id ? 'selected' : ''}>${esc(d.name)}${d.zone ? ` · ${esc(d.zone)}` : ''}</option>`).join('')
+      : (item.link ? `<option value="${esc(item.link.id)}" selected>${esc(item.link.name)}</option>` : '');
+    return `<div class="ha-task" data-linkrow="${item.id}">
+      <label class="homey-form-label" style="margin-top:0">${esc(t('usage.linked_to'))}</label>
+      <div class="ha-grid2">
+        <select class="homey-form-select link-select"><option value="">${esc(t('usage.link_none'))}</option>${opts}</select>
+        <button class="homey-button-secondary-small-shadow" data-act="link">${esc(t('usage.save'))}</button>
+      </div></div>`;
+  }
+
+  // ---------- task editor (fields carry data-f; the draft is kept in `editing.draft`) ----------
+  function draftFromTask(task, item) {
+    const d = { ...task };
+    if (task.type === 'usage' && task.source) {
+      Object.assign(d, {
+        metric: task.source.metric, srcCap: task.source.capability, op: task.source.condition && task.source.condition.op,
+        cmpValue: task.source.condition && task.source.condition.value, offDelayMin: task.source.offDelayMin, minRunMin: task.source.minRunMin,
+      });
+    }
+    return d;
+  }
+
+  function taskFromDraft(d, dev) {
+    const task = { ...d };
+    if (d.type === 'usage') {
+      task.source = {
+        capability: d.srcCap, metric: d.metric || 'hours', condition: { op: d.op || 'true', value: d.cmpValue },
+        offDelayMin: Number(d.offDelayMin ?? 3), minRunMin: Number(d.minRunMin ?? 1), units: usageUnit(d, dev),
+      };
+    }
+    ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'status', 'dueDate', 'days', 'progress', 'amountStatus'].forEach(k => delete task[k]);
+    return task;
+  }
+
+  function dateFields(d) {
+    const unitOpts = UNITS.map(u => `<option value="${u}" ${u === d.unit ? 'selected' : ''}>${esc(t('settings.units.' + u))}</option>`).join('');
+    return `<label class="homey-form-label">${esc(t('settings.every'))}</label>
+      <div class="ha-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" data-f="every" value="${d.every ?? 1}" /><select class="homey-form-select" data-f="unit">${unitOpts}</select></div>
+      <label class="homey-form-label">${esc(t('settings.lead'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" data-f="leadDays" value="${d.leadDays ?? 7}" /></div>
+      <label class="homey-form-label">${esc(t('settings.last_done'))}</label>
+      <input class="homey-form-input" type="date" data-f="lastDone" max="${today()}" value="${esc(d.lastDone || today())}" />`;
+  }
+
+  function usageFields(d, dev) {
+    if (!dev) return `<p class="ha-sub" style="margin-top:12px">${esc(t('usage.no_link'))}</p>`;
+    const metric = d.metric || 'hours';
+    const metricOpts = ['hours', 'cycles', 'counter'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(t('usage.metric_' + m))}</option>`).join('');
+    let source;
+    if (metric === 'counter') {
+      const caps = dev.capabilities.filter(c => c.type === 'number');
+      source = `<label class="homey-form-label">${esc(t('usage.counter_cap'))}</label>
+        <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === d.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>`;
+    } else {
+      const caps = dev.capabilities.filter(c => ['boolean', 'number', 'enum', 'string'].includes(c.type));
+      const cap = capOf(dev, d.srcCap) || caps[0];
+      let cond = '';
+      if (cap && cap.type === 'number') {
+        cond = `<div class="ha-inline days" style="margin-top:8px"><span>${esc(t('usage.greater_than'))}</span><input class="homey-form-input" type="number" inputmode="decimal" data-f="cmpValue" value="${esc(d.cmpValue ?? 10)}" style="width:90px" /><span>${esc(cap.units || '')}</span></div>`;
+      } else if (cap && (cap.type === 'enum' || cap.type === 'string')) {
+        const values = cap.values || [];
+        cond = values.length
+          ? `<select class="homey-form-select" style="margin-top:8px" data-f="cmpValue"><option value="">${esc(t('usage.equals'))}…</option>${values.map(v => `<option value="${esc(v.id)}" ${String(v.id) === String(d.cmpValue) ? 'selected' : ''}>${esc(t('usage.equals'))} ${esc(v.title)}</option>`).join('')}</select>`
+          : `<input class="homey-form-input" style="margin-top:8px" type="text" data-f="cmpValue" placeholder="${esc(t('usage.equals'))}…" value="${esc(d.cmpValue ?? '')}" />`;
+      }
+      source = `<label class="homey-form-label">${esc(t('usage.running_when'))}</label>
+        <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}${c.type === 'boolean' ? ` ${esc(t('usage.is_on'))}` : ''}</option>`).join('')}</select>
+        ${cond}
+        <label class="homey-form-label">${esc(t('usage.off_delay'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" data-f="offDelayMin" value="${d.offDelayMin ?? 3}" /><span>${esc(t('usage.minutes'))}</span></div>
+        ${metric === 'cycles' ? `<label class="homey-form-label">${esc(t('usage.min_run'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" data-f="minRunMin" value="${d.minRunMin ?? 1}" /><span>${esc(t('usage.minutes'))}</span></div>` : ''}`;
+    }
+    return `<label class="homey-form-label">${esc(t('usage.metric'))}</label>
+      <select class="homey-form-select" data-f="metric">${metricOpts}</select>
+      ${source}
+      <label class="homey-form-label">${esc(t('usage.threshold'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" data-f="threshold" value="${d.threshold ?? 100}" style="width:110px" /><span>${esc(usageUnit(d, dev))}</span></div>
+      <label class="homey-form-label">${esc(t('usage.lead_percent'))}</label>
+      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" data-f="leadPercent" value="${d.leadPercent ?? 10}" /><span>%</span></div>
+      <label class="homey-form-checkbox" style="margin-top:14px"><input class="homey-form-checkbox-input" type="checkbox" data-f="combine" ${d.combine ? 'checked' : ''} />
+        <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(t('usage.also_date'))}</span></label>
+      ${d.combine ? dateFields(d) : ''}`;
+  }
+
+  function editForm(d, item) {
+    const dev = linkedDevice(item);
+    const typeOpts = [['date', t('settings.type_date')], ['counter', t('settings.type_counter')]]
+      .concat(item.link ? [['usage', t('usage.kind_usage')]] : [])
+      .map(([v, l]) => `<option value="${v}" ${v === d.type ? 'selected' : ''}>${esc(l)}</option>`).join('');
+    let fields;
+    if (d.type === 'usage') fields = usageFields(d, dev);
+    else if (d.type === 'counter') {
+      fields = `<label class="homey-form-label">${esc(t('settings.threshold'))}</label>
+        <input class="homey-form-input" type="number" inputmode="decimal" min="1" data-f="threshold" value="${d.threshold ?? 100}" />
+        <label class="homey-form-label">${esc(t('settings.counter'))}</label>
+        <input class="homey-form-input" type="number" inputmode="decimal" min="0" data-f="counter" value="${d.counter ?? 0}" />
+        <label class="homey-form-label">${esc(t('settings.lead_percent'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" data-f="leadPercent" value="${d.leadPercent ?? 10}" /><span>%</span></div>`;
+    } else fields = dateFields(d);
     return `<div class="ha-editor">
-      <label class="homey-form-label" for="e_name">${esc(t('settings.name'))}</label>
-      <input class="homey-form-input" type="text" id="e_name" value="${esc(draft.name)}" maxlength="80" />
-      <label class="homey-form-label" for="e_type">${esc(t('settings.type'))}</label>
-      <select class="homey-form-select" id="e_type">
-        <option value="date" ${!counter ? 'selected' : ''}>${esc(t('settings.type_date'))}</option>
-        <option value="counter" ${counter ? 'selected' : ''}>${esc(t('settings.type_counter'))}</option></select>
-      ${counter ? `
-        <label class="homey-form-label" for="e_threshold">${esc(t('settings.threshold'))}</label>
-        <input class="homey-form-input" type="number" inputmode="decimal" id="e_threshold" min="1" value="${draft.threshold ?? 100}" />
-        <label class="homey-form-label" for="e_counter">${esc(t('settings.counter'))}</label>
-        <input class="homey-form-input" type="number" inputmode="decimal" id="e_counter" min="0" value="${draft.counter ?? 0}" />
-        <label class="homey-form-label" for="e_leadPercent">${esc(t('settings.lead_percent'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" id="e_leadPercent" min="0" max="100" value="${draft.leadPercent ?? 10}" /><span>%</span></div>`
-      : `
-        <label class="homey-form-label" for="e_every">${esc(t('settings.every'))}</label>
-        <div class="ha-inline"><input class="homey-form-input" type="number" inputmode="numeric" id="e_every" min="1" value="${draft.every ?? 1}" /><select class="homey-form-select" id="e_unit">${unitOpts}</select></div>
-        <label class="homey-form-label" for="e_leadDays">${esc(t('settings.lead'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" id="e_leadDays" min="0" value="${draft.leadDays ?? 7}" /></div>
-        <label class="homey-form-label" for="e_lastDone">${esc(t('settings.last_done'))}</label>
-        <input class="homey-form-input" type="date" id="e_lastDone" max="${today()}" value="${esc(draft.lastDone || today())}" />`}
-      <label class="homey-form-label" for="e_note">${esc(t('settings.note'))}</label>
-      <input class="homey-form-input" type="text" id="e_note" value="${esc(draft.note || '')}" maxlength="500" />
+      <label class="homey-form-label">${esc(t('settings.name'))}</label>
+      <input class="homey-form-input" type="text" data-f="name" value="${esc(d.name)}" maxlength="80" />
+      <label class="homey-form-label">${esc(t('settings.type'))}</label>
+      <select class="homey-form-select" data-f="type">${typeOpts}</select>
+      ${fields}
+      <label class="homey-form-label">${esc(t('settings.note'))}</label>
+      <input class="homey-form-input" type="text" data-f="note" value="${esc(d.note || '')}" maxlength="500" />
       <div class="ha-actions">
         <button class="homey-button-primary-small-shadow" data-act="save">${esc(t('settings.save'))}</button>
         <button class="homey-button-transparent-small" data-act="cancel">${esc(t('settings.cancel'))}</button>
@@ -151,30 +275,23 @@
     </div>`;
   }
 
-  function readDraft() {
-    const v = id => ($(id) ? $(id).value : undefined);
-    const d = { ...editing.draft, name: v('e_name') ?? editing.draft.name, note: v('e_note') ?? editing.draft.note };
-    if (d.type === 'counter') {
-      Object.assign(d, { threshold: Number(v('e_threshold') ?? d.threshold ?? 100), counter: Number(v('e_counter') ?? d.counter ?? 0), leadPercent: Number(v('e_leadPercent') ?? d.leadPercent ?? 10) });
-    } else {
-      Object.assign(d, { every: Number(v('e_every') ?? d.every ?? 1), unit: v('e_unit') ?? d.unit ?? 'months', leadDays: Number(v('e_leadDays') ?? d.leadDays ?? 7), lastDone: v('e_lastDone') ?? d.lastDone });
-    }
-    return d;
-  }
-
+  // ---------- render ----------
   function render() {
     if (!items.length) { $('items').innerHTML = `<div class="ha-card ha-pad ha-sub">${esc(t('settings.no_items'))}</div>`; return; }
     $('items').innerHTML = items.map(item => {
+      const dev = linkedDevice(item);
       const cat = templates.find(c => c.id === item.category);
       const used = new Set(item.tasks.map(tk => tk.key).filter(Boolean));
       const suggestions = (cat ? cat.tasks : []).filter(tk => !used.has(tk.key));
       const worst = item.tasks.reduce((w, tk) => (ORDER.indexOf(tk.status) > ORDER.indexOf(w) ? tk.status : w), 'ok');
       const tasks = item.tasks.map(task => {
         const isEditing = editing && editing.itemId === item.id && editing.taskId === task.id;
+        const bar = task.type === 'usage' || task.type === 'counter' ? `<div class="ha-bar"><span style="width:${Math.min(100, Math.round((task.progress || 0) * 100))}%"></span></div>` : '';
         return `<div class="ha-task" data-item="${item.id}" data-task="${task.id}">
           <div class="line"><span class="title">${esc(task.name)}</span>${stateIcon(task.status)}</div>
-          <div class="meta">${esc(metaText(task))}${task.note ? `<br>${esc(task.note)}` : ''}${task.history && task.history.length > 1 ? `<br>${esc(t('settings.history'))}: ${task.history.slice(1, 6).map(d => esc(fmt(d))).join(', ')}` : ''}</div>
-          ${isEditing ? editForm(editing.draft) : `<div class="ha-actions">
+          <div class="meta">${esc(metaText(task, dev))}${task.note ? `<br>${esc(task.note)}` : ''}${task.history && task.history.length > 1 ? `<br>${esc(t('settings.history'))}: ${task.history.slice(1, 6).map(x => esc(fmt(x))).join(', ')}` : ''}</div>
+          ${bar}
+          ${isEditing ? editForm(editing.draft, item) : `<div class="ha-actions">
             <button class="homey-button-primary-small-shadow" data-act="done">${esc(t('settings.done'))}</button>
             <button class="homey-button-secondary-small-shadow" data-act="snooze">${esc(t('settings.snooze'))}</button>
             <button class="homey-button-secondary-small-shadow" data-act="edit">${esc(t('settings.edit'))}</button></div>`}
@@ -182,11 +299,12 @@
       }).join('');
       const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
       return `<div class="ha-card" data-item="${item.id}">
-        <div class="ha-head"><span class="ha-icon" style="--icon:url('${item.iconUri}');"></span><div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
+        <div class="ha-head">${icon(item.iconUri)}<div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}${item.link ? ` · ${esc(item.link.name)}` : ''}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
         ${installRow(item)}
+        ${linkRow(item)}
         ${tasks}
         <div class="ha-task" data-item="${item.id}" data-task="new">
-          ${adding ? editForm(editing.draft) : `<select class="homey-form-select add-select">
+          ${adding ? editForm(editing.draft, item) : `<select class="homey-form-select add-select">
             <option value="">+ ${esc(t('settings.add_task'))}</option>
             ${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}
             <option value="custom">${esc(t('settings.custom'))}</option></select>`}
@@ -203,6 +321,7 @@
     render();
   }
 
+  // ---------- events ----------
   async function onClick(ev) {
     const btn = ev.target.closest('[data-act]');
     if (!btn) return;
@@ -212,8 +331,15 @@
         const year = row.querySelector('.inst-year').value;
         const month = row.querySelector('.inst-month').value || '01';
         replaceItem(await api('PUT', `/devices/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null }));
-        render();
-        H.alert(t('settings.saved'));
+        render(); H.alert(t('settings.saved'));
+        return;
+      }
+      if (btn.dataset.act === 'link') {
+        const row = btn.closest('[data-linkrow]');
+        const id = row.querySelector('.link-select').value;
+        const dev = (homeyDevices || []).find(d => d.id === id);
+        replaceItem(await api('PUT', `/devices/${row.dataset.linkrow}`, { link: dev ? { id: dev.id, name: dev.name } : null }));
+        render(); H.alert(t('settings.saved'));
         return;
       }
       const box = btn.closest('[data-task]');
@@ -223,15 +349,18 @@
       switch (btn.dataset.act) {
         case 'done': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/done`, { date: today() })); render(); break;
         case 'snooze': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/snooze`, { days: 7 })); render(); break;
-        case 'edit': editing = { itemId: item.id, taskId, draft: { ...task } }; render(); break;
+        case 'edit': editing = { itemId: item.id, taskId, draft: draftFromTask(task, item) }; render(); break;
         case 'cancel': editing = null; render(); break;
         case 'delete':
           if (!(await new Promise(res => H.confirm(t('settings.confirm_delete'), null, (e, ok) => res(!e && ok))))) break;
           await save(item, item.tasks.filter(tk => tk.id !== taskId)); break;
         case 'save': {
-          const draft = readDraft();
-          if (!String(draft.name || '').trim()) { H.alert(t('errors.name_required')); break; }
-          const tasks = editing.taskId === 'new' ? [...item.tasks, draft] : item.tasks.map(tk => (tk.id === editing.taskId ? { ...tk, ...draft } : tk));
+          const d = editing.draft;
+          if (!String(d.name || '').trim()) { H.alert(t('errors.name_required')); break; }
+          if (d.type === 'usage' && !d.srcCap) { H.alert(t('usage.no_link')); break; }
+          const dev = linkedDevice(item);
+          const newTask = taskFromDraft(d, dev);
+          const tasks = editing.taskId === 'new' ? [...item.tasks, newTask] : item.tasks.map(tk => (tk.id === editing.taskId ? { ...tk, ...newTask } : tk));
           await save(item, tasks); break;
         }
         default:
@@ -239,16 +368,37 @@
     } catch (err) { H.alert(err.message || String(err)); }
   }
 
+  function onInput(ev) {
+    const f = ev.target.dataset.f;
+    if (!f || !editing || ev.target.tagName === 'SELECT' || ev.target.type === 'checkbox') return;
+    editing.draft[f] = ev.target.value; // typing: keep focus
+  }
+
   function onChange(ev) {
     const el = ev.target;
-    if (el.id === 'e_type' && editing) { editing.draft = { ...readDraft(), type: el.value }; render(); return; }
+    const f = el.dataset.f;
+    if (f && editing) {
+      const d = editing.draft;
+      d[f] = el.type === 'checkbox' ? el.checked : el.value;
+      const item = items.find(i => i.id === editing.itemId);
+      const dev = linkedDevice(item);
+      if (f === 'type' && d.type === 'usage' && !d.srcCap) Object.assign(d, { combine: true }, autoSource(dev, d.metric || 'hours', 10));
+      if (f === 'metric') Object.assign(d, autoSource(dev, d.metric, 10));
+      if (f === 'srcCap') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
+      if (['type', 'metric', 'srcCap', 'combine', 'unit'].includes(f)) render();
+      return;
+    }
     if (!el.classList.contains('add-select') || !el.value) return;
     const item = items.find(i => i.id === el.closest('[data-item]').dataset.item);
-    let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today() };
+    let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today(), threshold: 100, leadPercent: 10 };
     if (el.value.startsWith('tpl:')) {
       const cat = templates.find(c => c.id === item.category);
-      draft = { ...draft, ...cat.tasks.find(tk => tk.key === el.value.slice(4)) };
+      const tpl = cat.tasks.find(tk => tk.key === el.value.slice(4));
+      draft = { ...draft, ...tpl };
       if (draft.basis === 'install' && item.installDate) draft.lastDone = item.installDate;
+      if (tpl.usage && item.link) {
+        Object.assign(draft, { type: 'usage', combine: true, threshold: tpl.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(linkedDevice(item), tpl.usage.metric, tpl.usage.watts));
+      }
     }
     editing = { itemId: item.id, taskId: 'new', draft };
     render();
@@ -258,6 +408,8 @@
     templates = await api('GET', '/templates');
     items = await api('GET', '/devices');
     render();
+    // The device list (for linking and usage) loads in the background.
+    api('GET', '/homey-devices').then(list => { homeyDevices = list; render(); }).catch(err => console.log('Could not load devices', err));
   }
 
   function onHomeyReady(Homey) {
@@ -270,6 +422,7 @@
     H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
     $('items').addEventListener('click', onClick);
+    $('items').addEventListener('input', onInput);
     $('items').addEventListener('change', onChange);
     $('export').addEventListener('click', async () => {
       try { $('backup').value = JSON.stringify(await api('GET', '/export'), null, 2); } catch (err) { H.alert(err.message || String(err)); }
