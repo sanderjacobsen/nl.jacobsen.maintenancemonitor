@@ -80,6 +80,11 @@
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
   },
+  "source": "https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor",
+  "homepage": "https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor",
+  "bugs": {
+    "url": "https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor/issues"
+  },
   "flow": {
     "triggers": [
       {

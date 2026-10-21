@@ -8,3 +8,7 @@ Per onderdeel (een apparaat in Homey) één of meer taken met een eigen termijn;
 - Meldingen: Homey-tijdlijn (push aanzetten via Homey > Instellingen > Meldingen > Huisarts) en flowkaarten.
 
 Ontwerp en fasering: zie ONTWERP.md. Tests van de datumlogica: `npm test`.
+
+## Credits
+Device pictograms: Athom (Homey), Sure Petcare (Felaqua Connect, SureFeed), Whisker (Litter-Robot 4) and Omlet (Autodoor)
+apps for Homey; water softener: AquaCell app. Used with respect for their makers; to be confirmed before a public release.
