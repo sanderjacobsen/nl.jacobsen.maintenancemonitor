@@ -1,0 +1,24 @@
+{
+  "title": {
+    "en": "Mark all open tasks of an item as done",
+    "nl": "Markeer alle openstaande taken van een onderdeel als uitgevoerd"
+  },
+  "titleFormatted": {
+    "en": "Mark all open tasks of [[item]] as done",
+    "nl": "Markeer alle openstaande taken van [[item]] als uitgevoerd"
+  },
+  "args": [
+    {
+      "name": "item",
+      "type": "autocomplete",
+      "title": {
+        "en": "Item",
+        "nl": "Onderdeel"
+      },
+      "placeholder": {
+        "en": "Choose an item",
+        "nl": "Kies een onderdeel"
+      }
+    }
+  ]
+}

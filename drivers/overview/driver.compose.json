@@ -1,0 +1,30 @@
+{
+  "name": {
+    "en": "Huisarts (overview)",
+    "nl": "Huisarts (overzicht)"
+  },
+  "class": "other",
+  "capabilities": [
+    "alarm_maintenance",
+    "maintenance_open",
+    "maintenance_days",
+    "maintenance_next"
+  ],
+  "platforms": [
+    "local",
+    "cloud"
+  ],
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.jacobsen.huisarts",
   "brandColor": "#2E8B6E",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -30,25 +30,41 @@
     ]
   },
   "api": {
-    "getDevices": {
+    "getItems": {
       "method": "GET",
-      "path": "/devices"
+      "path": "/items"
+    },
+    "addItem": {
+      "method": "POST",
+      "path": "/items"
+    },
+    "updateItem": {
+      "method": "PUT",
+      "path": "/items/:id"
+    },
+    "deleteItem": {
+      "method": "DELETE",
+      "path": "/items/:id"
+    },
+    "setTasks": {
+      "method": "PUT",
+      "path": "/items/:id/tasks"
+    },
+    "markDone": {
+      "method": "POST",
+      "path": "/items/:id/tasks/:taskId/done"
+    },
+    "snooze": {
+      "method": "POST",
+      "path": "/items/:id/tasks/:taskId/snooze"
     },
     "getTemplates": {
       "method": "GET",
       "path": "/templates"
     },
-    "setTasks": {
-      "method": "PUT",
-      "path": "/devices/:id/tasks"
-    },
-    "markDone": {
-      "method": "POST",
-      "path": "/devices/:id/tasks/:taskId/done"
-    },
-    "snooze": {
-      "method": "POST",
-      "path": "/devices/:id/tasks/:taskId/snooze"
+    "getHomeyDevices": {
+      "method": "GET",
+      "path": "/homey-devices"
     },
     "exportData": {
       "method": "GET",
@@ -57,14 +73,6 @@
     "importData": {
       "method": "POST",
       "path": "/import"
-    },
-    "updateItem": {
-      "method": "PUT",
-      "path": "/devices/:id"
-    },
-    "getHomeyDevices": {
-      "method": "GET",
-      "path": "/homey-devices"
     }
   },
   "flow": {
@@ -74,10 +82,28 @@
           "en": "A maintenance task is due",
           "nl": "Een onderhoudstaak is nodig"
         },
+        "titleFormatted": {
+          "en": "A task of [[item]] is due",
+          "nl": "Een taak van [[item]] is nodig"
+        },
         "hint": {
           "en": "Fires once when a task becomes due.",
           "nl": "Gaat één keer af als een taak nodig wordt."
         },
+        "args": [
+          {
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "All items",
+              "nl": "Alle onderdelen"
+            }
+          }
+        ],
         "tokens": [
           {
             "name": "item",
@@ -113,10 +139,6 @@
             "example": 7
           }
         ],
-        "titleFormatted": {
-          "en": "A maintenance task is due",
-          "nl": "Een onderhoudstaak is nodig"
-        },
         "id": "task_due"
       },
       {
@@ -124,10 +146,28 @@
           "en": "A maintenance task is overdue",
           "nl": "Een onderhoudstaak is te laat"
         },
+        "titleFormatted": {
+          "en": "A task of [[item]] is overdue",
+          "nl": "Een taak van [[item]] is te laat"
+        },
         "hint": {
           "en": "Days = days past the due date.",
           "nl": "Dagen = aantal dagen over de datum."
         },
+        "args": [
+          {
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "All items",
+              "nl": "Alle onderdelen"
+            }
+          }
+        ],
         "tokens": [
           {
             "name": "item",
@@ -163,10 +203,6 @@
             "example": 7
           }
         ],
-        "titleFormatted": {
-          "en": "A maintenance task is overdue",
-          "nl": "Een onderhoudstaak is te laat"
-        },
         "id": "task_overdue"
       },
       {
@@ -174,10 +210,28 @@
           "en": "A maintenance task is due soon",
           "nl": "Een onderhoudstaak is binnenkort nodig"
         },
+        "titleFormatted": {
+          "en": "A task of [[item]] is due soon",
+          "nl": "Een taak van [[item]] is binnenkort nodig"
+        },
         "hint": {
           "en": "Days = days left until the task is due.",
           "nl": "Dagen = aantal dagen tot de taak nodig is."
         },
+        "args": [
+          {
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "All items",
+              "nl": "Alle onderdelen"
+            }
+          }
+        ],
         "tokens": [
           {
             "name": "item",
@@ -213,196 +267,45 @@
             "example": 7
           }
         ],
-        "titleFormatted": {
-          "en": "A maintenance task is due soon",
-          "nl": "Een onderhoudstaak is binnenkort nodig"
-        },
         "id": "task_soon"
-      },
-      {
-        "id": "item_task_soon",
-        "title": {
-          "en": "A task is due soon",
-          "nl": "Een taak is binnenkort nodig"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "task",
-            "type": "string",
-            "title": {
-              "en": "Task",
-              "nl": "Taak"
-            },
-            "example": {
-              "en": "Clean filters",
-              "nl": "Filters schoonmaken"
-            }
-          },
-          {
-            "name": "days",
-            "type": "number",
-            "title": {
-              "en": "Days",
-              "nl": "Dagen"
-            },
-            "example": 7
-          }
-        ],
-        "titleFormatted": {
-          "en": "A task of [[device]] is due soon",
-          "nl": "Een taak van [[device]] is binnenkort nodig"
-        }
-      },
-      {
-        "id": "item_task_due",
-        "title": {
-          "en": "A task is due",
-          "nl": "Een taak is nodig"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "task",
-            "type": "string",
-            "title": {
-              "en": "Task",
-              "nl": "Taak"
-            },
-            "example": {
-              "en": "Clean filters",
-              "nl": "Filters schoonmaken"
-            }
-          },
-          {
-            "name": "days",
-            "type": "number",
-            "title": {
-              "en": "Days",
-              "nl": "Dagen"
-            },
-            "example": 7
-          }
-        ],
-        "titleFormatted": {
-          "en": "A task of [[device]] is due",
-          "nl": "Een taak van [[device]] is nodig"
-        }
-      },
-      {
-        "id": "item_task_overdue",
-        "title": {
-          "en": "A task is overdue",
-          "nl": "Een taak is te laat"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "task",
-            "type": "string",
-            "title": {
-              "en": "Task",
-              "nl": "Taak"
-            },
-            "example": {
-              "en": "Clean filters",
-              "nl": "Filters schoonmaken"
-            }
-          },
-          {
-            "name": "days",
-            "type": "number",
-            "title": {
-              "en": "Days",
-              "nl": "Dagen"
-            },
-            "example": 7
-          }
-        ],
-        "titleFormatted": {
-          "en": "A task of [[device]] is overdue",
-          "nl": "Een taak van [[device]] is te laat"
-        }
       }
     ],
     "conditions": [
       {
-        "id": "has_open_tasks",
         "title": {
-          "en": "!{{Has|Has no}} open tasks",
-          "nl": "!{{Heeft|Heeft geen}} openstaande taken"
+          "en": "!{{Has|Has no}} open maintenance tasks",
+          "nl": "!{{Heeft|Heeft geen}} openstaande onderhoudstaken"
+        },
+        "titleFormatted": {
+          "en": "[[item]] !{{has|has no}} open tasks",
+          "nl": "[[item]] !{{heeft|heeft geen}} openstaande taken"
         },
         "args": [
           {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "All items",
+              "nl": "Alle onderdelen"
+            }
           }
         ],
-        "titleFormatted": {
-          "en": "[[device]] !{{has|has no}} open tasks",
-          "nl": "[[device]] !{{heeft|heeft geen}} openstaande taken"
-        }
+        "id": "has_open_tasks"
       },
       {
-        "id": "task_due_within",
         "title": {
           "en": "Task !{{is|is not}} due within … days",
           "nl": "Taak !{{is|is niet}} binnen … dagen nodig"
         },
         "titleFormatted": {
-          "en": "[[task]] of [[device]] !{{is|is not}} due within [[days]] days",
-          "nl": "[[task]] van [[device]] !{{is|is niet}} binnen [[days]] dagen nodig"
+          "en": "[[task]] !{{is|is not}} due within [[days]] days",
+          "nl": "[[task]] !{{is|is niet}} binnen [[days]] dagen nodig"
         },
         "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          },
           {
             "name": "task",
             "type": "autocomplete",
@@ -430,143 +333,25 @@
               "nl": "7"
             }
           }
-        ]
+        ],
+        "id": "task_due_within"
       }
     ],
     "actions": [
       {
-        "id": "mark_task_done",
-        "title": {
-          "en": "Mark task as done",
-          "nl": "Markeer taak als uitgevoerd"
-        },
-        "titleFormatted": {
-          "en": "Mark [[task]] of [[device]] as done",
-          "nl": "Markeer [[task]] van [[device]] als uitgevoerd"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "task",
-            "type": "autocomplete",
-            "title": {
-              "en": "Task",
-              "nl": "Taak"
-            },
-            "placeholder": {
-              "en": "Choose a task",
-              "nl": "Kies een taak"
-            }
-          }
-        ]
-      },
-      {
-        "id": "mark_all_done",
-        "title": {
-          "en": "Mark all open tasks as done",
-          "nl": "Markeer alle openstaande taken als uitgevoerd"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          }
-        ],
-        "titleFormatted": {
-          "en": "Mark all open tasks of [[device]] as done",
-          "nl": "Markeer alle openstaande taken van [[device]] als uitgevoerd"
-        }
-      },
-      {
-        "id": "snooze_task",
-        "title": {
-          "en": "Postpone a task",
-          "nl": "Stel een taak uit"
-        },
-        "titleFormatted": {
-          "en": "Postpone [[task]] of [[device]] by [[days]] days",
-          "nl": "Stel [[task]] van [[device]] uit met [[days]] dagen"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "task",
-            "type": "autocomplete",
-            "title": {
-              "en": "Task",
-              "nl": "Taak"
-            },
-            "placeholder": {
-              "en": "Choose a task",
-              "nl": "Kies een taak"
-            }
-          },
-          {
-            "name": "days",
-            "type": "number",
-            "min": 1,
-            "max": 365,
-            "step": 1,
-            "title": {
-              "en": "Days",
-              "nl": "Dagen"
-            },
-            "placeholder": {
-              "en": "7",
-              "nl": "7"
-            }
-          }
-        ]
-      },
-      {
-        "id": "increment_counter",
         "title": {
           "en": "Increase a task counter",
           "nl": "Verhoog de teller van een taak"
         },
         "titleFormatted": {
-          "en": "Increase counter of [[task]] of [[device]] by [[amount]]",
-          "nl": "Verhoog teller van [[task]] van [[device]] met [[amount]]"
+          "en": "Increase counter of [[task]] by [[amount]]",
+          "nl": "Verhoog teller van [[task]] met [[amount]]"
         },
         "hint": {
           "en": "Only for tasks of the type 'counter'.",
           "nl": "Alleen voor taken van het type 'teller'."
         },
         "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=maintenance_item"
-          },
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=maintenance_item"
-          },
           {
             "name": "task",
             "type": "autocomplete",
@@ -594,22 +379,113 @@
               "nl": "1"
             }
           }
-        ]
+        ],
+        "id": "increment_counter"
+      },
+      {
+        "title": {
+          "en": "Mark all open tasks of an item as done",
+          "nl": "Markeer alle openstaande taken van een onderdeel als uitgevoerd"
+        },
+        "titleFormatted": {
+          "en": "Mark all open tasks of [[item]] as done",
+          "nl": "Markeer alle openstaande taken van [[item]] als uitgevoerd"
+        },
+        "args": [
+          {
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "Choose an item",
+              "nl": "Kies een onderdeel"
+            }
+          }
+        ],
+        "id": "mark_all_done"
+      },
+      {
+        "title": {
+          "en": "Mark task as done",
+          "nl": "Markeer taak als uitgevoerd"
+        },
+        "titleFormatted": {
+          "en": "Mark [[task]] as done",
+          "nl": "Markeer [[task]] als uitgevoerd"
+        },
+        "args": [
+          {
+            "name": "task",
+            "type": "autocomplete",
+            "title": {
+              "en": "Task",
+              "nl": "Taak"
+            },
+            "placeholder": {
+              "en": "Choose a task",
+              "nl": "Kies een taak"
+            }
+          }
+        ],
+        "id": "mark_task_done"
+      },
+      {
+        "title": {
+          "en": "Postpone a task",
+          "nl": "Stel een taak uit"
+        },
+        "titleFormatted": {
+          "en": "Postpone [[task]] by [[days]] days",
+          "nl": "Stel [[task]] uit met [[days]] dagen"
+        },
+        "args": [
+          {
+            "name": "task",
+            "type": "autocomplete",
+            "title": {
+              "en": "Task",
+              "nl": "Taak"
+            },
+            "placeholder": {
+              "en": "Choose a task",
+              "nl": "Kies een taak"
+            }
+          },
+          {
+            "name": "days",
+            "type": "number",
+            "min": 1,
+            "max": 3650,
+            "step": 1,
+            "title": {
+              "en": "Days",
+              "nl": "Dagen"
+            },
+            "placeholder": {
+              "en": "7",
+              "nl": "7"
+            }
+          }
+        ],
+        "id": "snooze_task"
       }
     ]
   },
   "drivers": [
     {
       "name": {
-        "en": "Maintenance item",
-        "nl": "Onderdeel"
+        "en": "Huisarts (overview)",
+        "nl": "Huisarts (overzicht)"
       },
       "class": "other",
       "capabilities": [
         "alarm_maintenance",
+        "maintenance_open",
         "maintenance_days",
-        "maintenance_next",
-        "maintenance_open"
+        "maintenance_next"
       ],
       "platforms": [
         "local",
@@ -617,25 +493,18 @@
       ],
       "pair": [
         {
-          "id": "add_item"
-        }
-      ],
-      "settings": [
-        {
-          "id": "info",
-          "type": "label",
-          "label": {
-            "en": "Tasks",
-            "nl": "Taken"
-          },
-          "value": "",
-          "hint": {
-            "en": "Add, change and complete tasks in the Huisarts app settings (Homey app > Settings > Apps > Huisarts > Configure).",
-            "nl": "Taken toevoegen, wijzigen en afvinken doe je in de instellingen van de app (Homey-app > Instellingen > Apps > Huisarts > Configureren)."
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
           }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
-      "id": "maintenance_item"
+      "id": "overview"
     }
   ],
   "widgets": {

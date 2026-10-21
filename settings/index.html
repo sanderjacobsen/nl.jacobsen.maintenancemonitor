@@ -3,6 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <script type="text/javascript" src="./wizard.js"></script>
   <style>
     /* Only layout; colours, fonts, buttons and form fields come from Homey's own styleguide (homey.css). */
     .hidden { display: none !important; }
@@ -49,13 +50,78 @@
     .ha-row:first-child { border-top: none; }
     .ha-row .homey-form-checkbox { margin: 0; }
     .ha-row .homey-form-input { width: 80px !important; }
+
+    /* ---- wizard ---- */
+
+  /* Only layout; colours, fonts, buttons and form fields come from Homey's own styleguide (homey.css). */
+  .ha { padding-bottom: 88px; }
+  .wz-progress { display: flex; gap: 6px; margin-bottom: var(--homey-su-1); }
+  .wz-progress span { flex: 1; height: 4px; border-radius: 2px; background: var(--homey-color-mono-05); }
+  .wz-progress span.on { background: var(--homey-color-blue); }
+  .wz-step { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); }
+  .ha .homey-title { margin-top: 2px; }
+  .wz-hint { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: 6px 0 0; line-height: 20px; }
+  
+  .wz-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
+    -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
+  /* Homey's styleguide has no date field: give it the same look as its other inputs. */
+  input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
+    background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
+    font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
+
+  /* Step 1: tiles like Homey's device tiles */
+  .wz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; margin-top: var(--homey-su-2); }
+  .wz-tile { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light);
+    padding: 10px; aspect-ratio: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; transition: box-shadow var(--homey-duration-fast); }
+  .wz-tile .name { font-size: var(--homey-font-size-small); line-height: 18px; color: var(--homey-color-text); hyphens: manual; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .wz-tile.sel { box-shadow: 0 0 0 2px var(--homey-color-blue), var(--homey-box-shadow-light); }
+
+  .wz-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Step 3: one card per task */
+  .wz-task { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light);
+    padding: 12px 14px; margin-top: 12px; }
+  .wz-task.off .wz-sum { opacity: .5; }
+  .wz-task .homey-form-checkbox { margin: 0; }
+  .wz-task .homey-form-checkbox-text { font-weight: var(--homey-font-weight-medium); }
+  .wz-sum { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; margin: 4px 0 0; }
+  .wz-task .wz-edit-btn { margin-top: 8px; }
+  .wz-task .homey-form-label { margin-top: 14px; }
+  .wz-inline { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; }
+  .wz-inline.days { grid-template-columns: 90px auto; justify-content: start; }
+  .wz-inline span { color: var(--homey-color-text-light); }
+  .wz-remove { margin-top: 12px; }
+  #addCustom { margin-top: 14px; }
+
+  /* Step 4 */
+  .wz-card { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light); margin-top: 12px; overflow: hidden; }
+  .wz-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
+  .wz-head .wz-icon { width: 44px; height: 44px; }
+  .wz-head .name { font-size: var(--homey-font-size-medium); font-weight: var(--homey-font-weight-medium); line-height: 26px; }
+  .wz-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--homey-color-line); }
+  .wz-line .t { font-weight: var(--homey-font-weight-medium); }
+  .wz-line .s { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); }
+  .wz-line .r { text-align: end; font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); white-space: nowrap; }
+  .wz-line .r b { display: block; font-weight: var(--homey-font-weight-medium); color: var(--homey-color-text); }
+  .wz-line .r b.now { color: #e07b00; }
+
+  /* Bottom navigation, like Homey's own pair screens */
+  .wz-nav { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 2fr; gap: 8px;
+    padding: 12px var(--homey-su-2) calc(12px + env(safe-area-inset-bottom)); background: var(--homey-color-component); }
+
+    .wz { padding-bottom: 96px; }
   </style>
 </head>
 <body>
+  <div id="wizard" class="hidden"></div>
+  <div id="main">
   <h1 class="homey-title" data-i18n="settings.title"></h1>
   <p class="homey-subtitle" data-i18n="settings.intro"></p>
 
   <div class="ha-section" data-i18n="settings.items"></div>
+  <button class="homey-button-primary-shadow-full" id="addItem" style="margin-bottom:12px">+ <span data-i18n="settings.add_item"></span></button>
   <div id="items"></div>
 
   <div class="ha-section" data-i18n="settings.notifications"></div>
@@ -75,10 +141,12 @@
       <button class="homey-button-secondary-small-shadow" id="import" data-i18n="settings.import"></button>
     </div>
   </div>
+  </div>
 
 <script>
   let H; let items = []; let templates = []; let homeyDevices = null;
   let editing = null; // { itemId, taskId | 'new', draft }
+  const openSettings = new Set(); // items whose settings block is open
   const UNITS = ['days', 'weeks', 'months', 'years'];
   const ORDER = ['ok', 'soon', 'due', 'overdue'];
   const $ = id => document.getElementById(id);
@@ -155,6 +223,13 @@
         <select class="homey-form-select inst-month"><option value="">${esc(t('pair.month'))}</option>${Array.from({ length: 12 }, (_, k) => pad(k + 1)).map(v => `<option value="${v}" ${v === m ? 'selected' : ''}>${esc(new Date(2026, Number(v) - 1, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('')}</select>
         <button class="homey-button-secondary-small-shadow" data-act="install">${esc(t('settings.install_save'))}</button>
       </div></div>`;
+  }
+
+  function nameRow(item) {
+    return `<div class="ha-task" data-namerow="${item.id}">
+      <label class="homey-form-label" style="margin-top:0">${esc(t('settings.rename'))}</label>
+      <div class="ha-grid2"><input class="homey-form-input item-name" type="text" maxlength="60" value="${esc(item.name)}" />
+        <button class="homey-button-secondary-small-shadow" data-act="rename">${esc(t('usage.save'))}</button></div></div>`;
   }
 
   function linkRow(item) {
@@ -300,8 +375,9 @@
       const adding = editing && editing.itemId === item.id && editing.taskId === 'new';
       return `<div class="ha-card" data-item="${item.id}">
         <div class="ha-head">${icon(item.iconUri)}<div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}${item.link ? ` · ${esc(item.link.name)}` : ''}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
-        ${installRow(item)}
-        ${linkRow(item)}
+        <div class="ha-task" style="padding-top:0;border-top:none"><button class="homey-button-transparent-small" style="padding-left:0" data-act="toggle-settings" data-id="${item.id}">${esc(t('settings.item_settings'))} ${openSettings.has(item.id) ? '▴' : '▾'}</button></div>
+        ${openSettings.has(item.id) ? `${nameRow(item)}${installRow(item)}${linkRow(item)}
+          <div class="ha-task"><button class="homey-button-danger-small-shadow" data-act="delete-item" data-id="${item.id}">${esc(t('settings.delete_item'))}</button></div>` : ''}
         ${tasks}
         <div class="ha-task" data-item="${item.id}" data-task="new">
           ${adding ? editForm(editing.draft, item) : `<select class="homey-form-select add-select">
@@ -313,10 +389,10 @@
     }).join('') + `<div class="ha-card ha-legend">${ORDER.map(s => `<span>${stateIcon(s)}${esc(t('status.' + s))}</span>`).join('')}</div>`;
   }
 
-  function replaceItem(updated) { items = items.map(i => (i.id === updated.id ? updated : i)); }
+  function replaceItem(list) { items = list; }
 
   async function save(item, tasks) {
-    replaceItem(await api('PUT', `/devices/${item.id}/tasks`, { tasks }));
+    replaceItem(await api('PUT', `/items/${item.id}/tasks`, { tasks }));
     editing = null;
     render();
   }
@@ -326,11 +402,29 @@
     const btn = ev.target.closest('[data-act]');
     if (!btn) return;
     try {
+      if (btn.dataset.act === 'toggle-settings') {
+        if (openSettings.has(btn.dataset.id)) openSettings.delete(btn.dataset.id); else openSettings.add(btn.dataset.id);
+        render();
+        return;
+      }
+      if (btn.dataset.act === 'rename') {
+        const row = btn.closest('[data-namerow]');
+        replaceItem(await api('PUT', `/items/${row.dataset.namerow}`, { name: row.querySelector('.item-name').value }));
+        render(); H.alert(t('settings.saved'));
+        return;
+      }
+      if (btn.dataset.act === 'delete-item') {
+        if (!(await new Promise(res => H.confirm(t('settings.confirm_delete_item'), 'warning', (e, ok) => res(!e && ok))))) return;
+        replaceItem(await api('DELETE', `/items/${btn.dataset.id}`));
+        openSettings.delete(btn.dataset.id);
+        render();
+        return;
+      }
       if (btn.dataset.act === 'install') {
         const row = btn.closest('[data-install]');
         const year = row.querySelector('.inst-year').value;
         const month = row.querySelector('.inst-month').value || '01';
-        replaceItem(await api('PUT', `/devices/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null }));
+        replaceItem(await api('PUT', `/items/${row.dataset.install}`, { installDate: year ? `${year}-${month}-01` : null }));
         render(); H.alert(t('settings.saved'));
         return;
       }
@@ -338,7 +432,7 @@
         const row = btn.closest('[data-linkrow]');
         const id = row.querySelector('.link-select').value;
         const dev = (homeyDevices || []).find(d => d.id === id);
-        replaceItem(await api('PUT', `/devices/${row.dataset.linkrow}`, { link: dev ? { id: dev.id, name: dev.name } : null }));
+        replaceItem(await api('PUT', `/items/${row.dataset.linkrow}`, { link: dev ? { id: dev.id, name: dev.name } : null }));
         render(); H.alert(t('settings.saved'));
         return;
       }
@@ -347,8 +441,8 @@
       const taskId = box.dataset.task;
       const task = item.tasks.find(tk => tk.id === taskId);
       switch (btn.dataset.act) {
-        case 'done': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/done`, { date: today() })); render(); break;
-        case 'snooze': replaceItem(await api('POST', `/devices/${item.id}/tasks/${taskId}/snooze`, { days: 7 })); render(); break;
+        case 'done': replaceItem(await api('POST', `/items/${item.id}/tasks/${taskId}/done`, { date: today() })); render(); break;
+        case 'snooze': replaceItem(await api('POST', `/items/${item.id}/tasks/${taskId}/snooze`, { days: 7 })); render(); break;
         case 'edit': editing = { itemId: item.id, taskId, draft: draftFromTask(task, item) }; render(); break;
         case 'cancel': editing = null; render(); break;
         case 'delete':
@@ -404,9 +498,27 @@
     render();
   }
 
+  function closeWizard() {
+    $('wizard').classList.add('hidden');
+    $('wizard').innerHTML = '';
+    $('main').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  function openWizard() {
+    $('main').classList.add('hidden');
+    $('wizard').classList.remove('hidden');
+    // eslint-disable-next-line no-undef
+    HuisartsWizard($('wizard'), {
+      t, api, alert: msg => H.alert(msg),
+      onDone: list => { items = list; closeWizard(); render(); },
+      onCancel: closeWizard,
+    });
+  }
+
   async function load() {
     templates = await api('GET', '/templates');
-    items = await api('GET', '/devices');
+    items = await api('GET', '/items');
     render();
     // The device list (for linking and usage) loads in the background.
     api('GET', '/homey-devices').then(list => { homeyDevices = list; render(); }).catch(err => console.log('Could not load devices', err));
@@ -422,6 +534,7 @@
     H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
     $('items').addEventListener('click', onClick);
+    $('addItem').addEventListener('click', openWizard);
     $('items').addEventListener('input', onInput);
     $('items').addEventListener('change', onChange);
     $('export').addEventListener('click', async () => {

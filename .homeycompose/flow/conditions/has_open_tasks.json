@@ -1,0 +1,24 @@
+{
+  "title": {
+    "en": "!{{Has|Has no}} open maintenance tasks",
+    "nl": "!{{Heeft|Heeft geen}} openstaande onderhoudstaken"
+  },
+  "titleFormatted": {
+    "en": "[[item]] !{{has|has no}} open tasks",
+    "nl": "[[item]] !{{heeft|heeft geen}} openstaande taken"
+  },
+  "args": [
+    {
+      "name": "item",
+      "type": "autocomplete",
+      "title": {
+        "en": "Item",
+        "nl": "Onderdeel"
+      },
+      "placeholder": {
+        "en": "All items",
+        "nl": "Alle onderdelen"
+      }
+    }
+  ]
+}

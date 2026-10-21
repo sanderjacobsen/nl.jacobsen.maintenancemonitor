@@ -1,0 +1,39 @@
+{
+  "title": {
+    "en": "Postpone a task",
+    "nl": "Stel een taak uit"
+  },
+  "titleFormatted": {
+    "en": "Postpone [[task]] by [[days]] days",
+    "nl": "Stel [[task]] uit met [[days]] dagen"
+  },
+  "args": [
+    {
+      "name": "task",
+      "type": "autocomplete",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "placeholder": {
+        "en": "Choose a task",
+        "nl": "Kies een taak"
+      }
+    },
+    {
+      "name": "days",
+      "type": "number",
+      "min": 1,
+      "max": 3650,
+      "step": 1,
+      "title": {
+        "en": "Days",
+        "nl": "Dagen"
+      },
+      "placeholder": {
+        "en": "7",
+        "nl": "7"
+      }
+    }
+  ]
+}

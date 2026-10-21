@@ -90,7 +90,7 @@
   },
   "settings": {
     "title": "Huisarts",
-    "intro": "Add items via Add device > Huisarts. Manage their tasks here.",
+    "intro": "All maintenance in one place. Add items with the button below; your device list only shows the 'Huisarts' overview.",
     "notifications": "Notifications",
     "notify_soon": "Notify when a task is due soon",
     "notify_due": "Notify when a task is due",
@@ -138,7 +138,13 @@
     "history": "Done before",
     "install": "Installed",
     "install_unknown": "unknown",
-    "install_save": "Save"
+    "install_save": "Save",
+    "add_item": "Add item",
+    "item_settings": "Item settings",
+    "delete_item": "Delete item",
+    "confirm_delete_item": "Delete this item and all its tasks?",
+    "rename": "Name",
+    "close": "Close"
   },
   "usage": {
     "link": "Link to a Homey device",
@@ -174,5 +180,11 @@
     "empty": "Everything is up to date 👍",
     "done": "Done",
     "more": "+ __n__ more"
+  },
+  "flow": {
+    "any_item": "All items"
+  },
+  "overview": {
+    "hint": "Add this single device for a tile with the overall summary. Items and tasks are managed in the app settings."
   }
 }

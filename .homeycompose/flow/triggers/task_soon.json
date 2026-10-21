@@ -3,10 +3,28 @@
     "en": "A maintenance task is due soon",
     "nl": "Een onderhoudstaak is binnenkort nodig"
   },
+  "titleFormatted": {
+    "en": "A task of [[item]] is due soon",
+    "nl": "Een taak van [[item]] is binnenkort nodig"
+  },
   "hint": {
     "en": "Days = days left until the task is due.",
     "nl": "Dagen = aantal dagen tot de taak nodig is."
   },
+  "args": [
+    {
+      "name": "item",
+      "type": "autocomplete",
+      "title": {
+        "en": "Item",
+        "nl": "Onderdeel"
+      },
+      "placeholder": {
+        "en": "All items",
+        "nl": "Alle onderdelen"
+      }
+    }
+  ],
   "tokens": [
     {
       "name": "item",
@@ -41,9 +59,5 @@
       },
       "example": 7
     }
-  ],
-  "titleFormatted": {
-    "en": "A maintenance task is due soon",
-    "nl": "Een onderhoudstaak is binnenkort nodig"
-  }
+  ]
 }

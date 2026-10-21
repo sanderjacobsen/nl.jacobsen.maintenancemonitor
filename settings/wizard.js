@@ -1,69 +1,15 @@
-<style>
-  /* Only layout; colours, fonts, buttons and form fields come from Homey's own styleguide (homey.css). */
-  .ha { padding-bottom: 88px; }
-  .ha-progress { display: flex; gap: 6px; margin-bottom: var(--homey-su-1); }
-  .ha-progress span { flex: 1; height: 4px; border-radius: 2px; background: var(--homey-color-mono-05); }
-  .ha-progress span.on { background: var(--homey-color-blue); }
-  .ha-step { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); }
-  .ha .homey-title { margin-top: 2px; }
-  .ha-hint { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: 6px 0 0; line-height: 20px; }
-  .hidden { display: none !important; }
-  .ha-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
-    -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
-  /* Homey's styleguide has no date field: give it the same look as its other inputs. */
-  input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
-    background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
-    font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
+'use strict';
 
-  /* Step 1: tiles like Homey's device tiles */
-  .ha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; margin-top: var(--homey-su-2); }
-  .ha-tile { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light);
-    padding: 10px; aspect-ratio: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
-    -webkit-tap-highlight-color: transparent; transition: box-shadow var(--homey-duration-fast); }
-  .ha-tile .name { font-size: var(--homey-font-size-small); line-height: 18px; color: var(--homey-color-text); hyphens: manual; overflow-wrap: anywhere;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .ha-tile.sel { box-shadow: 0 0 0 2px var(--homey-color-blue), var(--homey-box-shadow-light); }
-
-  .ha-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* Step 3: one card per task */
-  .ha-task { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light);
-    padding: 12px 14px; margin-top: 12px; }
-  .ha-task.off .ha-sum { opacity: .5; }
-  .ha-task .homey-form-checkbox { margin: 0; }
-  .ha-task .homey-form-checkbox-text { font-weight: var(--homey-font-weight-medium); }
-  .ha-sum { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; margin: 4px 0 0; }
-  .ha-task .ha-edit-btn { margin-top: 8px; }
-  .ha-task .homey-form-label { margin-top: 14px; }
-  .ha-inline { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; }
-  .ha-inline.days { grid-template-columns: 90px auto; justify-content: start; }
-  .ha-inline span { color: var(--homey-color-text-light); }
-  .ha-remove { margin-top: 12px; }
-  #addCustom { margin-top: 14px; }
-
-  /* Step 4 */
-  .ha-card { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light); margin-top: 12px; overflow: hidden; }
-  .ha-head { display: flex; align-items: center; gap: 12px; padding: 14px; }
-  .ha-head .ha-icon { width: 44px; height: 44px; }
-  .ha-head .name { font-size: var(--homey-font-size-medium); font-weight: var(--homey-font-weight-medium); line-height: 26px; }
-  .ha-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--homey-color-line); }
-  .ha-line .t { font-weight: var(--homey-font-weight-medium); }
-  .ha-line .s { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); }
-  .ha-line .r { text-align: end; font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); white-space: nowrap; }
-  .ha-line .r b { display: block; font-weight: var(--homey-font-weight-medium); color: var(--homey-color-text); }
-  .ha-line .r b.now { color: #e07b00; }
-
-  /* Bottom navigation, like Homey's own pair screens */
-  .ha-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 2fr; gap: 8px;
-    padding: 12px var(--homey-su-2) calc(12px + env(safe-area-inset-bottom)); background: var(--homey-color-component); }
-</style>
-
-<div class="ha">
-  <div class="ha-progress" id="progress"><span></span><span></span><span></span><span></span></div>
-  <div class="ha-step" id="steps"></div>
+/* Wizard "Onderdeel toevoegen" for the Huisarts settings page.
+ * HuisartsWizard(root, { t, api, alert, onDone(items), onCancel() }) renders the four steps into `root`. */
+// eslint-disable-next-line no-unused-vars
+function HuisartsWizard(root, deps) {
+  root.innerHTML = `<div class="ha">
+  <div class="wz-progress" id="progress"><span></span><span></span><span></span><span></span></div>
+  <div class="wz-step" id="steps"></div>
   <h1 class="homey-title" id="title"></h1>
 
-  <div id="step1"><div class="ha-grid" id="cats"></div></div>
+  <div id="step1"><div class="wz-grid" id="cats"></div></div>
 
   <div id="step2" class="hidden">
     <div class="homey-form">
@@ -73,22 +19,22 @@
       </div>
       <div class="homey-form-group">
         <label class="homey-form-label" for="year" data-i18n="pair.install"></label>
-        <div class="ha-pair">
+        <div class="wz-pair">
           <select class="homey-form-select" id="year"></select>
           <select class="homey-form-select" id="month"></select>
         </div>
-        <p class="ha-hint" data-i18n="pair.install_hint"></p>
+        <p class="wz-hint" data-i18n="pair.install_hint"></p>
       </div>
       <div class="homey-form-group">
         <label class="homey-form-label" for="link" data-i18n="usage.link"></label>
         <select class="homey-form-select" id="link"></select>
-        <p class="ha-hint" data-i18n="usage.link_hint"></p>
+        <p class="wz-hint" data-i18n="usage.link_hint"></p>
       </div>
     </div>
   </div>
 
   <div id="step3" class="hidden">
-    <p class="ha-hint" data-i18n="pair.tasks_hint"></p>
+    <p class="wz-hint" data-i18n="pair.tasks_hint"></p>
     <div id="tasks"></div>
     <button class="homey-button-secondary-shadow-full" id="addCustom" data-i18n="pair.add_custom"></button>
   </div>
@@ -96,16 +42,15 @@
   <div id="step4" class="hidden"><div id="summary"></div></div>
 </div>
 
-<div class="ha-nav" id="nav">
+<div class="wz-nav" id="nav">
   <button class="homey-button-transparent" id="back" data-i18n="pair.back"></button>
   <button class="homey-button-primary-shadow" id="next" data-i18n="pair.next"></button>
-</div>
+</div>`;
 
-<script>
   const UNITS = ['days', 'weeks', 'months', 'years'];
-  const $ = id => document.getElementById(id);
+  const $ = id => root.querySelector(`#${id}`);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const tr = (k, v) => Homey.__(k, v);
+  const tr = (k, v) => deps.t(k, v);
   const pad = n => String(n).padStart(2, '0');
   const now = new Date();
   const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -196,7 +141,8 @@
     [...$('progress').children].forEach((el, i) => el.classList.toggle('on', i < step));
     $('steps').textContent = tr('pair.step', { n: step });
     $('title').textContent = tr(`pair.s${step}_title`);
-    $('nav').classList.toggle('hidden', step === 1);
+    $('next').classList.toggle('hidden', step === 1);
+    $('back').textContent = tr(step === 1 ? 'settings.cancel' : 'pair.back');
     $('next').textContent = tr(step === 4 ? 'pair.add' : 'pair.next');
     // The last button adds the item: green, like Homey's own "Connect" button.
     $('next').style.setProperty('--homey-button-background', step === 4 ? 'var(--homey-color-green)' : '');
@@ -206,8 +152,8 @@
   }
 
   function renderCats() {
-    $('cats').innerHTML = templates.map(c => `<div class="ha-tile ${cat && cat.id === c.id ? 'sel' : ''}" data-id="${c.id}">
-      <span class="ha-icon" style="--icon:url('${c.iconUri}');"></span><div class="name">${esc(softHyphen(c.name))}</div></div>`).join('');
+    $('cats').innerHTML = templates.map(c => `<div class="wz-tile ${cat && cat.id === c.id ? 'sel' : ''}" data-id="${c.id}">
+      <span class="wz-icon" style="--icon:url('${c.iconUri}');"></span><div class="name">${esc(softHyphen(c.name))}</div></div>`).join('');
   }
 
   function lastText(tk) {
@@ -235,7 +181,7 @@
       ['date', tr('pair.last_date')],
     ].filter(Boolean).map(([v, l]) => `<option value="${v}" ${(tk.last === v || (v === 'today' && tk.last === 'install' && !installDate())) ? 'selected' : ''}>${esc(l)}</option>`).join('');
 
-    const editor = !tk.open || !tk.use ? '' : `<div class="ha-editor">
+    const editor = !tk.open || !tk.use ? '' : `<div class="wz-editor">
       ${tk.custom ? `<label class="homey-form-label" for="${id}n">${esc(tr('pair.custom_name'))}</label>
         <input class="homey-form-input" type="text" id="${id}n" data-f="name" value="${esc(tk.name)}" maxlength="80" />` : ''}
       <label class="homey-form-label" for="${id}k">${esc(tr('pair.kind'))}</label>
@@ -247,27 +193,27 @@
         <label class="homey-form-label" for="${id}g">${esc(tr('pair.threshold'))}</label>
         <input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}g" data-f="threshold" value="${tk.threshold}" />
         <label class="homey-form-label" for="${id}p">${esc(tr('pair.lead_percent'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>`
+        <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>`
       : `
         <label class="homey-form-label" for="${id}e">${esc(tr('pair.every'))}</label>
-        <div class="ha-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}e" data-f="every" value="${tk.every}" />
+        <div class="wz-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}e" data-f="every" value="${tk.every}" />
           <select class="homey-form-select" data-f="unit">${unitOpts}</select></div>
         <label class="homey-form-label" for="${id}l">${esc(tr('pair.lead'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}l" data-f="leadDays" value="${tk.leadDays}" /><span>${esc(tr('pair.lead_days'))}</span></div>
+        <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}l" data-f="leadDays" value="${tk.leadDays}" /><span>${esc(tr('pair.lead_days'))}</span></div>
         <label class="homey-form-label" for="${id}d">${esc(tr('pair.last'))}</label>
         <select class="homey-form-select" id="${id}d" data-f="last">${lastOpts}</select>
         ${tk.last === 'date' ? `<input class="homey-form-input" style="margin-top:8px" type="date" data-f="lastDate" max="${today}" value="${esc(tk.lastDate)}" />` : ''}`}
-      ${tk.custom ? `<button class="homey-button-danger-small-shadow ha-remove" data-remove="${i}">${esc(tr('pair.remove'))}</button>` : ''}
+      ${tk.custom ? `<button class="homey-button-danger-small-shadow wz-remove" data-remove="${i}">${esc(tr('pair.remove'))}</button>` : ''}
     </div>`;
 
-    return `<div class="ha-task ${tk.use ? '' : 'off'}" data-i="${i}">
+    return `<div class="wz-task ${tk.use ? '' : 'off'}" data-i="${i}">
       <label class="homey-form-checkbox">
         <input class="homey-form-checkbox-input" type="checkbox" data-f="use" ${tk.use ? 'checked' : ''} />
         <span class="homey-form-checkbox-checkmark"></span>
         <span class="homey-form-checkbox-text">${esc(tk.name || tr('pair.custom_name'))}</span>
       </label>
-      <p class="ha-sum">${esc(summaryOf(tk))}</p>
-      ${tk.use && !tk.open ? `<button class="homey-button-secondary-small-shadow ha-edit-btn" data-open="${i}">${esc(tr('settings.edit'))}</button>` : ''}
+      <p class="wz-sum">${esc(summaryOf(tk))}</p>
+      ${tk.use && !tk.open ? `<button class="homey-button-secondary-small-shadow wz-edit-btn" data-open="${i}">${esc(tr('settings.edit'))}</button>` : ''}
       ${editor}
     </div>`;
   }
@@ -280,10 +226,10 @@
       ['date', tr('pair.last_date')],
     ].filter(Boolean).map(([v, l]) => `<option value="${v}" ${(tk.last === v || (v === 'today' && tk.last === 'install' && !installDate())) ? 'selected' : ''}>${esc(l)}</option>`).join('');
     return `<label class="homey-form-label" for="${id}e">${esc(tr('pair.every'))}</label>
-      <div class="ha-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}e" data-f="every" value="${tk.every}" />
+      <div class="wz-inline"><input class="homey-form-input" type="number" inputmode="numeric" min="1" id="${id}e" data-f="every" value="${tk.every}" />
         <select class="homey-form-select" data-f="unit">${unitOpts}</select></div>
       <label class="homey-form-label" for="${id}l">${esc(tr('pair.lead'))}</label>
-      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}l" data-f="leadDays" value="${tk.leadDays}" /><span>${esc(tr('pair.lead_days'))}</span></div>
+      <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}l" data-f="leadDays" value="${tk.leadDays}" /><span>${esc(tr('pair.lead_days'))}</span></div>
       <label class="homey-form-label" for="${id}d">${esc(tr('pair.last'))}</label>
       <select class="homey-form-select" id="${id}d" data-f="last">${lastOpts}</select>
       ${tk.last === 'date' ? `<input class="homey-form-input" style="margin-top:8px" type="date" data-f="lastDate" max="${today}" value="${esc(tk.lastDate)}" />` : ''}`;
@@ -303,7 +249,7 @@
       const cap = capOf(dev, tk.srcCap) || caps[0];
       let cond = '';
       if (cap && cap.type === 'number') {
-        cond = `<div class="ha-inline days" style="margin-top:8px"><span>${esc(tr('usage.greater_than'))}</span><input class="homey-form-input" type="number" inputmode="decimal" data-f="cmpValue" value="${esc(tk.cmpValue ?? 10)}" style="width:90px" /><span>${esc(cap.units || '')}</span></div>`;
+        cond = `<div class="wz-inline days" style="margin-top:8px"><span>${esc(tr('usage.greater_than'))}</span><input class="homey-form-input" type="number" inputmode="decimal" data-f="cmpValue" value="${esc(tk.cmpValue ?? 10)}" style="width:90px" /><span>${esc(cap.units || '')}</span></div>`;
       } else if (cap && (cap.type === 'enum' || cap.type === 'string')) {
         const values = cap.values || (cap.value !== null && cap.value !== undefined ? [{ id: String(cap.value), title: String(cap.value) }] : []);
         cond = values.length && cap.type === 'enum'
@@ -314,17 +260,17 @@
         <select class="homey-form-select" id="${id}c" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}${c.type === 'boolean' ? ` ${esc(tr('usage.is_on'))}` : ''}</option>`).join('')}</select>
         ${cond}
         <label class="homey-form-label" for="${id}o">${esc(tr('usage.off_delay'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}o" data-f="offDelayMin" value="${tk.offDelayMin ?? 3}" /><span>${esc(tr('usage.minutes'))}</span></div>
+        <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}o" data-f="offDelayMin" value="${tk.offDelayMin ?? 3}" /><span>${esc(tr('usage.minutes'))}</span></div>
         ${metric === 'cycles' ? `<label class="homey-form-label" for="${id}m">${esc(tr('usage.min_run'))}</label>
-        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}m" data-f="minRunMin" value="${tk.minRunMin ?? 1}" /><span>${esc(tr('usage.minutes'))}</span></div>` : ''}`;
+        <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" id="${id}m" data-f="minRunMin" value="${tk.minRunMin ?? 1}" /><span>${esc(tr('usage.minutes'))}</span></div>` : ''}`;
     }
     return `<label class="homey-form-label" for="${id}w">${esc(tr('usage.metric'))}</label>
       <select class="homey-form-select" id="${id}w" data-f="metric">${metricOpts}</select>
       ${source}
       <label class="homey-form-label" for="${id}t">${esc(tr('usage.threshold'))}</label>
-      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" id="${id}t" data-f="threshold" value="${tk.threshold}" style="width:110px" /><span>${esc(unitLabel(tk))}</span></div>
+      <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" id="${id}t" data-f="threshold" value="${tk.threshold}" style="width:110px" /><span>${esc(unitLabel(tk))}</span></div>
       <label class="homey-form-label" for="${id}p">${esc(tr('usage.lead_percent'))}</label>
-      <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>
+      <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>
       <label class="homey-form-checkbox" style="margin-top:14px"><input class="homey-form-checkbox-input" type="checkbox" data-f="combine" ${tk.combine ? 'checked' : ''} />
         <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(tr('usage.also_date'))}</span></label>
       ${tk.combine ? dateFields(tk, id) : ''}`;
@@ -335,9 +281,9 @@
   function renderSummary() {
     const chosen = tasks.filter(tk => tk.use && String(tk.name).trim());
     const inst = installDate();
-    let html = `<div class="ha-card"><div class="ha-head"><span class="ha-icon" style="--icon:url('${cat.iconUri}');"></span><div><div class="name">${esc($('name').value)}</div>
-      <div class="ha-step">${esc(tr('pair.install'))}: ${inst ? esc(fmt(inst, { month: 'long', year: 'numeric' })) : esc(tr('pair.unknown').toLowerCase())}</div></div></div>`;
-    if (!chosen.length) html += `<div class="ha-line"><span class="s">${esc(tr('pair.no_tasks_selected'))}</span></div>`;
+    let html = `<div class="wz-card"><div class="wz-head"><span class="wz-icon" style="--icon:url('${cat.iconUri}');"></span><div><div class="name">${esc($('name').value)}</div>
+      <div class="wz-step">${esc(tr('pair.install'))}: ${inst ? esc(fmt(inst, { month: 'long', year: 'numeric' })) : esc(tr('pair.unknown').toLowerCase())}</div></div></div>`;
+    if (!chosen.length) html += `<div class="wz-line"><span class="s">${esc(tr('pair.no_tasks_selected'))}</span></div>`;
     html += chosen.map(tk => {
       let due;
       if (tk.type === 'counter' || tk.type === 'usage') {
@@ -349,7 +295,7 @@
         due = d <= today ? `<b class="now">${esc(tr('pair.now'))}</b>` : `<b>${esc(fmt(d))}</b>`;
       }
       const sub = tk.type === 'counter' ? tr('pair.kind_counter') : tk.type === 'usage' ? summaryOf(tk) : everyText(tk.every, tk.unit);
-      return `<div class="ha-line"><div><div class="t">${esc(tk.name)}</div><div class="s">${esc(sub)}</div></div>
+      return `<div class="wz-line"><div><div class="t">${esc(tk.name)}</div><div class="s">${esc(sub)}</div></div>
         <div class="r">${esc(tr('pair.first_due'))}${due}</div></div>`;
     }).join('');
     $('summary').innerHTML = `${html}</div>`;
@@ -393,34 +339,33 @@
     })).filter(tk => tk.type !== 'usage' || tk.source.capability);
     $('next').classList.add('is-loading');
     try {
-      const device = await Homey.emit('createItem', {
+      const res = await deps.api('POST', '/items', {
         name: $('name').value, category: cat.id, installDate: installDate(), tasks: chosen,
         link: linked() ? { id: linked().id, name: linked().name } : null,
       });
-      await Homey.createDevice(device);
-      Homey.done();
+      deps.onDone(res.items);
     } catch (err) {
-      Homey.alert(err.message || String(err));
+      deps.alert(err.message || String(err));
       $('next').classList.remove('is-loading');
     }
   }
 
   // ---- events ----
   $('cats').addEventListener('click', ev => {
-    const tile = ev.target.closest('.ha-tile');
+    const tile = ev.target.closest('.wz-tile');
     if (tile) pickCategory(tile.dataset.id);
   });
   $('tasks').addEventListener('input', ev => {
-    const card = ev.target.closest('.ha-task');
+    const card = ev.target.closest('.wz-task');
     const f = ev.target.dataset.f;
     if (!card || !f || ev.target.type === 'checkbox' || ev.target.tagName === 'SELECT') return;
     const tk = tasks[Number(card.dataset.i)];
     tk[f] = ev.target.value; // typing: keep focus, update the summary line only
-    card.querySelector('.ha-sum').textContent = summaryOf(tk);
+    card.querySelector('.wz-sum').textContent = summaryOf(tk);
     if (f === 'name') card.querySelector('.homey-form-checkbox-text').textContent = tk.name || tr('pair.custom_name');
   });
   $('tasks').addEventListener('change', ev => {
-    const card = ev.target.closest('.ha-task');
+    const card = ev.target.closest('.wz-task');
     const f = ev.target.dataset.f;
     if (!card || !f) return;
     const tk = tasks[Number(card.dataset.i)];
@@ -444,16 +389,20 @@
     renderTasks();
   });
   $('link').addEventListener('change', () => applyLink());
-  $('back').addEventListener('click', () => { step = Math.max(1, step - 1); show(); });
+  $('back').addEventListener('click', () => {
+    if (step === 1) { deps.onCancel(); return; }
+    step -= 1;
+    show();
+  });
   $('next').addEventListener('click', () => {
-    if (step === 2 && !$('name').value.trim()) { Homey.alert(tr('errors.name_required')); return; }
+    if (step === 2 && !$('name').value.trim()) { deps.alert(tr('errors.name_required')); return; }
     if (step === 4) { finish(); return; }
     step += 1;
     show();
   });
 
   (async () => {
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.dataset.i18n); });
+    root.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.dataset.i18n); });
     $('name').placeholder = tr('pair.name_placeholder');
     const thisYear = now.getFullYear();
     $('year').innerHTML = `<option value="">${esc(tr('pair.year'))}</option>`
@@ -461,13 +410,14 @@
     $('month').innerHTML = `<option value="">${esc(tr('pair.month'))}</option>`
       + Array.from({ length: 12 }, (_, k) => `<option value="${pad(k + 1)}">${esc(new Date(2026, k, 1).toLocaleDateString(undefined, { month: 'long' }))}</option>`).join('');
     $('link').innerHTML = `<option value="">${esc(tr('usage.link_loading'))}</option>`;
-    Homey.emit('getHomeyDevices').then(list => {
+    deps.api('GET', '/homey-devices').then(list => {
       homeyDevices = list;
       $('link').innerHTML = `<option value="">${esc(tr('usage.link_none'))}</option>`
         + list.map(d => `<option value="${esc(d.id)}">${esc(d.name)}${d.zone ? ` · ${esc(d.zone)}` : ''}</option>`).join('');
     }).catch(() => { $('link').innerHTML = `<option value="">${esc(tr('usage.link_none'))}</option>`; });
-    templates = await Homey.emit('getTemplates');
+    templates = await deps.api('GET', '/templates');
     renderCats();
     show();
   })();
-</script>
+
+}

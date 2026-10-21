@@ -1,7 +1,7 @@
 {
   "id": "nl.jacobsen.huisarts",
   "brandColor": "#2E8B6E",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -29,25 +29,41 @@
     ]
   },
   "api": {
-    "getDevices": {
+    "getItems": {
       "method": "GET",
-      "path": "/devices"
+      "path": "/items"
+    },
+    "addItem": {
+      "method": "POST",
+      "path": "/items"
+    },
+    "updateItem": {
+      "method": "PUT",
+      "path": "/items/:id"
+    },
+    "deleteItem": {
+      "method": "DELETE",
+      "path": "/items/:id"
+    },
+    "setTasks": {
+      "method": "PUT",
+      "path": "/items/:id/tasks"
+    },
+    "markDone": {
+      "method": "POST",
+      "path": "/items/:id/tasks/:taskId/done"
+    },
+    "snooze": {
+      "method": "POST",
+      "path": "/items/:id/tasks/:taskId/snooze"
     },
     "getTemplates": {
       "method": "GET",
       "path": "/templates"
     },
-    "setTasks": {
-      "method": "PUT",
-      "path": "/devices/:id/tasks"
-    },
-    "markDone": {
-      "method": "POST",
-      "path": "/devices/:id/tasks/:taskId/done"
-    },
-    "snooze": {
-      "method": "POST",
-      "path": "/devices/:id/tasks/:taskId/snooze"
+    "getHomeyDevices": {
+      "method": "GET",
+      "path": "/homey-devices"
     },
     "exportData": {
       "method": "GET",
@@ -56,14 +72,6 @@
     "importData": {
       "method": "POST",
       "path": "/import"
-    },
-    "updateItem": {
-      "method": "PUT",
-      "path": "/devices/:id"
-    },
-    "getHomeyDevices": {
-      "method": "GET",
-      "path": "/homey-devices"
     }
   }
 }

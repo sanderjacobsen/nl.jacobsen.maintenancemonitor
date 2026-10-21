@@ -90,7 +90,7 @@
   },
   "settings": {
     "title": "Huisarts",
-    "intro": "Onderdelen voeg je toe via Apparaat toevoegen > Huisarts. Hier beheer je de taken.",
+    "intro": "Al het onderhoud op één plek. Voeg onderdelen toe met de knop hieronder; op je apparatenlijst staat alleen het overzicht 'Huisarts'.",
     "notifications": "Meldingen",
     "notify_soon": "Melding als een taak binnenkort nodig is",
     "notify_due": "Melding als een taak nodig is",
@@ -138,7 +138,13 @@
     "history": "Eerder gedaan",
     "install": "Geïnstalleerd",
     "install_unknown": "onbekend",
-    "install_save": "Bewaar"
+    "install_save": "Bewaar",
+    "add_item": "Onderdeel toevoegen",
+    "item_settings": "Instellingen onderdeel",
+    "delete_item": "Verwijder onderdeel",
+    "confirm_delete_item": "Onderdeel en al zijn taken verwijderen?",
+    "rename": "Naam",
+    "close": "Sluiten"
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",
@@ -174,5 +180,11 @@
     "empty": "Alles is bijgewerkt 👍",
     "done": "Gedaan",
     "more": "+ __n__ meer"
+  },
+  "flow": {
+    "any_item": "Alle onderdelen"
+  },
+  "overview": {
+    "hint": "Voeg dit ene apparaat toe voor een tegel met het totaaloverzicht. Onderdelen en taken beheer je in de app-instellingen."
   }
 }

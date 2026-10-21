@@ -1,0 +1,39 @@
+{
+  "title": {
+    "en": "Task !{{is|is not}} due within … days",
+    "nl": "Taak !{{is|is niet}} binnen … dagen nodig"
+  },
+  "titleFormatted": {
+    "en": "[[task]] !{{is|is not}} due within [[days]] days",
+    "nl": "[[task]] !{{is|is niet}} binnen [[days]] dagen nodig"
+  },
+  "args": [
+    {
+      "name": "task",
+      "type": "autocomplete",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "placeholder": {
+        "en": "Choose a task",
+        "nl": "Kies een taak"
+      }
+    },
+    {
+      "name": "days",
+      "type": "number",
+      "min": 0,
+      "max": 3650,
+      "step": 1,
+      "title": {
+        "en": "Days",
+        "nl": "Dagen"
+      },
+      "placeholder": {
+        "en": "7",
+        "nl": "7"
+      }
+    }
+  ]
+}

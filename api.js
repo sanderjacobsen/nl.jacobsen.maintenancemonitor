@@ -4,105 +4,84 @@ const {
   getTemplates, getCategory, getIconUri, localize,
 } = require('./lib/templates');
 
-async function describe(homey, device) {
-  const states = await device.evaluate();
-  const category = getCategory(device.getStoreValue('category'));
-  return {
-    id: device.getData().id,
-    name: device.getName(),
-    category: category.id,
-    categoryName: localize(category.name, homey.i18n.getLanguage()),
-    icon: category.icon,
-    iconUri: getIconUri(category.icon),
-    installDate: device.getInstallDate(),
-    link: device.getLink(),
-    tasks: states,
-  };
+// Items with the computed state of their tasks, plus icon and category name for the settings page.
+async function describeAll(homey) {
+  const language = homey.i18n.getLanguage();
+  return (await homey.app.items.evaluate()).map(item => {
+    const category = getCategory(item.category);
+    return {
+      ...item,
+      categoryName: localize(category.name, language),
+      iconUri: getIconUri(category.icon),
+    };
+  }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 module.exports = {
 
-  async getDevices({ homey }) {
-    const devices = homey.app.getDevices();
-    const result = [];
-    for (const device of devices) result.push(await describe(homey, device));
-    return result.sort((a, b) => a.name.localeCompare(b.name));
+  async getItems({ homey }) {
+    return describeAll(homey);
+  },
+
+  async addItem({ homey, body }) {
+    const id = await homey.app.items.addItem(body || {});
+    return { id, items: await describeAll(homey) };
+  },
+
+  async updateItem({ homey, params, body }) {
+    await homey.app.items.updateItem(params.id, body || {});
+    return describeAll(homey);
+  },
+
+  async deleteItem({ homey, params }) {
+    await homey.app.items.deleteItem(params.id);
+    return describeAll(homey);
+  },
+
+  async setTasks({ homey, params, body }) {
+    await homey.app.items.setTasks(params.id, body && body.tasks);
+    return describeAll(homey);
+  },
+
+  async markDone({ homey, params, body }) {
+    await homey.app.items.markDone(params.id, params.taskId, body && body.date);
+    return describeAll(homey);
+  },
+
+  async snooze({ homey, params, body }) {
+    await homey.app.items.snooze(params.id, params.taskId, body && body.days);
+    return describeAll(homey);
   },
 
   async getTemplates({ homey }) {
     return getTemplates(homey.i18n.getLanguage());
   },
 
-  async setTasks({ homey, params, body }) {
-    const device = homey.app.getDeviceById(params.id);
-    await device.setTasks(body && body.tasks);
-    return describe(homey, device);
-  },
-
   async getHomeyDevices({ homey }) {
     return homey.app.getHomeyDevices();
-  },
-
-  async updateItem({ homey, params, body }) {
-    const device = homey.app.getDeviceById(params.id);
-    if (body && 'installDate' in body) await device.setInstallDate(body.installDate);
-    if (body && 'link' in body) await device.setLink(body.link);
-    return describe(homey, device);
-  },
-
-  async markDone({ homey, params, body }) {
-    const device = homey.app.getDeviceById(params.id);
-    await device.markDone(params.taskId, body && body.date);
-    return describe(homey, device);
-  },
-
-  async snooze({ homey, params, body }) {
-    const device = homey.app.getDeviceById(params.id);
-    await device.snooze(params.taskId, body && body.days);
-    return describe(homey, device);
   },
 
   async exportData({ homey }) {
     return {
       app: 'nl.jacobsen.huisarts',
+      version: 2,
       exported: new Date().toISOString(),
       settings: ['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days']
         .reduce((acc, key) => ({ ...acc, [key]: homey.settings.get(key) }), {}),
-      items: homey.app.getDevices().map(device => ({
-        id: device.getData().id,
-        name: device.getName(),
-        category: device.getStoreValue('category'),
-        installDate: device.getInstallDate(),
-        link: device.getLink(),
-        tasks: device.getTasks(),
-      })),
+      items: homey.app.items.exportItems(),
     };
   },
 
-  // Restores tasks onto existing items (matched by id, then by name). Items themselves are added via pairing.
+  // Restores items with the same id or name and adds the others.
   async importData({ homey, body }) {
     const data = body && body.data;
     if (!data || !Array.isArray(data.items)) throw new Error('Invalid backup file');
-    const devices = homey.app.getDevices();
-    const restored = [];
-    const missing = [];
-    for (const item of data.items) {
-      const device = devices.find(d => d.getData().id === item.id) || devices.find(d => d.getName() === item.name);
-      if (!device) {
-        missing.push(item.name);
-        continue;
-      }
-      await device.setTasks(item.tasks || []);
-      if (item.installDate) await device.setInstallDate(item.installDate);
-      if (item.link) await device.setLink(item.link);
-      restored.push(device.getName());
-    }
     if (data.settings) {
       for (const [key, value] of Object.entries(data.settings)) {
         if (['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days'].includes(key) && value !== null) homey.settings.set(key, value);
       }
     }
-    return { restored, missing };
+    return homey.app.items.importItems(data.items);
   },
 
 };

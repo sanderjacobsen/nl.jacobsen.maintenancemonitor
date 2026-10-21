@@ -1,0 +1,43 @@
+{
+  "title": {
+    "en": "Increase a task counter",
+    "nl": "Verhoog de teller van een taak"
+  },
+  "titleFormatted": {
+    "en": "Increase counter of [[task]] by [[amount]]",
+    "nl": "Verhoog teller van [[task]] met [[amount]]"
+  },
+  "hint": {
+    "en": "Only for tasks of the type 'counter'.",
+    "nl": "Alleen voor taken van het type 'teller'."
+  },
+  "args": [
+    {
+      "name": "task",
+      "type": "autocomplete",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "placeholder": {
+        "en": "Choose a task",
+        "nl": "Kies een taak"
+      }
+    },
+    {
+      "name": "amount",
+      "type": "number",
+      "min": 0,
+      "max": 1000000,
+      "step": 0.01,
+      "title": {
+        "en": "Amount",
+        "nl": "Aantal"
+      },
+      "placeholder": {
+        "en": "1",
+        "nl": "1"
+      }
+    }
+  ]
+}

@@ -9,13 +9,13 @@ module.exports = {
   // All tasks of all items, most urgent first.
   async getTasks({ homey }) {
     const tasks = [];
-    for (const device of homey.app.getDevices()) {
-      const category = getCategory(device.getStoreValue('category'));
-      for (const task of await device.evaluate()) {
+    for (const item of await homey.app.items.evaluate()) {
+      const iconUri = getIconUri(getCategory(item.category).icon);
+      for (const task of item.tasks) {
         tasks.push({
-          itemId: device.getData().id,
-          item: device.getName(),
-          iconUri: getIconUri(category.icon),
+          itemId: item.id,
+          item: item.name,
+          iconUri,
           taskId: task.id,
           task: task.name,
           status: task.status,
@@ -32,8 +32,7 @@ module.exports = {
   },
 
   async markDone({ homey, body }) {
-    const device = homey.app.getDeviceById(body.itemId);
-    await device.markDone(body.taskId);
+    await homey.app.items.markDone(body.itemId, body.taskId);
     return true;
   },
 

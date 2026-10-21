@@ -1,0 +1,24 @@
+{
+  "title": {
+    "en": "Mark task as done",
+    "nl": "Markeer taak als uitgevoerd"
+  },
+  "titleFormatted": {
+    "en": "Mark [[task]] as done",
+    "nl": "Markeer [[task]] als uitgevoerd"
+  },
+  "args": [
+    {
+      "name": "task",
+      "type": "autocomplete",
+      "title": {
+        "en": "Task",
+        "nl": "Taak"
+      },
+      "placeholder": {
+        "en": "Choose a task",
+        "nl": "Kies een taak"
+      }
+    }
+  ]
+}
