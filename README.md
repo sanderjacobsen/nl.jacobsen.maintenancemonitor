@@ -1,4 +1,4 @@
-# Huisarts (Homey app)
+# Maintenance Monitor / Huisarts (Homey app)
 
 Houd al het onderhoud in en om je huis bij: rookmelders, airco, wasmachine, CV-ketel, 3D-printer, dakgoot …
 Per onderdeel (een apparaat in Homey) één of meer taken met een eigen termijn; Huisarts meldt wanneer iets nodig is.

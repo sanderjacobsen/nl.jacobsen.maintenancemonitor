@@ -89,8 +89,8 @@
     }
   },
   "settings": {
-    "title": "Huisarts",
-    "intro": "All maintenance in one place. Add items with the button below; your device list only shows the 'Huisarts' overview.",
+    "title": "Maintenance Monitor",
+    "intro": "All maintenance in one place. Add items with the button below; your device list only shows the 'Maintenance Monitor' overview.",
     "notifications": "Notifications",
     "notify_soon": "Notify when a task is due soon",
     "notify_due": "Notify when a task is due",
@@ -185,6 +185,7 @@
     "any_item": "All items"
   },
   "overview": {
-    "hint": "Add this single device for a tile with the overall summary. Items and tasks are managed in the app settings."
+    "hint": "Add this single device for a tile with the overall summary. Items and tasks are managed in the app settings.",
+    "name": "Maintenance Monitor"
   }
 }

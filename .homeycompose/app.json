@@ -1,16 +1,16 @@
 {
-  "id": "nl.jacobsen.huisarts",
-  "brandColor": "#2E8B6E",
+  "id": "nl.jacobsen.maintenancemonitor",
+  "brandColor": "#E8504A",
   "version": "0.3.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
-    "en": "Huisarts",
+    "en": "Maintenance Monitor",
     "nl": "Huisarts"
   },
   "description": {
-    "en": "Keep track of all maintenance in and around your home — and get a reminder when it is due.",
-    "nl": "Houd al het onderhoud in en om je huis bij — en krijg een seintje als het tijd is."
+    "en": "Keeps an eye on all maintenance in and around your home, and tells you when it's time.",
+    "nl": "Houdt al het onderhoud in en om je huis in de gaten en laat je weten wanneer het tijd is."
   },
   "category": [
     "tools"
@@ -73,5 +73,10 @@
       "method": "POST",
       "path": "/import"
     }
+  },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
   }
 }

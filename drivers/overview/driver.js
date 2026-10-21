@@ -7,7 +7,7 @@ class OverviewDriver extends Homey.Driver {
 
   async onPairListDevices() {
     if (this.getDevices().length) return []; // only one overview device is needed
-    return [{ name: 'Huisarts', data: { id: 'huisarts-overview' } }];
+    return [{ name: this.homey.__('overview.name'), data: { id: 'huisarts-overview' } }];
   }
 
 }

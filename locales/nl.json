@@ -185,6 +185,7 @@
     "any_item": "Alle onderdelen"
   },
   "overview": {
-    "hint": "Voeg dit ene apparaat toe voor een tegel met het totaaloverzicht. Onderdelen en taken beheer je in de app-instellingen."
+    "hint": "Voeg dit ene apparaat toe voor een tegel met het totaaloverzicht. Onderdelen en taken beheer je in de app-instellingen.",
+    "name": "Huisarts"
   }
 }

@@ -183,7 +183,7 @@ class HuisartsApp extends Homey.App {
     const language = this.homey.i18n.getLanguage();
     const title = t => (t && typeof t === 'object' ? t[language] || t.en || '' : t || '');
     return Object.values(devices)
-      .filter(d => !String(d.driverId || '').includes('nl.jacobsen.huisarts'))
+      .filter(d => !String(d.driverId || '').includes('nl.jacobsen.maintenancemonitor'))
       .map(d => ({
         id: d.id,
         name: d.name,

@@ -1,6 +1,6 @@
 {
   "name": {
-    "en": "Huisarts (overview)",
+    "en": "Maintenance Monitor (overview)",
     "nl": "Huisarts (overzicht)"
   },
   "class": "other",
@@ -26,5 +26,10 @@
       "id": "add_devices",
       "template": "add_devices"
     }
-  ]
+  ],
+  "images": {
+    "small": "/drivers/overview/assets/images/small.png",
+    "large": "/drivers/overview/assets/images/large.png",
+    "xlarge": "/drivers/overview/assets/images/xlarge.png"
+  }
 }

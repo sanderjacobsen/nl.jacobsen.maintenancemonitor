@@ -63,7 +63,7 @@ module.exports = {
 
   async exportData({ homey }) {
     return {
-      app: 'nl.jacobsen.huisarts',
+      app: 'nl.jacobsen.maintenancemonitor',
       version: 2,
       exported: new Date().toISOString(),
       settings: ['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days']
