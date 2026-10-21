@@ -490,6 +490,7 @@
         "alarm_maintenance",
         "maintenance_open",
         "maintenance_days",
+        "maintenance_item",
         "maintenance_next"
       ],
       "platforms": [
@@ -620,6 +621,17 @@
       "uiComponent": "sensor",
       "insights": false,
       "icon": "/assets/capabilities/days.svg"
+    },
+    "maintenance_item": {
+      "type": "string",
+      "title": {
+        "en": "Next item",
+        "nl": "Volgend onderdeel"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/item.svg"
     },
     "maintenance_next": {
       "type": "string",

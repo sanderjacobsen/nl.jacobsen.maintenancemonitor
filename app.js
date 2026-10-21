@@ -52,15 +52,13 @@ class MaintenanceMonitorApp extends Homey.App {
     const open = tasks.filter(tk => severity(tk.status) >= severity('due'));
     const dated = tasks.filter(tk => tk.days !== null).sort((a, b) => a.days - b.days);
     const next = [...open].sort((a, b) => severity(b.status) - severity(a.status))[0] || dated[0];
-    let nextText = this.homey.__('device.no_tasks');
-    if (next) {
-      const when = next.days !== null && !(next.amountStatus && severity(next.amountStatus) >= severity(next.status))
-        ? this._daysText(next.days) : `${Math.round((next.progress || 0) * 100)}%`;
-      nextText = `${next.item}: ${next.name} (${when})`;
-    }
     for (const device of devices) {
       await device.setSummary({
-        alarm: open.length > 0, open: open.length, days: dated.length ? dated[0].days : null, next: nextText,
+        alarm: open.length > 0,
+        open: open.length,
+        days: dated.length ? dated[0].days : null,
+        item: next ? next.item : '-',
+        next: next ? next.name : this.homey.__('device.no_tasks'),
       });
     }
   }

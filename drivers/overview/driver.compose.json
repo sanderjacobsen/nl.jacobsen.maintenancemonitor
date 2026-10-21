@@ -8,6 +8,7 @@
     "alarm_maintenance",
     "maintenance_open",
     "maintenance_days",
+    "maintenance_item",
     "maintenance_next"
   ],
   "platforms": [

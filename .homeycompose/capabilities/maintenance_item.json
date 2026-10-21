@@ -1,0 +1,11 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Next item",
+    "nl": "Volgend onderdeel"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capabilities/item.svg"
+}
