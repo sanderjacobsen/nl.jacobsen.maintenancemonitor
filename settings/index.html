@@ -509,7 +509,7 @@
     $('main').classList.add('hidden');
     $('wizard').classList.remove('hidden');
     // eslint-disable-next-line no-undef
-    HuisartsWizard($('wizard'), {
+    MaintenanceWizard($('wizard'), {
       t, api, alert: msg => H.alert(msg),
       onDone: list => { items = list; closeWizard(); render(); },
       onCancel: closeWizard,

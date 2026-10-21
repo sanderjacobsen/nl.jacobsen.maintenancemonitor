@@ -89,15 +89,15 @@
     }
   },
   "settings": {
-    "title": "Huisarts",
-    "intro": "Al het onderhoud op één plek. Voeg onderdelen toe met de knop hieronder; op je apparatenlijst staat alleen het overzicht 'Huisarts'.",
+    "title": "Maintenance Monitor",
+    "intro": "Al het onderhoud op één plek. Voeg onderdelen toe met de knop hieronder; op je apparatenlijst staat alleen het overzicht 'Maintenance Monitor'.",
     "notifications": "Meldingen",
     "notify_soon": "Melding als een taak binnenkort nodig is",
     "notify_due": "Melding als een taak nodig is",
     "notify_overdue": "Melding als een taak te laat is",
     "overdue_after": "Te laat na (dagen over de datum)",
     "items": "Onderdelen",
-    "no_items": "Nog geen onderdelen. Voeg ze toe via Apparaat toevoegen > Huisarts.",
+    "no_items": "Nog geen onderdelen. Voeg ze toe met de knop 'Onderdeel toevoegen' hierboven.",
     "task": "Taak",
     "interval": "Termijn",
     "last_done": "Laatst gedaan",
@@ -149,7 +149,7 @@
   "usage": {
     "link": "Koppelen aan Homey-apparaat",
     "link_none": "Niet koppelen",
-    "link_hint": "Optioneel. Dan kan Huisarts het gebruik meten, zoals draaiuren of het aantal wasbeurten.",
+    "link_hint": "Optioneel. Dan kan Maintenance Monitor het gebruik meten, zoals draaiuren of het aantal wasbeurten.",
     "link_loading": "Apparaten laden…",
     "linked_to": "Gekoppeld aan",
     "save": "Bewaar",
@@ -186,6 +186,6 @@
   },
   "overview": {
     "hint": "Voeg dit ene apparaat toe voor een tegel met het totaaloverzicht. Onderdelen en taken beheer je in de app-instellingen.",
-    "name": "Huisarts"
+    "name": "Maintenance Monitor"
   }
 }

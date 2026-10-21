@@ -97,7 +97,7 @@
     "notify_overdue": "Notify when a task is overdue",
     "overdue_after": "Overdue after (days past due date)",
     "items": "Items",
-    "no_items": "No items yet. Add them via Add device > Huisarts.",
+    "no_items": "No items yet. Add them with the 'Add item' button above.",
     "task": "Task",
     "interval": "Interval",
     "last_done": "Last done",
@@ -149,7 +149,7 @@
   "usage": {
     "link": "Link to a Homey device",
     "link_none": "Don't link",
-    "link_hint": "Optional. Huisarts can then measure usage, like running hours or the number of washes.",
+    "link_hint": "Optional. Maintenance Monitor can then measure usage, like running hours or the number of washes.",
     "link_loading": "Loading devices…",
     "linked_to": "Linked to",
     "save": "Save",

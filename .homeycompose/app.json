@@ -6,7 +6,7 @@
   "sdk": 3,
   "name": {
     "en": "Maintenance Monitor",
-    "nl": "Huisarts"
+    "nl": "Maintenance Monitor"
   },
   "description": {
     "en": "Keeps an eye on all maintenance in and around your home, and tells you when it's time.",

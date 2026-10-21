@@ -1,9 +1,9 @@
 'use strict';
 
-/* Wizard "Onderdeel toevoegen" for the Huisarts settings page.
- * HuisartsWizard(root, { t, api, alert, onDone(items), onCancel() }) renders the four steps into `root`. */
+/* Wizard "Onderdeel toevoegen" for the Maintenance Monitor settings page.
+ * MaintenanceWizard(root, { t, api, alert, onDone(items), onCancel() }) renders the four steps into `root`. */
 // eslint-disable-next-line no-unused-vars
-function HuisartsWizard(root, deps) {
+function MaintenanceWizard(root, deps) {
   root.innerHTML = `<div class="ha">
   <div class="wz-progress" id="progress"><span></span><span></span><span></span><span></span></div>
   <div class="wz-step" id="steps"></div>

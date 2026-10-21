@@ -10,7 +10,7 @@ const USAGE_TICK_MS = 60 * 1000;
 const CAPABILITY_TYPES = ['boolean', 'number', 'enum', 'string'];
 const ANY = '*';
 
-class HuisartsApp extends Homey.App {
+class MaintenanceMonitorApp extends Homey.App {
 
   async onInit() {
     // Defaults for the notification settings (only set when missing).
@@ -32,7 +32,7 @@ class HuisartsApp extends Homey.App {
       this.checkAll();
       this.syncTracking().catch(err => this.error('Sync tracking failed:', err.message));
     }, 15 * 1000);
-    this.log('Huisarts started');
+    this.log('Maintenance Monitor started');
   }
 
   async onUninit() {
@@ -242,4 +242,4 @@ class HuisartsApp extends Homey.App {
 
 }
 
-module.exports = HuisartsApp;
+module.exports = MaintenanceMonitorApp;

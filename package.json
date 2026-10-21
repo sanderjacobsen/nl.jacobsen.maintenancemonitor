@@ -1,7 +1,7 @@
 {
   "name": "nl.jacobsen.maintenancemonitor",
   "version": "0.1.0",
-  "description": "Huisarts: keep track of maintenance in and around your home (Homey app)",
+  "description": "Maintenance Monitor: keep track of maintenance in and around your home (Homey app)",
   "main": "app.js",
   "scripts": {
     "test": "node test/schedule.test.js && node test/usage.test.js"
