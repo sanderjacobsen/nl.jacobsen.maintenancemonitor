@@ -25,7 +25,7 @@ Test the smoke detectors, clean the air conditioner filters, give the washing ma
 
 Smoke detector · CO detector · Washing machine · Tumble dryer · Dishwasher · Extractor · Cooker hood · Mechanical ventilation · Air conditioner · Fan · Boiler / heat pump · Floor heating · 3D printer · Robot vacuum · Coffee machine · Litter box · Pet fountain · Pet feeder · Chicken coop · Camera / doorbell · Solar panels · Car · Water softener · House · Other
 
-Every type comes with suggested tasks (for example *Smoke detector: test every year, replace after 10 years*). All tasks and intervals can be changed, and you can add your own.
+Every type comes with suggested tasks, based on manufacturer advice where available (for example *Smoke detector: test every month, replace after 10 years* or *Robot vacuum: replace the main brush after 300 cleaning hours*). All tasks and intervals can be changed, and you can add your own.
 
 ---
 
@@ -61,7 +61,7 @@ npm test            # Unit tests for the date and usage logic
 
 | Type | How it works | Example |
 |---|---|---|
-| **By date** | Every X days/weeks/months/years since it was last done (or since installation) | Test smoke detector every year |
+| **By date** | Every X days/weeks/months/years since it was last done (or since installation) | Test smoke detector every month |
 | **Counter** | A counter you increase with a Flow card | Robot vacuum: +40 per cleaning, due at 9000 |
 | **By usage** | Measured from a linked Homey device | See below |
 

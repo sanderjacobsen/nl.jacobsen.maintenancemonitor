@@ -223,11 +223,25 @@ class MaintenanceMonitorApp extends Homey.App {
         this._instances.delete(key);
       }
     }
-    if (![...wanted.keys()].some(key => !this._instances.has(key))) return;
+    if (![...wanted].some(([key, w]) => w.fresh || !this._instances.has(key))) return;
 
     const api = await this.getApi();
-    for (const [key, { itemId, linkId, capability }] of wanted) {
-      if (this._instances.has(key)) continue;
+    for (const [key, {
+      itemId, linkId, capability, fresh,
+    }] of wanted) {
+      if (this._instances.has(key)) {
+        // Already followed, but a new counter task needs a starting value.
+        if (fresh) {
+          try {
+            const device = await api.devices.getDevice({ id: linkId });
+            const current = device.capabilitiesObj && device.capabilitiesObj[capability];
+            if (current) await this.items.applyUsage(itemId, capability, current.value);
+          } catch (err) {
+            this.error(`Could not read ${capability} of device ${linkId}:`, err.message);
+          }
+        }
+        continue;
+      }
       try {
         const device = await api.devices.getDevice({ id: linkId });
         const instance = device.makeCapabilityInstance(capability, value => {

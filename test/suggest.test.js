@@ -25,6 +25,9 @@ const vacuum = { class: 'vacuumcleaner', capabilities: [
 ] };
 s = suggestSource(vacuum, 'hours');
 assert.deepStrictEqual([s.kind, s.cmpValue], ['status', 'cleaning']);
+// The battery level is not a counter.
+s = suggestSource({ ...vacuum, capabilities: [...vacuum.capabilities, { id: 'measure_battery', title: 'Battery', type: 'number', units: '%' }] }, 'counter');
+assert.strictEqual(s.kind, null);
 
 const litter = { class: 'other', capabilities: [
   { id: 'onoff', title: 'On', type: 'boolean' }, { id: 'measure_odometer_clean_cycles', title: 'Clean cycles', type: 'number', units: 'cycli' },

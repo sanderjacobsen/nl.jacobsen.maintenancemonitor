@@ -14,5 +14,9 @@
   "0.4.0": {
     "en": "Smarter usage detection when linking a device: appliance status (e.g. 'In use') first, then power, then on/off; device counters for runs. The wizard explains what was chosen.",
     "nl": "Slimmere herkenning bij koppelen: eerst de status van het apparaat (bijv. 'In gebruik'), dan het vermogen, dan aan/uit; eigen tellers voor het aantal keer. De wizard legt uit wat er gekozen is."
+  },
+  "0.4.1": {
+    "en": "Suggested tasks follow manufacturer advice: robot vacuum per part (brushes, filter, sensors) on cleaning hours, Litter-Robot globe and deep clean on clean cycles, smoke and CO detectors tested monthly, and more. The battery level is no longer suggested as a counter.",
+    "nl": "Voorgestelde taken volgen het advies van fabrikanten: robotstofzuiger per onderdeel (borstels, filter, sensoren) op schoonmaakuren, Litter-Robot bol en grote schoonmaak op reinigingscycli, rook- en CO-melders maandelijks testen, en meer. Het accuniveau wordt niet meer als teller voorgesteld."
   }
 }
