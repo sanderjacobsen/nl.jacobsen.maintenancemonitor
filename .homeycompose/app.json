@@ -1,7 +1,7 @@
 {
   "id": "nl.jacobsen.maintenancemonitor",
   "brandColor": "#E8504A",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -83,5 +83,6 @@
   "homepage": "https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor",
   "bugs": {
     "url": "https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor/issues"
-  }
+  },
+  "support": "https://community.homey.app/t/app-pro-maintenance-monitor-keep-track-of-all-maintenance-in-and-around-your-home/161164"
 }

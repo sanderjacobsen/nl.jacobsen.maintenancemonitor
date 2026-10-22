@@ -8,3 +8,5 @@ Rookmelders testen, airco-filters schoonmaken, de wasmachine een heet reinigings
 - Eén overzichtsapparaat met een rood bolletje als er iets moet, zonder dubbele apparaten in je lijst.
 - Een widget voor je dashboard en flowkaarten om zelf te automatiseren.
 - Een eenvoudige wizard om onderdelen toe te voegen, in de stijl van Homey.
+
+Werkt op Homey Pro (2023 of nieuwer), Homey Pro mini en Homey Self-Hosted Server.

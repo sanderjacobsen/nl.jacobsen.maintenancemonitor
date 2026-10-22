@@ -6,5 +6,9 @@
   "0.3.1": {
     "en": "App icon now shows correctly on Flow cards.",
     "nl": "App-icoon wordt nu goed getoond op flowkaarten."
+  },
+  "0.3.2": {
+    "en": "Support link to the Homey Community topic.",
+    "nl": "Support-link naar het topic op het Homey-forum."
   }
 }

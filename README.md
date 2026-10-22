@@ -35,7 +35,7 @@ Every type comes with suggested tasks (for example *Smoke detector: test every y
 The app is currently in **test**. Install the test version via:
 **https://homey.app/a/nl.jacobsen.maintenancemonitor/test/**
 
-Requires Homey Pro (2023 or later) or Homey Self-Hosted Server, firmware 12.2.0 or newer.
+Requires Homey Pro (2023 or later), Homey Pro mini or Homey Self-Hosted Server, firmware 12.2.0 or newer.
 
 ### Manual / Development
 ```bash
@@ -128,6 +128,12 @@ Maintenance Monitor writes to the Homey timeline when a task becomes *due soon*,
 - Linked devices are followed with the Homey Web API (`homey:manager:api` permission) via capability listeners; usage is saved immediately on start/stop and at most every 10 minutes while running
 - Status is evaluated every hour and on every change
 - Backup and restore of all items as JSON in the app settings
+
+---
+
+## Support
+
+Questions, ideas or bugs? Reply in the [Homey Community topic](https://community.homey.app/t/app-pro-maintenance-monitor-keep-track-of-all-maintenance-in-and-around-your-home/161164) or open an [issue](https://github.com/sanderjacobsen/nl.jacobsen.maintenancemonitor/issues).
 
 ---
 

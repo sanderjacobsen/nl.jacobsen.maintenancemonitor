@@ -8,3 +8,5 @@ Test the smoke detectors, clean the air conditioner filters, give the washing ma
 - One overview device with a red dot when something needs attention, so your appliances don't appear twice in your device list.
 - A dashboard widget and Flow cards to automate everything yourself.
 - A simple wizard to add items, in Homey's own look and feel.
+
+Works on Homey Pro (2023 or later), Homey Pro mini and Homey Self-Hosted Server.
