@@ -75,6 +75,8 @@ npm test            # Unit tests for the date and usage logic
 
 Usage tasks can be combined with a date: **whichever comes first**.
 
+When you link a device, Maintenance Monitor picks the best source automatically: an appliance **status** such as *In use* (smart washers, dryers, robot vacuums), otherwise **power** above a threshold (smart plugs with energy metering), otherwise **on/off**. For the number of runs it prefers the device's own counter (e.g. clean cycles). The wizard shows what was chosen, and you can always change it.
+
 ---
 
 ## Overview device

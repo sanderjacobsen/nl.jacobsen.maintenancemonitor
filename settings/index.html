@@ -186,15 +186,26 @@
   }
 
   function autoSource(dev, metric, watts) {
-    if (!dev) return { metric };
-    if (metric === 'counter') {
-      const c = dev.capabilities.find(x => x.type === 'number' && x.id.startsWith('meter_')) || dev.capabilities.find(x => x.type === 'number');
-      return { metric, srcCap: c ? c.id : '' };
-    }
-    if (capOf(dev, 'measure_power')) return { metric, srcCap: 'measure_power', op: 'gt', cmpValue: watts || 10 };
-    const b = capOf(dev, 'onoff') || dev.capabilities.find(x => x.type === 'boolean');
-    return { metric, srcCap: b ? b.id : '', op: 'true', cmpValue: '' };
+    const sug = dev && dev.suggest && dev.suggest[metric];
+    if (!sug || !sug.kind) return { metric, srcCap: '', op: 'true', cmpValue: '' };
+    return {
+      metric: sug.metric, srcCap: sug.srcCap, op: sug.op, cmpValue: sug.kind === 'power' ? (watts || sug.cmpValue) : sug.cmpValue, auto: true, offDelayMin: sug.offDelayMin ?? 3, minRunMin: sug.minRunMin ?? 1,
+    };
   }
+
+  function describeSource(d, dev) {
+    const c = capOf(dev, d.srcCap);
+    if (!c) return '';
+    if ((d.metric || 'hours') === 'counter') return t('usage.desc_counter', { cap: c.title });
+    let cond = t('usage.is_on');
+    if (d.op === 'gt') cond = `${t('usage.greater_than')} ${d.cmpValue} ${c.units || ''}`.trim();
+    if (d.op === 'equals') {
+      const v = (c.values || []).find(x => String(x.id) === String(d.cmpValue));
+      cond = `${t('usage.equals')} '${v ? v.title : d.cmpValue}'`;
+    }
+    return t('usage.desc_running', { cap: c.title, cond });
+  }
+
 
   // ---------- texts ----------
   function metaText(task, dev) {
@@ -310,6 +321,7 @@
     return `<label class="homey-form-label">${esc(t('usage.metric'))}</label>
       <select class="homey-form-select" data-f="metric">${metricOpts}</select>
       ${source}
+      ${describeSource(d, dev) ? `<p class="ha-sub" style="margin-top:8px">${esc(describeSource(d, dev))}${d.auto ? ` · ${esc(t('usage.auto'))}` : ''}</p>` : ''}
       <label class="homey-form-label">${esc(t('usage.threshold'))}</label>
       <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" data-f="threshold" value="${d.threshold ?? 100}" style="width:110px" /><span>${esc(usageUnit(d, dev))}</span></div>
       <label class="homey-form-label">${esc(t('usage.lead_percent'))}</label>
@@ -478,6 +490,7 @@
       const dev = linkedDevice(item);
       if (f === 'type' && d.type === 'usage' && !d.srcCap) Object.assign(d, { combine: true }, autoSource(dev, d.metric || 'hours', 10));
       if (f === 'metric') Object.assign(d, autoSource(dev, d.metric, 10));
+      if (['srcCap', 'cmpValue'].includes(f)) d.auto = false;
       if (f === 'srcCap') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
       if (['type', 'metric', 'srcCap', 'combine', 'unit'].includes(f)) render();
       return;

@@ -173,7 +173,10 @@
     "unit_cycles": "keer",
     "no_link": "Koppel eerst een Homey-apparaat aan dit onderdeel.",
     "progress": "__amount__ van __threshold__ __unit__",
-    "or_date": "of op datum"
+    "or_date": "of op datum",
+    "desc_running": "Telt als aan wanneer __cap__ __cond__.",
+    "desc_counter": "Telt de toename van __cap__.",
+    "auto": "automatisch gekozen"
   },
   "widget": {
     "title": "Onderhoud",

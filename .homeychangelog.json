@@ -10,5 +10,9 @@
   "0.3.2": {
     "en": "Support link to the Homey Community topic.",
     "nl": "Support-link naar het topic op het Homey-forum."
+  },
+  "0.4.0": {
+    "en": "Smarter usage detection when linking a device: appliance status (e.g. 'In use') first, then power, then on/off; device counters for runs. The wizard explains what was chosen.",
+    "nl": "Slimmere herkenning bij koppelen: eerst de status van het apparaat (bijv. 'In gebruik'), dan het vermogen, dan aan/uit; eigen tellers voor het aantal keer. De wizard legt uit wat er gekozen is."
   }
 }

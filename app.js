@@ -4,6 +4,7 @@ const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 const ItemManager = require('./lib/items');
 const { severity } = require('./lib/schedule');
+const { suggestSource } = require('./lib/suggest');
 
 const CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const USAGE_TICK_MS = 60 * 1000;
@@ -197,6 +198,11 @@ class MaintenanceMonitorApp extends Homey.App {
             values: Array.isArray(c.values) ? c.values.map(v => ({ id: v.id, title: title(v.title) || v.id })) : null,
             value: c.value,
           })),
+      }))
+      .map(d => ({
+        ...d,
+        // How to measure usage of this device (status "In use" > power above X W > on/off; own counters for runs).
+        suggest: Object.fromEntries(['hours', 'cycles', 'counter'].map(m => [m, suggestSource(d, m)])),
       }))
       .sort((a, b) => (a.zone + a.name).localeCompare(b.zone + b.name));
   }

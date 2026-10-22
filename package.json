@@ -1,10 +1,10 @@
 {
   "name": "nl.jacobsen.maintenancemonitor",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Maintenance Monitor: keep track of maintenance in and around your home (Homey app)",
   "main": "app.js",
   "scripts": {
-    "test": "node test/schedule.test.js && node test/usage.test.js"
+    "test": "node test/schedule.test.js && node test/usage.test.js && node test/suggest.test.js"
   },
   "engines": {
     "node": ">=18.0.0"

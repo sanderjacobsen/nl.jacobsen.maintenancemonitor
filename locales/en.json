@@ -173,7 +173,10 @@
     "unit_cycles": "times",
     "no_link": "Link a Homey device to this item first.",
     "progress": "__amount__ of __threshold__ __unit__",
-    "or_date": "or by date"
+    "or_date": "or by date",
+    "desc_running": "Counts as running when __cap__ __cond__.",
+    "desc_counter": "Counts the increase of __cap__.",
+    "auto": "chosen automatically"
   },
   "widget": {
     "title": "Maintenance",

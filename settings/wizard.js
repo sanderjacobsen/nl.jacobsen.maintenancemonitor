@@ -65,16 +65,29 @@ function MaintenanceWizard(root, deps) {
   const capOf = (dev, id) => (dev ? dev.capabilities.find(c => c.id === id) : null);
 
   // Best guess of how to detect "running" for a linked device: power above X W, otherwise on/off.
+  // Suggestion from the app (lib/suggest.js): status like "In use", else power above X W, else on/off.
   function autoSource(dev, tk) {
-    const metric = (tk.usage && tk.usage.metric) || 'hours';
-    if (!dev) return { metric };
-    if (metric === 'counter') {
-      const c = dev.capabilities.find(x => x.type === 'number' && x.id.startsWith('meter_')) || dev.capabilities.find(x => x.type === 'number');
-      return { metric, srcCap: c ? c.id : '', units: c ? c.units : '' };
+    const metric = (tk.usage && tk.usage.metric) || tk.metric || 'hours';
+    const sug = dev && dev.suggest && dev.suggest[metric];
+    if (!sug || !sug.kind) return { metric, srcCap: '', op: 'true', cmpValue: '' };
+    const cmpValue = sug.kind === 'power' ? ((tk.usage && tk.usage.watts) || sug.cmpValue) : sug.cmpValue;
+    return {
+      metric: sug.metric, srcCap: sug.srcCap, op: sug.op, cmpValue, auto: true, offDelayMin: sug.offDelayMin ?? 3, minRunMin: sug.minRunMin ?? 1,
+    };
+  }
+
+  // Plain-language description of the current choice, e.g. "Counts as running when Status is 'In use'".
+  function describeSource(tk) {
+    const c = capOf(linked(), tk.srcCap);
+    if (!c) return '';
+    if ((tk.metric || 'hours') === 'counter') return tr('usage.desc_counter', { cap: c.title });
+    let cond = tr('usage.is_on');
+    if (tk.op === 'gt') cond = `${tr('usage.greater_than')} ${tk.cmpValue} ${c.units || ''}`.trim();
+    if (tk.op === 'equals') {
+      const v = (c.values || []).find(x => String(x.id) === String(tk.cmpValue));
+      cond = `${tr('usage.equals')} '${v ? v.title : tk.cmpValue}'`;
     }
-    if (capOf(dev, 'measure_power')) return { metric, srcCap: 'measure_power', op: 'gt', cmpValue: (tk.usage && tk.usage.watts) || 10 };
-    const b = capOf(dev, 'onoff') || dev.capabilities.find(x => x.type === 'boolean');
-    return { metric, srcCap: b ? b.id : '', op: 'true', cmpValue: '' };
+    return tr('usage.desc_running', { cap: c.title, cond });
   }
 
   // Linking changes the suggested interval types: tasks with a usage suggestion switch to "by usage" (and back).
@@ -267,6 +280,7 @@ function MaintenanceWizard(root, deps) {
     return `<label class="homey-form-label" for="${id}w">${esc(tr('usage.metric'))}</label>
       <select class="homey-form-select" id="${id}w" data-f="metric">${metricOpts}</select>
       ${source}
+      ${describeSource(tk) ? `<p class="wz-hint" style="margin-top:8px">${esc(describeSource(tk))}${tk.auto ? ` · ${esc(tr('usage.auto'))}` : ''}</p>` : ''}
       <label class="homey-form-label" for="${id}t">${esc(tr('usage.threshold'))}</label>
       <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" id="${id}t" data-f="threshold" value="${tk.threshold}" style="width:110px" /><span>${esc(unitLabel(tk))}</span></div>
       <label class="homey-form-label" for="${id}p">${esc(tr('usage.lead_percent'))}</label>
@@ -371,7 +385,8 @@ function MaintenanceWizard(root, deps) {
     const tk = tasks[Number(card.dataset.i)];
     tk[f] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value;
     if (f === 'type' && tk.type === 'usage') Object.assign(tk, { combine: tk.combine ?? true, threshold: (tk.usage && tk.usage.threshold) || tk.threshold }, tk.srcCap ? {} : autoSource(linked(), tk));
-    if (f === 'metric') Object.assign(tk, autoSource(linked(), { usage: { metric: tk.metric, watts: tk.cmpValue } }));
+    if (f === 'metric') Object.assign(tk, autoSource(linked(), { metric: tk.metric, usage: tk.usage && { ...tk.usage, metric: tk.metric } }));
+    if (['srcCap', 'cmpValue'].includes(f)) tk.auto = false;
     if (f === 'srcCap') { const c = capOf(linked(), tk.srcCap); tk.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; tk.cmpValue = tk.op === 'gt' ? 10 : ''; }
     if (['use', 'type', 'last', 'unit', 'lastDate', 'metric', 'srcCap', 'combine'].includes(f)) renderTasks();
   });
