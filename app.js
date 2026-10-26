@@ -28,7 +28,7 @@ class MaintenanceMonitorApp extends Homey.App {
     this._registerFlowCards();
 
     this.homey.setInterval(() => this.checkAll(), CHECK_INTERVAL_MS);
-    this.homey.setInterval(() => this.items.tickUsage().catch(err => this.error('Usage tick failed:', err.message)), USAGE_TICK_MS);
+    this.homey.setInterval(() => this.usageTick(), USAGE_TICK_MS);
     this.homey.setTimeout(() => {
       this.checkAll();
       this.syncTracking().catch(err => this.error('Sync tracking failed:', err.message));
@@ -208,6 +208,41 @@ class MaintenanceMonitorApp extends Homey.App {
   }
 
   // (Re)create the capability listeners for all usage tasks. Safe to call often.
+  // Every minute: read the linked devices once more (realtime updates are sometimes missed), then add running time.
+  async usageTick() {
+    if (this._ticking) return;
+    this._ticking = true;
+    try {
+      await this.pollTracking();
+      await this.items.tickUsage();
+    } catch (err) {
+      this.error('Usage tick failed:', err.message);
+    } finally {
+      this._ticking = false;
+    }
+  }
+
+  async pollTracking() {
+    const byDevice = new Map();
+    for (const w of this.items.getTrackedCapabilities()) {
+      if (!byDevice.has(w.linkId)) byDevice.set(w.linkId, []);
+      byDevice.get(w.linkId).push(w);
+    }
+    if (!byDevice.size) return;
+    const api = await this.getApi();
+    for (const [linkId, list] of byDevice) {
+      try {
+        const device = await api.devices.getDevice({ id: linkId, $cache: false, $updateCache: false });
+        for (const { itemId, capability } of list) {
+          const current = device.capabilitiesObj && device.capabilitiesObj[capability];
+          if (current) await this.items.applyUsage(itemId, capability, current.value);
+        }
+      } catch (err) {
+        this.error(`Could not read device ${linkId}:`, err.message);
+      }
+    }
+  }
+
   async syncTracking() {
     const run = this._syncing.then(() => this._syncTracking());
     this._syncing = run.catch(() => {});

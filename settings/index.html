@@ -121,6 +121,7 @@
   <p class="homey-subtitle" data-i18n="settings.intro"></p>
 
   <div class="ha-section" data-i18n="settings.items"></div>
+  <input class="homey-form-input" type="text" inputmode="search" enterkeyhint="search" id="search" autocomplete="off" style="margin-bottom:12px" />
   <button class="homey-button-primary-shadow-full" id="addItem" style="margin-bottom:12px">+ <span data-i18n="settings.add_item"></span></button>
   <div id="items"></div>
 
@@ -146,6 +147,7 @@
 <script>
   let H; let items = []; let templates = []; let homeyDevices = null;
   let editing = null; // { itemId, taskId | 'new', draft }
+  let query = ''; // search text
   const openSettings = new Set(); // items whose settings block is open
   const UNITS = ['days', 'weeks', 'months', 'years'];
   const ORDER = ['ok', 'soon', 'due', 'overdue'];
@@ -363,9 +365,19 @@
   }
 
   // ---------- render ----------
+  // Search: an item matches on its name, type, linked device or one of its tasks.
+  function matches(item) {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return true;
+    const text = [item.name, item.categoryName, item.link && item.link.name, ...item.tasks.map(tk => tk.name)].join(' ').toLowerCase();
+    return words.every(w => text.includes(w));
+  }
+
   function render() {
     if (!items.length) { $('items').innerHTML = `<div class="ha-card ha-pad ha-sub">${esc(t('settings.no_items'))}</div>`; return; }
-    $('items').innerHTML = items.map(item => {
+    const shown = items.filter(matches);
+    if (!shown.length) { $('items').innerHTML = `<div class="ha-card ha-pad ha-sub">${esc(t('settings.no_results', { query }))}</div>`; return; }
+    $('items').innerHTML = shown.map(item => {
       const dev = linkedDevice(item);
       const cat = templates.find(c => c.id === item.category);
       const used = new Set(item.tasks.map(tk => tk.key).filter(Boolean));
@@ -546,6 +558,8 @@
     }
     H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
+    $('search').placeholder = t('settings.search');
+    $('search').addEventListener('input', () => { query = $('search').value.trim(); render(); });
     $('items').addEventListener('click', onClick);
     $('addItem').addEventListener('click', openWizard);
     $('items').addEventListener('input', onInput);

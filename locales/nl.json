@@ -144,7 +144,9 @@
     "delete_item": "Verwijder onderdeel",
     "confirm_delete_item": "Onderdeel en al zijn taken verwijderen?",
     "rename": "Naam",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "search": "Zoek op onderdeel, apparaat of taak",
+    "no_results": "Geen onderdelen gevonden voor '__query__'."
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",

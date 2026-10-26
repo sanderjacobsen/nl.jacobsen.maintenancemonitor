@@ -144,7 +144,9 @@
     "delete_item": "Delete item",
     "confirm_delete_item": "Delete this item and all its tasks?",
     "rename": "Name",
-    "close": "Close"
+    "close": "Close",
+    "search": "Search by item, device or task",
+    "no_results": "No items found for '__query__'."
   },
   "usage": {
     "link": "Link to a Homey device",

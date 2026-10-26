@@ -18,5 +18,9 @@
   "0.4.1": {
     "en": "Suggested tasks follow manufacturer advice: robot vacuum per part (brushes, filter, sensors) on cleaning hours, Litter-Robot globe and deep clean on clean cycles, smoke and CO detectors tested monthly, and more. The battery level is no longer suggested as a counter.",
     "nl": "Voorgestelde taken volgen het advies van fabrikanten: robotstofzuiger per onderdeel (borstels, filter, sensoren) op schoonmaakuren, Litter-Robot bol en grote schoonmaak op reinigingscycli, rook- en CO-melders maandelijks testen, en meer. Het accuniveau wordt niet meer als teller voorgesteld."
+  },
+  "0.5.0": {
+    "en": "More reliable usage tracking: linked devices are also checked every minute, so a missed update (e.g. a robot vacuum or smart plug) no longer stops or inflates the count. New search field to quickly find an item.",
+    "nl": "Betrouwbaardere meting: gekoppelde apparaten worden ook elke minuut uitgelezen, zodat een gemiste update (bijv. robotstofzuiger of slimme stekker) de telling niet meer stopt of laat doorlopen. Nieuw zoekveld om snel een onderdeel te vinden."
   }
 }
