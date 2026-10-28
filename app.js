@@ -93,6 +93,16 @@ class MaintenanceMonitorApp extends Homey.App {
     });
   }
 
+  // Every "done" (app, widget, flow or device): flows can follow up, e.g. reset the counter in the device itself.
+  async triggerDone({ item, task, automatic }) {
+    await this.homey.flow.getTriggerCard('task_done').trigger(
+      {
+        item: item.name, task: task.name, key: task.key || '', automatic: Boolean(automatic),
+      },
+      { itemId: item.id, taskId: task.id },
+    );
+  }
+
   // ---------- flow cards (choose an item or "item › task") ----------
 
   _itemChoices(query, withAny) {
@@ -121,7 +131,7 @@ class MaintenanceMonitorApp extends Homey.App {
     const items = (query, args) => this._itemChoices(query, true);
     const tasks = query => this._taskChoices(query, false);
 
-    for (const status of ['soon', 'due', 'overdue']) {
+    for (const status of ['soon', 'due', 'overdue', 'done']) {
       const card = this.homey.flow.getTriggerCard(`task_${status}`);
       card.registerArgumentAutocompleteListener('item', items);
       card.registerRunListener(async (args, state) => !args.item || args.item.id === ANY || args.item.id === state.itemId);

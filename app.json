@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.jacobsen.maintenancemonitor",
   "brandColor": "#E8504A",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
@@ -88,6 +88,79 @@
   "support": "https://community.homey.app/t/app-pro-maintenance-monitor-keep-track-of-all-maintenance-in-and-around-your-home/161164",
   "flow": {
     "triggers": [
+      {
+        "title": {
+          "en": "A maintenance task was done",
+          "nl": "Een onderhoudstaak is gedaan"
+        },
+        "titleFormatted": {
+          "en": "A task of [[item]] was done",
+          "nl": "Een taak van [[item]] is gedaan"
+        },
+        "hint": {
+          "en": "Fires when a task is marked done: in the app, the widget, a flow, or automatically by the device. Use it to e.g. reset the consumable counter of the device as well.",
+          "nl": "Gaat af als een taak is afgevinkt: in de app, de widget, een flow of automatisch door het apparaat. Bijvoorbeeld om ook de teller in het apparaat zelf terug te zetten."
+        },
+        "args": [
+          {
+            "name": "item",
+            "type": "autocomplete",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "placeholder": {
+              "en": "All items",
+              "nl": "Alle onderdelen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "item",
+            "type": "string",
+            "title": {
+              "en": "Item",
+              "nl": "Onderdeel"
+            },
+            "example": {
+              "en": "Robot vacuum",
+              "nl": "Robotstofzuiger"
+            }
+          },
+          {
+            "name": "task",
+            "type": "string",
+            "title": {
+              "en": "Task",
+              "nl": "Taak"
+            },
+            "example": {
+              "en": "Replace main brush",
+              "nl": "Hoofdborstel vervangen"
+            }
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "title": {
+              "en": "Task type",
+              "nl": "Soort taak"
+            },
+            "example": "main_brush"
+          },
+          {
+            "name": "automatic",
+            "type": "boolean",
+            "title": {
+              "en": "By the device",
+              "nl": "Door het apparaat"
+            },
+            "example": false
+          }
+        ],
+        "id": "task_done"
+      },
       {
         "title": {
           "en": "A maintenance task is due",

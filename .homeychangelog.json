@@ -26,5 +26,9 @@
   "0.6.0": {
     "en": "Follow the value a device reports itself (e.g. robot vacuum brushes and filter in %, days of salt in a water softener); a replaced or refilled part marks the task done. Tasks can be marked done by the device, e.g. a smoke detector test. Both come with the suggested tasks when you link a device.",
     "nl": "Volg de waarde die een apparaat zelf meldt (bijv. borstels en filter van een robotstofzuiger in %, dagen zout van een waterontharder); vervangen of bijvullen vinkt de taak af. Taken kunnen ook door het apparaat worden afgevinkt, bijv. bij het testen van een rookmelder. Beide komen mee met de voorgestelde taken bij koppelen."
+  },
+  "0.7.0": {
+    "en": "New flow card 'A task of [item] was done' (with task type and whether the device did it), e.g. to reset the consumable counter in the device itself. Progress of a percentage counting down now starts at 100 %.",
+    "nl": "Nieuwe flowkaart 'Een taak van [onderdeel] is gedaan' (met soort taak en of het apparaat het deed), bijvoorbeeld om ook de teller in het apparaat zelf terug te zetten. Voortgang van een aflopend percentage telt nu vanaf 100 %."
   }
 }

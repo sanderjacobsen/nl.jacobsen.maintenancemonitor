@@ -100,6 +100,7 @@ When you link a device, Maintenance Monitor picks the best source automatically:
 
 ### Triggers
 - **A task of [item] is due soon** — tokens: item, task, days
+- **A task of [item] was done** — tokens: item, task, task type, by the device (e.g. reset the counter in the device itself)
 - **A task of [item] is due**
 - **A task of [item] is overdue**
 
