@@ -18,7 +18,8 @@
     "soon_counter": "🩺 __item__: __task__ is bijna nodig.",
     "due_counter": "🩺 __item__: tijd voor __task__.",
     "overdue_counter": "🩺 __item__: __task__ is al een tijd nodig.",
-    "auto_done": "🩺 __item__: __task__ is automatisch afgevinkt."
+    "auto_done": "🩺 __item__: __task__ is automatisch afgevinkt.",
+    "reset_failed": "🩺 __item__: __task__ is afgevinkt, maar '__action__' op het apparaat lukte niet. Doe het even in de app van het apparaat."
   },
   "errors": {
     "task_not_found": "Taak niet gevonden",
@@ -212,6 +213,9 @@
     "desc": "Wordt vanzelf afgevinkt zodra __cap__ __cond__.",
     "desc_on": "aan / ja wordt",
     "desc_equals": "gelijk wordt aan '__value__'",
-    "desc_contains": "'__value__' bevat"
+    "desc_contains": "'__value__' bevat",
+    "reset_title": "Bij 'Gedaan' ook uitvoeren op het apparaat",
+    "reset_none": "Niets",
+    "reset_short": "zet de teller van het apparaat terug"
   }
 }

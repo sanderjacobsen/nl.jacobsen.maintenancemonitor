@@ -30,5 +30,9 @@
   "0.7.0": {
     "en": "New flow card 'A task of [item] was done' (with task type and whether the device did it), e.g. to reset the consumable counter in the device itself. Progress of a percentage counting down now starts at 100 %.",
     "nl": "Nieuwe flowkaart 'Een taak van [onderdeel] is gedaan' (met soort taak en of het apparaat het deed), bijvoorbeeld om ook de teller in het apparaat zelf terug te zetten. Voortgang van een aflopend percentage telt nu vanaf 100 %."
+  },
+  "0.8.0": {
+    "en": "When you mark a task done, Maintenance Monitor can also run an action on the linked device, e.g. reset the brush or filter counter of a robot vacuum: one place to tick it off. Chosen automatically for robot vacuums that offer reset actions. New flow card 'A task of [item] was done'.",
+    "nl": "Vink je een taak af, dan kan Maintenance Monitor ook een actie op het gekoppelde apparaat uitvoeren, bijv. de borstel- of filterteller van een robotstofzuiger terugzetten: één plek om af te vinken. Wordt vanzelf gekozen bij robotstofzuigers met resetacties. Nieuwe flowkaart 'Een taak van [onderdeel] is gedaan'."
   }
 }

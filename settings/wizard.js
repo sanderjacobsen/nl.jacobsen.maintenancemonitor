@@ -12,6 +12,12 @@ const MM = {
     const caps = dev.capabilities.filter(c => c.type === 'number' && c.id.toLowerCase().includes(String(match).toLowerCase()) && !/time/i.test(c.id));
     return caps.find(c => c.units === '%') || caps.find(c => /(left|remaining|life|days)/i.test(c.id)) || null;
   },
+  // Device action that resets the counter of this part, e.g. "reset_main_brush" for match "main_brush".
+  findResetAction(dev, match) {
+    if (!dev || !match) return null;
+    const a = (dev.actions || []).find(x => /reset/i.test(x.id) && x.id.toLowerCase().includes(String(match).toLowerCase()));
+    return a ? { id: a.id, title: a.title } : null;
+  },
   // The automatic "done" of a (template) task, only when the linked device has that capability.
   autoDoneFor(dev, tk) {
     return dev && tk.autoDone && dev.capabilities.some(c => c.id === tk.autoDone.capability) ? tk.autoDone : null;
@@ -210,7 +216,8 @@ function MaintenanceWizard(root, deps) {
   }
 
   function summaryOf(tk) {
-    const auto = MM.autoDoneFor(linked(), tk) ? ` · ${tr('auto.short')}` : '';
+    const auto = (MM.autoDoneFor(linked(), tk) ? ` · ${tr('auto.short')}` : '')
+      + (tk.level && MM.findResetAction(linked(), tk.level.match) ? ` · ${tr('auto.reset_short')}` : '');
     if (tk.type === 'usage') {
       const what = tr('usage.metric_' + (tk.metric || 'hours'));
       const amount = tk.metric === 'level' ? `${tr('usage.level_at')} ${tk.threshold} ${unitLabel(tk)}` : `${tr('usage.threshold').toLowerCase()} ${tk.threshold} ${unitLabel(tk)}`;
@@ -394,6 +401,7 @@ function MaintenanceWizard(root, deps) {
         direction: tk.direction || 'down',
       } : null,
       autoDone: MM.autoDoneFor(linked(), tk),
+      resetAction: tk.level ? MM.findResetAction(linked(), tk.level.match) : null,
     })).filter(tk => tk.type !== 'usage' || tk.source.capability);
     $('next').classList.add('is-loading');
     try {

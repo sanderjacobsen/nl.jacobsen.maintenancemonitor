@@ -212,7 +212,7 @@
 
   // ---------- texts ----------
   function metaText(task, dev) {
-    const auto = task.autoDone ? ` · ${t('auto.short')}` : '';
+    const auto = (task.autoDone ? ` · ${t('auto.short')}` : '') + (task.resetAction ? ` · ${t('auto.reset_short')}` : '');
     if (task.type === 'counter' || task.type === 'usage') {
       const metric = (task.source && task.source.metric) || 'hours';
       const what = task.type === 'counter' ? t('settings.type_counter') : t('usage.metric_' + metric);
@@ -272,7 +272,7 @@
         direction: task.source.direction || 'down',
       });
     }
-    Object.assign(d, autoDraft(task.autoDone));
+    Object.assign(d, autoDraft(task.autoDone), { raId: task.resetAction ? task.resetAction.id : '' });
     return d;
   }
 
@@ -287,6 +287,9 @@
       };
     }
     task.autoDone = d.adOn && d.adCap ? { capability: d.adCap, op: d.adOp || 'true', value: d.adValue } : null;
+    const action = d.raId && dev ? (dev.actions || []).find(a => a.id === d.raId) : null;
+    task.resetAction = action ? { id: action.id, title: action.title } : (d.raId && d.resetAction && d.resetAction.id === d.raId ? d.resetAction : null);
+    delete task.raId;
     // Template hints (usage/level suggestions) are not task fields.
     if (typeof task.usage === 'object') delete task.usage;
     ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'direction', 'adOn', 'adCap', 'adOp', 'adValue', 'level',
@@ -394,6 +397,8 @@
       <select class="homey-form-select" data-f="type">${typeOpts}</select>
       ${fields}
       ${dev ? autoDoneFields(d, dev) : ''}
+      ${dev && (dev.actions || []).length ? `<label class="homey-form-label">${esc(t('auto.reset_title'))}</label>
+        <select class="homey-form-select" data-f="raId"><option value="">${esc(t('auto.reset_none'))}</option>${dev.actions.map(a => `<option value="${esc(a.id)}" ${a.id === d.raId ? 'selected' : ''}>${esc(a.title)}</option>`).join('')}</select>` : ''}
       <label class="homey-form-label">${esc(t('settings.note'))}</label>
       <input class="homey-form-input" type="text" data-f="note" value="${esc(d.note || '')}" maxlength="500" />
       <div class="ha-actions">
@@ -564,6 +569,8 @@
         Object.assign(draft, { type: 'usage', combine: true, threshold: tpl.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(dev, tpl.usage.metric, tpl.usage.watts));
       }
       Object.assign(draft, autoDraft(MM.autoDoneFor(dev, tpl)));
+      const reset = tpl.level ? MM.findResetAction(dev, tpl.level.match) : null;
+      draft.raId = reset ? reset.id : '';
     }
     editing = { itemId: item.id, taskId: 'new', draft };
     render();

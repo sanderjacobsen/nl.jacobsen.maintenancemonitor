@@ -18,7 +18,8 @@
     "soon_counter": "🩺 __item__: __task__ is almost due.",
     "due_counter": "🩺 __item__: time for __task__.",
     "overdue_counter": "🩺 __item__: __task__ has been due for a while.",
-    "auto_done": "🩺 __item__: __task__ was marked done automatically."
+    "auto_done": "🩺 __item__: __task__ was marked done automatically.",
+    "reset_failed": "🩺 __item__: __task__ was marked done, but '__action__' on the device failed. Please do it in the device's own app."
   },
   "errors": {
     "task_not_found": "Task not found",
@@ -212,6 +213,9 @@
     "desc": "Marked done by itself as soon as __cap__ __cond__.",
     "desc_on": "turns on / yes",
     "desc_equals": "becomes '__value__'",
-    "desc_contains": "contains '__value__'"
+    "desc_contains": "contains '__value__'",
+    "reset_title": "When done, also run on the device",
+    "reset_none": "Nothing",
+    "reset_short": "resets the device counter"
   }
 }

@@ -80,6 +80,8 @@ Usage tasks can be combined with a date: **whichever comes first**.
 
 Any task can be marked done by the linked device itself, for example *Smoke detector: Test* when the smoke alarm sounds during the monthly test, or a hot cleaning programme on a washing machine. You get a timeline notification when this happens.
 
+The other way round works too: when you mark a task done, Maintenance Monitor can run an action on the linked device, e.g. *Reset main brush life counter* on a robot vacuum. You only tick it off in one place.
+
 When you link a device, Maintenance Monitor picks the best source automatically: an appliance **status** such as *In use* (smart washers, dryers, robot vacuums), otherwise **power** above a threshold (smart plugs with energy metering), otherwise **on/off**. For the number of runs it prefers the device's own counter (e.g. clean cycles). The wizard shows what was chosen, and you can always change it.
 
 ---

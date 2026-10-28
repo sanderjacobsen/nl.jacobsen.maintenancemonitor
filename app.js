@@ -93,6 +93,21 @@ class MaintenanceMonitorApp extends Homey.App {
     });
   }
 
+  // Done by the user: also run the chosen action on the linked device, e.g. reset its consumable counter.
+  async runResetAction({ item, task }) {
+    if (!item.link || !task.resetAction) return;
+    const api = await this.getApi();
+    try {
+      await api.flow.runFlowCardAction({ uri: `homey:device:${item.link.id}`, id: task.resetAction.id, args: {} });
+      this.log(`Ran "${task.resetAction.title}" for "${task.name}" of "${item.name}"`);
+    } catch (err) {
+      this.error(`Reset action failed for "${task.name}":`, err.message);
+      await this.homey.notifications.createNotification({
+        excerpt: this.homey.__('notify.reset_failed', { item: item.name, task: task.name, action: task.resetAction.title }),
+      }).catch(() => {});
+    }
+  }
+
   // Every "done" (app, widget, flow or device): flows can follow up, e.g. reset the counter in the device itself.
   async triggerDone({ item, task, automatic }) {
     await this.homey.flow.getTriggerCard('task_done').trigger(
@@ -195,9 +210,13 @@ class MaintenanceMonitorApp extends Homey.App {
   // All devices of other apps, with the capabilities that can be used for tracking.
   async getHomeyDevices() {
     const api = await this.getApi();
-    const [devices, zones] = await Promise.all([api.devices.getDevices(), api.zones.getZones()]);
+    const [devices, zones, actions] = await Promise.all([api.devices.getDevices(), api.zones.getZones(), api.flow.getFlowCardActions().catch(() => ({}))]);
     const language = this.homey.i18n.getLanguage();
     const title = t => (t && typeof t === 'object' ? t[language] || t.en || '' : t || '');
+    // Device actions without arguments (e.g. "Reset main brush life counter"), to run when a task is done.
+    const actionsOf = id => Object.values(actions)
+      .filter(c => c.ownerUri === `homey:device:${id}` && !(c.args || []).some(a => a.name !== 'device' && a.required !== false))
+      .map(c => ({ id: c.id, title: title(c.title) }));
     return Object.values(devices)
       .filter(d => !String(d.driverId || '').includes('nl.jacobsen.maintenancemonitor'))
       .map(d => ({
@@ -215,6 +234,7 @@ class MaintenanceMonitorApp extends Homey.App {
             values: Array.isArray(c.values) ? c.values.map(v => ({ id: v.id, title: title(v.title) || v.id })) : null,
             value: c.value,
           })),
+        actions: actionsOf(d.id),
       }))
       .map(d => ({
         ...d,
@@ -224,7 +244,6 @@ class MaintenanceMonitorApp extends Homey.App {
       .sort((a, b) => (a.zone + a.name).localeCompare(b.zone + b.name));
   }
 
-  // (Re)create the capability listeners for all usage tasks. Safe to call often.
   // Every minute: read the linked devices once more (realtime updates are sometimes missed), then add running time.
   async usageTick() {
     if (this._ticking) return;
@@ -260,6 +279,7 @@ class MaintenanceMonitorApp extends Homey.App {
     }
   }
 
+  // (Re)create the capability listeners for all usage tasks. Safe to call often.
   async syncTracking() {
     const run = this._syncing.then(() => this._syncTracking());
     this._syncing = run.catch(() => {});

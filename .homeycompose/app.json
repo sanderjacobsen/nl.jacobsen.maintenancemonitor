@@ -1,7 +1,7 @@
 {
   "id": "nl.jacobsen.maintenancemonitor",
   "brandColor": "#E8504A",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "name": {
