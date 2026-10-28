@@ -22,5 +22,9 @@
   "0.5.0": {
     "en": "More reliable usage tracking: linked devices are also checked every minute, so a missed update (e.g. a robot vacuum or smart plug) no longer stops or inflates the count. New search field to quickly find an item.",
     "nl": "Betrouwbaardere meting: gekoppelde apparaten worden ook elke minuut uitgelezen, zodat een gemiste update (bijv. robotstofzuiger of slimme stekker) de telling niet meer stopt of laat doorlopen. Nieuw zoekveld om snel een onderdeel te vinden."
+  },
+  "0.6.0": {
+    "en": "Follow the value a device reports itself (e.g. robot vacuum brushes and filter in %, days of salt in a water softener); a replaced or refilled part marks the task done. Tasks can be marked done by the device, e.g. a smoke detector test. Both come with the suggested tasks when you link a device.",
+    "nl": "Volg de waarde die een apparaat zelf meldt (bijv. borstels en filter van een robotstofzuiger in %, dagen zout van een waterontharder); vervangen of bijvullen vinkt de taak af. Taken kunnen ook door het apparaat worden afgevinkt, bijv. bij het testen van een rookmelder. Beide komen mee met de voorgestelde taken bij koppelen."
   }
 }

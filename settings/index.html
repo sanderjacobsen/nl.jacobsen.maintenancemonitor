@@ -199,6 +199,7 @@
     const c = capOf(dev, d.srcCap);
     if (!c) return '';
     if ((d.metric || 'hours') === 'counter') return t('usage.desc_counter', { cap: c.title });
+    if (d.metric === 'level') return t('usage.desc_level', { cap: c.title, value: `${c.value ?? '–'} ${c.units || ''}`.trim() });
     let cond = t('usage.is_on');
     if (d.op === 'gt') cond = `${t('usage.greater_than')} ${d.cmpValue} ${c.units || ''}`.trim();
     if (d.op === 'equals') {
@@ -211,16 +212,20 @@
 
   // ---------- texts ----------
   function metaText(task, dev) {
+    const auto = task.autoDone ? ` · ${t('auto.short')}` : '';
     if (task.type === 'counter' || task.type === 'usage') {
-      const what = task.type === 'counter' ? t('settings.type_counter') : t('usage.metric_' + ((task.source && task.source.metric) || 'hours'));
+      const metric = (task.source && task.source.metric) || 'hours';
+      const what = task.type === 'counter' ? t('settings.type_counter') : t('usage.metric_' + metric);
       const unit = task.type === 'usage' ? ` ${usageUnit(task, dev)}` : '';
-      let txt = `${what}: ${round(task.type === 'counter' ? task.counter : task.usage)} / ${task.threshold}${unit} (${Math.round((task.progress || 0) * 100)}%)`;
+      let txt = task.type === 'usage' && metric === 'level'
+        ? `${what}: ${task.track && typeof task.track.last === 'number' ? round(task.usage) : '–'}${unit} · ${t('usage.level_at')} ${task.threshold}${unit} (${Math.round((task.progress || 0) * 100)}%)`
+        : `${what}: ${round(task.type === 'counter' ? task.counter : task.usage)} / ${task.threshold}${unit} (${Math.round((task.progress || 0) * 100)}%)`;
       if (task.type === 'usage' && task.combine && task.dueDate) txt += ` · ${t('usage.or_date')}: ${fmt(task.dueDate)}`;
-      return txt;
+      return txt + auto;
     }
     const d = task.days;
     const when = d > 0 ? t('device.in_days', { days: d }) : d === 0 ? t('device.today') : t('device.days_late', { days: -d });
-    return `${everyText(task.every, task.unit)} · ${t('settings.last_done').toLowerCase()} ${fmt(task.lastDone)} · ${t('settings.next').toLowerCase()} ${fmt(task.dueDate)} (${when})`;
+    return `${everyText(task.every, task.unit)} · ${t('settings.last_done').toLowerCase()} ${fmt(task.lastDone)} · ${t('settings.next').toLowerCase()} ${fmt(task.dueDate)} (${when})${auto}`;
   }
 
   // ---------- item rows ----------
@@ -264,20 +269,28 @@
       Object.assign(d, {
         metric: task.source.metric, srcCap: task.source.capability, op: task.source.condition && task.source.condition.op,
         cmpValue: task.source.condition && task.source.condition.value, offDelayMin: task.source.offDelayMin, minRunMin: task.source.minRunMin,
+        direction: task.source.direction || 'down',
       });
     }
+    Object.assign(d, autoDraft(task.autoDone));
     return d;
   }
+
+  const autoDraft = ad => (ad ? { adOn: true, adCap: ad.capability, adOp: ad.op, adValue: ad.value ?? '' } : { adOn: false });
 
   function taskFromDraft(d, dev) {
     const task = { ...d };
     if (d.type === 'usage') {
       task.source = {
         capability: d.srcCap, metric: d.metric || 'hours', condition: { op: d.op || 'true', value: d.cmpValue },
-        offDelayMin: Number(d.offDelayMin ?? 3), minRunMin: Number(d.minRunMin ?? 1), units: usageUnit(d, dev),
+        offDelayMin: Number(d.offDelayMin ?? 3), minRunMin: Number(d.minRunMin ?? 1), units: usageUnit(d, dev), direction: d.direction || 'down',
       };
     }
-    ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'status', 'dueDate', 'days', 'progress', 'amountStatus'].forEach(k => delete task[k]);
+    task.autoDone = d.adOn && d.adCap ? { capability: d.adCap, op: d.adOp || 'true', value: d.adValue } : null;
+    // Template hints (usage/level suggestions) are not task fields.
+    if (typeof task.usage === 'object') delete task.usage;
+    ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'direction', 'adOn', 'adCap', 'adOp', 'adValue', 'level',
+      'status', 'dueDate', 'days', 'progress', 'amountStatus'].forEach(k => delete task[k]);
     return task;
   }
 
@@ -294,9 +307,15 @@
   function usageFields(d, dev) {
     if (!dev) return `<p class="ha-sub" style="margin-top:12px">${esc(t('usage.no_link'))}</p>`;
     const metric = d.metric || 'hours';
-    const metricOpts = ['hours', 'cycles', 'counter'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(t('usage.metric_' + m))}</option>`).join('');
+    const metricOpts = ['hours', 'cycles', 'counter', 'level'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(t('usage.metric_' + m))}</option>`).join('');
     let source;
-    if (metric === 'counter') {
+    if (metric === 'level') {
+      const caps = dev.capabilities.filter(c => c.type === 'number');
+      source = `<label class="homey-form-label">${esc(t('usage.level_cap'))}</label>
+        <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === d.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>
+        <label class="homey-form-label">${esc(t('usage.level_direction'))}</label>
+        <select class="homey-form-select" data-f="direction">${['down', 'up'].map(v => `<option value="${v}" ${v === (d.direction || 'down') ? 'selected' : ''}>${esc(t('usage.dir_' + v))}</option>`).join('')}</select>`;
+    } else if (metric === 'counter') {
       const caps = dev.capabilities.filter(c => c.type === 'number');
       source = `<label class="homey-form-label">${esc(t('usage.counter_cap'))}</label>
         <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === d.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>`;
@@ -324,13 +343,33 @@
       <select class="homey-form-select" data-f="metric">${metricOpts}</select>
       ${source}
       ${describeSource(d, dev) ? `<p class="ha-sub" style="margin-top:8px">${esc(describeSource(d, dev))}${d.auto ? ` · ${esc(t('usage.auto'))}` : ''}</p>` : ''}
-      <label class="homey-form-label">${esc(t('usage.threshold'))}</label>
+      <label class="homey-form-label">${esc(t(metric === 'level' ? 'usage.level_threshold' : 'usage.threshold'))}</label>
       <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" data-f="threshold" value="${d.threshold ?? 100}" style="width:110px" /><span>${esc(usageUnit(d, dev))}</span></div>
       <label class="homey-form-label">${esc(t('usage.lead_percent'))}</label>
       <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" data-f="leadPercent" value="${d.leadPercent ?? 10}" /><span>%</span></div>
       <label class="homey-form-checkbox" style="margin-top:14px"><input class="homey-form-checkbox-input" type="checkbox" data-f="combine" ${d.combine ? 'checked' : ''} />
         <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(t('usage.also_date'))}</span></label>
       ${d.combine ? dateFields(d) : ''}`;
+  }
+
+  // "Mark done by itself" when the linked device reports something (test button, programme, ...).
+  function autoDoneFields(d, dev) {
+    const caps = dev.capabilities.filter(c => ['boolean', 'enum', 'string'].includes(c.type));
+    const cap = capOf(dev, d.adCap) || caps[0];
+    const op = d.adOp || (cap && cap.type === 'boolean' ? 'true' : 'equals');
+    const ops = (cap && cap.type === 'boolean' ? ['true'] : ['equals', 'contains']).map(o => `<option value="${o}" ${o === op ? 'selected' : ''}>${esc(t('auto.op_' + o))}</option>`).join('');
+    const values = cap && cap.values ? cap.values : null;
+    const valueField = op === 'true' ? '' : values && op === 'equals'
+      ? `<select class="homey-form-select" style="margin-top:8px" data-f="adValue"><option value=""></option>${values.map(v => `<option value="${esc(v.id)}" ${String(v.id) === String(d.adValue) ? 'selected' : ''}>${esc(v.title)}</option>`).join('')}</select>`
+      : `<input class="homey-form-input" style="margin-top:8px" type="text" data-f="adValue" value="${esc(d.adValue ?? '')}" />`;
+    const desc = d.adOn && cap ? MM.describeAutoDone(dev, { capability: cap.id, op, value: d.adValue }, t) : '';
+    return `<label class="homey-form-checkbox" style="margin-top:14px"><input class="homey-form-checkbox-input" type="checkbox" data-f="adOn" ${d.adOn ? 'checked' : ''} />
+        <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(t('auto.title'))}</span></label>
+      ${d.adOn && caps.length ? `<label class="homey-form-label">${esc(t('auto.when'))}</label>
+        <select class="homey-form-select" data-f="adCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select>
+        <select class="homey-form-select" style="margin-top:8px" data-f="adOp">${ops}</select>
+        ${valueField}
+        ${desc ? `<p class="ha-sub" style="margin-top:8px">${esc(desc)}</p>` : ''}` : ''}`;
   }
 
   function editForm(d, item) {
@@ -354,6 +393,7 @@
       <label class="homey-form-label">${esc(t('settings.type'))}</label>
       <select class="homey-form-select" data-f="type">${typeOpts}</select>
       ${fields}
+      ${dev ? autoDoneFields(d, dev) : ''}
       <label class="homey-form-label">${esc(t('settings.note'))}</label>
       <input class="homey-form-input" type="text" data-f="note" value="${esc(d.note || '')}" maxlength="500" />
       <div class="ha-actions">
@@ -501,10 +541,12 @@
       const item = items.find(i => i.id === editing.itemId);
       const dev = linkedDevice(item);
       if (f === 'type' && d.type === 'usage' && !d.srcCap) Object.assign(d, { combine: true }, autoSource(dev, d.metric || 'hours', 10));
-      if (f === 'metric') Object.assign(d, autoSource(dev, d.metric, 10));
+      if (f === 'metric') Object.assign(d, d.metric === 'level' ? MM.levelSource(dev, d.level) : autoSource(dev, d.metric, 10));
       if (['srcCap', 'cmpValue'].includes(f)) d.auto = false;
-      if (f === 'srcCap') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
-      if (['type', 'metric', 'srcCap', 'combine', 'unit'].includes(f)) render();
+      if (f === 'srcCap' && d.metric !== 'level') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
+      if (f === 'adOn' && d.adOn && !d.adCap) { const c = dev && dev.capabilities.find(x => x.type === 'boolean'); if (c) Object.assign(d, { adCap: c.id, adOp: 'true' }); }
+      if (f === 'adCap') { const c = capOf(dev, d.adCap); d.adOp = c && c.type === 'boolean' ? 'true' : 'equals'; d.adValue = ''; }
+      if (['type', 'metric', 'srcCap', 'combine', 'unit', 'adOn', 'adCap', 'adOp', 'adValue'].includes(f)) render();
       return;
     }
     if (!el.classList.contains('add-select') || !el.value) return;
@@ -515,9 +557,13 @@
       const tpl = cat.tasks.find(tk => tk.key === el.value.slice(4));
       draft = { ...draft, ...tpl };
       if (draft.basis === 'install' && item.installDate) draft.lastDone = item.installDate;
-      if (tpl.usage && item.link) {
-        Object.assign(draft, { type: 'usage', combine: true, threshold: tpl.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(linkedDevice(item), tpl.usage.metric, tpl.usage.watts));
+      const dev = linkedDevice(item);
+      if (tpl.level && dev && MM.findLevelCap(dev, tpl.level.match)) {
+        Object.assign(draft, { type: 'usage', combine: true }, MM.levelSource(dev, tpl.level));
+      } else if (tpl.usage && item.link) {
+        Object.assign(draft, { type: 'usage', combine: true, threshold: tpl.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(dev, tpl.usage.metric, tpl.usage.watts));
       }
+      Object.assign(draft, autoDraft(MM.autoDoneFor(dev, tpl)));
     }
     editing = { itemId: item.id, taskId: 'new', draft };
     render();

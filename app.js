@@ -86,6 +86,13 @@ class MaintenanceMonitorApp extends Homey.App {
       .trigger({ item: item.name, task: task.name, days }, { itemId: item.id, taskId: task.id });
   }
 
+  // A task marked done by the device itself (test button, consumable replaced, refilled): confirm it in the timeline.
+  async announceAutoDone({ item, task }) {
+    await this.homey.notifications.createNotification({
+      excerpt: this.homey.__('notify.auto_done', { item: item.name, task: task.name }),
+    });
+  }
+
   // ---------- flow cards (choose an item or "item › task") ----------
 
   _itemChoices(query, withAny) {

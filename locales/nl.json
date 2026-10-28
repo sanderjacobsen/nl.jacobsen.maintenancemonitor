@@ -17,7 +17,8 @@
     "overdue": "🩺 __item__: __task__ is __days__ dagen te laat.",
     "soon_counter": "🩺 __item__: __task__ is bijna nodig.",
     "due_counter": "🩺 __item__: tijd voor __task__.",
-    "overdue_counter": "🩺 __item__: __task__ is al een tijd nodig."
+    "overdue_counter": "🩺 __item__: __task__ is al een tijd nodig.",
+    "auto_done": "🩺 __item__: __task__ is automatisch afgevinkt."
   },
   "errors": {
     "task_not_found": "Taak niet gevonden",
@@ -178,7 +179,15 @@
     "or_date": "of op datum",
     "desc_running": "Telt als aan wanneer __cap__ __cond__.",
     "desc_counter": "Telt de toename van __cap__.",
-    "auto": "automatisch gekozen"
+    "auto": "automatisch gekozen",
+    "metric_level": "Waarde van het apparaat",
+    "level_cap": "Welke waarde",
+    "level_direction": "Aan de beurt als de waarde",
+    "dir_down": "daalt tot (wat er nog over is)",
+    "dir_up": "stijgt tot (hoe vol het is)",
+    "level_threshold": "Aan de beurt bij",
+    "level_at": "aan de beurt bij",
+    "desc_level": "Volgt __cap__ (nu __value__). Springt de waarde terug (vervangen, bijgevuld of geleegd), dan wordt de taak vanzelf afgevinkt."
   },
   "widget": {
     "title": "Onderhoud",
@@ -192,5 +201,17 @@
   "overview": {
     "hint": "Voeg dit ene apparaat toe voor een tegel met het totaaloverzicht. Onderdelen en taken beheer je in de app-instellingen.",
     "name": "Maintenance Monitor"
+  },
+  "auto": {
+    "title": "Automatisch afvinken door het apparaat",
+    "when": "Afvinken wanneer",
+    "op_true": "aan / ja wordt",
+    "op_equals": "gelijk wordt aan",
+    "op_contains": "de tekst bevat",
+    "short": "vinkt zichzelf af",
+    "desc": "Wordt vanzelf afgevinkt zodra __cap__ __cond__.",
+    "desc_on": "aan / ja wordt",
+    "desc_equals": "gelijk wordt aan '__value__'",
+    "desc_contains": "'__value__' bevat"
   }
 }

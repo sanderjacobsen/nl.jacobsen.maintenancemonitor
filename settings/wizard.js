@@ -2,6 +2,37 @@
 
 /* Wizard "Onderdeel toevoegen" for the Maintenance Monitor settings page.
  * MaintenanceWizard(root, { t, api, alert, onDone(items), onCancel() }) renders the four steps into `root`. */
+
+// Shared by the wizard and the settings page.
+// eslint-disable-next-line no-unused-vars
+const MM = {
+  // Number capability that reports what is left of a part, e.g. "main_brush_left" (%) or "salt_days_left" (days).
+  findLevelCap(dev, match) {
+    if (!dev || !match) return null;
+    const caps = dev.capabilities.filter(c => c.type === 'number' && c.id.toLowerCase().includes(String(match).toLowerCase()) && !/time/i.test(c.id));
+    return caps.find(c => c.units === '%') || caps.find(c => /(left|remaining|life|days)/i.test(c.id)) || null;
+  },
+  // The automatic "done" of a (template) task, only when the linked device has that capability.
+  autoDoneFor(dev, tk) {
+    return dev && tk.autoDone && dev.capabilities.some(c => c.id === tk.autoDone.capability) ? tk.autoDone : null;
+  },
+  // Source fields for "follow the value of the device".
+  levelSource(dev, level) {
+    const cap = MM.findLevelCap(dev, level && level.match)
+      || (dev ? dev.capabilities.find(c => c.type === 'number' && c.units === '%' && c.id !== 'measure_battery') : null);
+    return {
+      metric: 'level', srcCap: cap ? cap.id : '', direction: (level && level.direction) || 'down', op: 'true', cmpValue: '',
+      threshold: level ? level.threshold : 10, auto: Boolean(cap && level),
+    };
+  },
+  // "When is the task done by itself", in words.
+  describeAutoDone(dev, ad, tr) {
+    const c = dev && ad ? dev.capabilities.find(x => x.id === ad.capability) : null;
+    if (!c) return '';
+    const cond = ad.op === 'contains' ? tr('auto.desc_contains', { value: ad.value }) : ad.op === 'equals' ? tr('auto.desc_equals', { value: ad.value }) : tr('auto.desc_on');
+    return tr('auto.desc', { cap: c.title, cond });
+  },
+};
 // eslint-disable-next-line no-unused-vars
 function MaintenanceWizard(root, deps) {
   root.innerHTML = `<div class="ha">
@@ -81,6 +112,7 @@ function MaintenanceWizard(root, deps) {
     const c = capOf(linked(), tk.srcCap);
     if (!c) return '';
     if ((tk.metric || 'hours') === 'counter') return tr('usage.desc_counter', { cap: c.title });
+    if (tk.metric === 'level') return tr('usage.desc_level', { cap: c.title, value: `${c.value ?? '–'} ${c.units || ''}`.trim() });
     let cond = tr('usage.is_on');
     if (tk.op === 'gt') cond = `${tr('usage.greater_than')} ${tk.cmpValue} ${c.units || ''}`.trim();
     if (tk.op === 'equals') {
@@ -94,7 +126,9 @@ function MaintenanceWizard(root, deps) {
   function applyLink() {
     const dev = linked();
     for (const tk of tasks) {
-      if (dev && tk.usage && tk.type !== 'counter') {
+      if (dev && tk.level && tk.type !== 'counter' && MM.findLevelCap(dev, tk.level.match)) {
+        Object.assign(tk, { type: 'usage', combine: true }, MM.levelSource(dev, tk.level));
+      } else if (dev && tk.usage && tk.type !== 'counter') {
         Object.assign(tk, { type: 'usage', combine: true, threshold: tk.usage.threshold, offDelayMin: 3, minRunMin: 1 }, autoSource(dev, tk));
       } else if (!dev && tk.type === 'usage') {
         tk.type = 'date';
@@ -176,12 +210,14 @@ function MaintenanceWizard(root, deps) {
   }
 
   function summaryOf(tk) {
+    const auto = MM.autoDoneFor(linked(), tk) ? ` · ${tr('auto.short')}` : '';
     if (tk.type === 'usage') {
       const what = tr('usage.metric_' + (tk.metric || 'hours'));
-      return `${what} · ${tr('usage.threshold').toLowerCase()} ${tk.threshold} ${unitLabel(tk)}${tk.combine ? ` · ${tr('usage.or_date')}: ${everyText(tk.every, tk.unit, true)}` : ''}`;
+      const amount = tk.metric === 'level' ? `${tr('usage.level_at')} ${tk.threshold} ${unitLabel(tk)}` : `${tr('usage.threshold').toLowerCase()} ${tk.threshold} ${unitLabel(tk)}`;
+      return `${what} · ${amount}${tk.combine ? ` · ${tr('usage.or_date')}: ${everyText(tk.every, tk.unit, true)}` : ''}${auto}`;
     }
-    if (tk.type === 'counter') return `${tr('pair.kind_counter')} · ${tr('pair.threshold').toLowerCase()} ${tk.threshold}`;
-    return `${everyText(tk.every, tk.unit)} · ${tr('pair.lead').toLowerCase()} ${tk.leadDays} ${tr('pair.lead_days')} · ${tr('pair.last').toLowerCase()}: ${lastText(tk)}`;
+    if (tk.type === 'counter') return `${tr('pair.kind_counter')} · ${tr('pair.threshold').toLowerCase()} ${tk.threshold}${auto}`;
+    return `${everyText(tk.every, tk.unit)} · ${tr('pair.lead').toLowerCase()} ${tk.leadDays} ${tr('pair.lead_days')} · ${tr('pair.last').toLowerCase()}: ${lastText(tk)}${auto}`;
   }
 
   function taskCard(tk, i) {
@@ -251,9 +287,15 @@ function MaintenanceWizard(root, deps) {
   function usageEditor(tk, id) {
     const dev = linked();
     const metric = tk.metric || 'hours';
-    const metricOpts = ['hours', 'cycles', 'counter'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(tr('usage.metric_' + m))}</option>`).join('');
+    const metricOpts = ['hours', 'cycles', 'counter', 'level'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(tr('usage.metric_' + m))}</option>`).join('');
     let source;
-    if (metric === 'counter') {
+    if (metric === 'level') {
+      const caps = dev.capabilities.filter(c => c.type === 'number');
+      source = `<label class="homey-form-label" for="${id}c">${esc(tr('usage.level_cap'))}</label>
+        <select class="homey-form-select" id="${id}c" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === tk.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>
+        <label class="homey-form-label" for="${id}r">${esc(tr('usage.level_direction'))}</label>
+        <select class="homey-form-select" id="${id}r" data-f="direction">${['down', 'up'].map(v => `<option value="${v}" ${v === (tk.direction || 'down') ? 'selected' : ''}>${esc(tr('usage.dir_' + v))}</option>`).join('')}</select>`;
+    } else if (metric === 'counter') {
       const caps = dev.capabilities.filter(c => c.type === 'number');
       source = `<label class="homey-form-label" for="${id}c">${esc(tr('usage.counter_cap'))}</label>
         <select class="homey-form-select" id="${id}c" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${c.id === tk.srcCap ? 'selected' : ''}>${esc(c.title)}${c.units ? ` (${esc(c.units)})` : ''} · ${esc(c.value ?? '–')}</option>`).join('')}</select>`;
@@ -281,7 +323,7 @@ function MaintenanceWizard(root, deps) {
       <select class="homey-form-select" id="${id}w" data-f="metric">${metricOpts}</select>
       ${source}
       ${describeSource(tk) ? `<p class="wz-hint" style="margin-top:8px">${esc(describeSource(tk))}${tk.auto ? ` · ${esc(tr('usage.auto'))}` : ''}</p>` : ''}
-      <label class="homey-form-label" for="${id}t">${esc(tr('usage.threshold'))}</label>
+      <label class="homey-form-label" for="${id}t">${esc(tr(metric === 'level' ? 'usage.level_threshold' : 'usage.threshold'))}</label>
       <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="decimal" min="0" id="${id}t" data-f="threshold" value="${tk.threshold}" style="width:110px" /><span>${esc(unitLabel(tk))}</span></div>
       <label class="homey-form-label" for="${id}p">${esc(tr('usage.lead_percent'))}</label>
       <div class="wz-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" max="100" id="${id}p" data-f="leadPercent" value="${tk.leadPercent}" /><span>%</span></div>
@@ -301,7 +343,7 @@ function MaintenanceWizard(root, deps) {
     html += chosen.map(tk => {
       let due;
       if (tk.type === 'counter' || tk.type === 'usage') {
-        due = `<b>${esc(tr('usage.threshold'))} ${tk.threshold} ${esc(tk.type === 'usage' ? unitLabel(tk) : '')}</b>`;
+        due = `<b>${esc(tk.metric === 'level' && tk.type === 'usage' ? tr('usage.level_at') : tr('usage.threshold'))} ${tk.threshold} ${esc(tk.type === 'usage' ? unitLabel(tk) : '')}</b>`;
         if (tk.type === 'usage' && tk.combine) due += `<b>${esc(tr('usage.or_date').split(' ')[0])} ${esc(fmt(addInterval(lastDoneOf(tk), Number(tk.every) || 1, tk.unit)))}</b>`;
       }
       else {
@@ -338,7 +380,7 @@ function MaintenanceWizard(root, deps) {
       every: Math.max(1, Number(tk.every) || 1),
       unit: tk.unit,
       leadDays: Math.max(0, Number(tk.leadDays) || 0),
-      threshold: Math.max(1, Number(tk.threshold) || 100),
+      threshold: Math.max(0.01, Number(tk.threshold) || 100),
       leadPercent: Number(tk.leadPercent) || 10,
       lastDone: lastDoneOf(tk),
       combine: tk.type === 'usage' ? Boolean(tk.combine) : false,
@@ -349,7 +391,9 @@ function MaintenanceWizard(root, deps) {
         offDelayMin: Number(tk.offDelayMin ?? 3),
         minRunMin: Number(tk.minRunMin ?? 1),
         units: unitLabel(tk),
+        direction: tk.direction || 'down',
       } : null,
+      autoDone: MM.autoDoneFor(linked(), tk),
     })).filter(tk => tk.type !== 'usage' || tk.source.capability);
     $('next').classList.add('is-loading');
     try {
@@ -385,9 +429,12 @@ function MaintenanceWizard(root, deps) {
     const tk = tasks[Number(card.dataset.i)];
     tk[f] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value;
     if (f === 'type' && tk.type === 'usage') Object.assign(tk, { combine: tk.combine ?? true, threshold: (tk.usage && tk.usage.threshold) || tk.threshold }, tk.srcCap ? {} : autoSource(linked(), tk));
-    if (f === 'metric') Object.assign(tk, autoSource(linked(), { metric: tk.metric, usage: tk.usage && { ...tk.usage, metric: tk.metric } }));
+    if (f === 'metric') {
+      Object.assign(tk, tk.metric === 'level' ? MM.levelSource(linked(), tk.level)
+        : autoSource(linked(), { metric: tk.metric, usage: tk.usage && { ...tk.usage, metric: tk.metric } }));
+    }
     if (['srcCap', 'cmpValue'].includes(f)) tk.auto = false;
-    if (f === 'srcCap') { const c = capOf(linked(), tk.srcCap); tk.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; tk.cmpValue = tk.op === 'gt' ? 10 : ''; }
+    if (f === 'srcCap' && tk.metric !== 'level') { const c = capOf(linked(), tk.srcCap); tk.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; tk.cmpValue = tk.op === 'gt' ? 10 : ''; }
     if (['use', 'type', 'last', 'unit', 'lastDate', 'metric', 'srcCap', 'combine'].includes(f)) renderTasks();
   });
   $('tasks').addEventListener('click', ev => {

@@ -46,4 +46,44 @@ resetUsage(hours, 10.5 * H);
 tick(hours, 11 * H);
 assert.ok(Math.abs(hours.usage - 0.5) < 1e-9);
 
+// Level (device reports what is left): progress from the fullest value down to the threshold, reset = replaced.
+const { levelProgress, applyAutoDone, defaultTrack } = require('../lib/usage');
+const { evaluateTask } = require('../lib/schedule');
+const lvl = { type: 'usage', threshold: 10, leadPercent: 10, source: { capability: 'filter_left', metric: 'level', direction: 'down' }, track: defaultTrack(), usage: 0 };
+assert.strictEqual(applyValue(lvl, 100, 0), 'event');
+assert.strictEqual(applyValue(lvl, 55, 0), 'event');
+assert.ok(Math.abs(levelProgress(lvl) - 0.5) < 1e-9);
+assert.strictEqual(applyValue(lvl, 55, 0), null);
+assert.strictEqual(evaluateTask(lvl, '2026-10-28').status, 'ok');
+applyValue(lvl, 18, 0);
+assert.strictEqual(evaluateTask(lvl, '2026-10-28').status, 'soon');
+applyValue(lvl, 9, 0);
+assert.strictEqual(evaluateTask(lvl, '2026-10-28').status, 'due');
+assert.strictEqual(applyValue(lvl, 100, 0), 'reset');
+assert.strictEqual(levelProgress(lvl), 0);
+// Small upward noise (e.g. salt estimate 13 -> 15 days) is not a refill.
+const salt = { type: 'usage', threshold: 7, source: { capability: 'salt_days_left', metric: 'level', direction: 'down' }, track: defaultTrack() };
+applyValue(salt, 13, 0);
+assert.strictEqual(applyValue(salt, 15, 0), 'event');
+assert.strictEqual(applyValue(salt, 3, 0), 'event');
+assert.strictEqual(applyValue(salt, 60, 0), 'reset');
+// Fill level going up (e.g. waste drawer), emptied = reset.
+const drawer = { type: 'usage', threshold: 80, source: { capability: 'drawer_level', metric: 'level', direction: 'up' }, track: defaultTrack() };
+applyValue(drawer, 0, 0);
+applyValue(drawer, 40, 0);
+assert.ok(Math.abs(levelProgress(drawer) - 0.5) < 1e-9);
+assert.strictEqual(applyValue(drawer, 2, 0), 'reset');
+// No reading yet: no progress.
+assert.strictEqual(levelProgress({ threshold: 10, source: { metric: 'level' }, track: defaultTrack() }), 0);
+
+// Automatic "done": only on the change to true, not on the first reading.
+const test = { autoDone: { capability: 'alarm_smoke', op: 'true' }, autoLast: null };
+assert.strictEqual(applyAutoDone(test, true), false);
+assert.strictEqual(applyAutoDone(test, false), false);
+assert.strictEqual(applyAutoDone(test, true), true);
+assert.strictEqual(applyAutoDone(test, true), false);
+const prog = { autoDone: { capability: 'display_program', op: 'contains', value: '90' }, autoLast: null };
+applyAutoDone(prog, null);
+assert.strictEqual(applyAutoDone(prog, 'Katoen 90°C'), true);
+
 console.log('usage tests ok');

@@ -72,8 +72,13 @@ npm test            # Unit tests for the date and usage logic
 | **Running hours** | A boolean capability is on, a number is above a threshold (e.g. power > 40 W), or a status equals a value | 3D printer: lubricate rods after 200 printing hours |
 | **Number of runs** | Same, with *off-delay* (pauses don't count as a new run) and a minimum run time | Washing machine: clean drum after 30 washes (status = *In use*) |
 | **Device counter** | Increase of a cumulative capability (kWh, cycles, …); resets of the device counter are handled | Litter-Robot: deep clean after 250 clean cycles |
+| **Value of the device** | The device reports what is left (or how full it is); due at a level you choose. When the value jumps back (replaced, refilled, emptied) the task is marked done | Robot vacuum: main brush at 5 % · Water softener: salt for 7 more days |
 
 Usage tasks can be combined with a date: **whichever comes first**.
+
+### Marked done by the device
+
+Any task can be marked done by the linked device itself, for example *Smoke detector: Test* when the smoke alarm sounds during the monthly test, or a hot cleaning programme on a washing machine. You get a timeline notification when this happens.
 
 When you link a device, Maintenance Monitor picks the best source automatically: an appliance **status** such as *In use* (smart washers, dryers, robot vacuums), otherwise **power** above a threshold (smart plugs with energy metering), otherwise **on/off**. For the number of runs it prefers the device's own counter (e.g. clean cycles). The wizard shows what was chosen, and you can always change it.
 

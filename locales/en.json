@@ -17,7 +17,8 @@
     "overdue": "🩺 __item__: __task__ is __days__ days overdue.",
     "soon_counter": "🩺 __item__: __task__ is almost due.",
     "due_counter": "🩺 __item__: time for __task__.",
-    "overdue_counter": "🩺 __item__: __task__ has been due for a while."
+    "overdue_counter": "🩺 __item__: __task__ has been due for a while.",
+    "auto_done": "🩺 __item__: __task__ was marked done automatically."
   },
   "errors": {
     "task_not_found": "Task not found",
@@ -178,7 +179,15 @@
     "or_date": "or by date",
     "desc_running": "Counts as running when __cap__ __cond__.",
     "desc_counter": "Counts the increase of __cap__.",
-    "auto": "chosen automatically"
+    "auto": "chosen automatically",
+    "metric_level": "Value reported by the device",
+    "level_cap": "Which value",
+    "level_direction": "Due when the value",
+    "dir_down": "drops to (what is left)",
+    "dir_up": "rises to (how full it is)",
+    "level_threshold": "Due at",
+    "level_at": "due at",
+    "desc_level": "Follows __cap__ (now __value__). When the value jumps back (replaced, refilled or emptied), the task is marked done by itself."
   },
   "widget": {
     "title": "Maintenance",
@@ -192,5 +201,17 @@
   "overview": {
     "hint": "Add this single device for a tile with the overall summary. Items and tasks are managed in the app settings.",
     "name": "Maintenance Monitor"
+  },
+  "auto": {
+    "title": "Marked done by the device",
+    "when": "Mark done when",
+    "op_true": "turns on / yes",
+    "op_equals": "becomes",
+    "op_contains": "text contains",
+    "short": "marks itself done",
+    "desc": "Marked done by itself as soon as __cap__ __cond__.",
+    "desc_on": "turns on / yes",
+    "desc_equals": "becomes '__value__'",
+    "desc_contains": "contains '__value__'"
   }
 }
