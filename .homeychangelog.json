@@ -42,5 +42,9 @@
   "0.9.1": {
     "en": "Settings page with two tabs, Items and Settings, so notifications and backup are one tap away; the search field stays on top while scrolling. Icon picker tiles no longer grey.",
     "nl": "Beheerscherm met twee tabbladen, Onderdelen en Instellingen, zodat meldingen en reservekopie met één tik bereikbaar zijn; het zoekveld blijft bovenaan staan tijdens het scrollen. Tegels van de pictogramkiezer niet meer grijs."
+  },
+  "1.0.0": {
+    "en": "First public release: all maintenance in one place, by date or by usage of your Homey devices, notifications at a time you choose, daily reminder, widget and Flow cards.",
+    "nl": "Eerste openbare versie: al het onderhoud op één plek, op datum of op gebruik van je Homey-apparaten, meldingen op een zelf gekozen tijdstip, dagelijkse herinnering, widget en flowkaarten."
   }
 }
