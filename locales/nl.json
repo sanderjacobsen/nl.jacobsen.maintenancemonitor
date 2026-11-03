@@ -160,7 +160,8 @@
     "icon_hint": "Standaard is het pictogram van het soort onderdeel; bij Overig met een gekoppeld apparaat het pictogram dat dat apparaat in Homey heeft.",
     "notify_push_hint": "Meldingen op datum en de dagelijkse herinnering komen op het tijdstip hierboven; meldingen door gebruik of een teller komen direct. Ze staan in de tijdlijn van Homey. Wil je ze ook als pushbericht op je telefoon: Homey-app › Instellingen › Meldingen › Maintenance Monitor › Pushmelding aan.",
     "notify_time": "Tijdstip voor meldingen",
-    "daily_reminder": "Elke dag herinneren zolang taken nodig of te laat zijn"
+    "daily_reminder": "Elke dag herinneren zolang taken nodig of te laat zijn",
+    "tab_settings": "Instellingen"
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",

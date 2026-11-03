@@ -160,7 +160,8 @@
     "icon_hint": "Default is the icon of the item type; for Other with a linked device, the icon that device has in Homey.",
     "notify_push_hint": "Date-based notifications and the daily reminder arrive at the time above; notifications from usage or a counter arrive right away. They appear in the Homey timeline. To also get them as a push message on your phone: Homey app › Settings › Notifications › Maintenance Monitor › turn on push notifications.",
     "notify_time": "Time for notifications",
-    "daily_reminder": "Remind me every day while tasks are due or overdue"
+    "daily_reminder": "Remind me every day while tasks are due or overdue",
+    "tab_settings": "Settings"
   },
   "usage": {
     "link": "Link to a Homey device",

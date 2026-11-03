@@ -13,6 +13,13 @@
     input.homey-form-input[type='date'], input.homey-form-input[type='time'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
       background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
       font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
+    /* Tabs: Homey-style segmented control, stays on top while scrolling */
+    .ha-tabbar { position: sticky; top: 0; z-index: 5; background: var(--homey-color-white); padding: 8px 0 10px; margin: 0 -2px 4px; }
+    .ha-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: var(--homey-border-radius); background: var(--homey-color-mono-05); }
+    .ha-tabs button { all: unset; text-align: center; padding: 8px 0; border-radius: var(--homey-border-radius-small); cursor: pointer;
+      font-size: var(--homey-font-size-default); font-weight: var(--homey-font-weight-medium); color: var(--homey-color-text-light); -webkit-tap-highlight-color: transparent; }
+    .ha-tabs button.on { background: var(--homey-color-white); color: var(--homey-color-blue); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+    .ha-tabbar #search { margin: 10px 0 0; }
     .ha-section { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: var(--homey-su-3) 2px var(--homey-su-1); }
     .ha-card { background: var(--homey-color-component); border-radius: var(--homey-border-radius); box-shadow: var(--homey-box-shadow-light); margin-bottom: 12px; overflow: hidden; }
     .ha-pad { padding: 12px 14px; }
@@ -130,10 +137,20 @@
   <h1 class="homey-title" data-i18n="settings.title"></h1>
   <p class="homey-subtitle" data-i18n="settings.intro"></p>
 
-  <div class="ha-section" data-i18n="settings.items"></div>
-  <input class="homey-form-input" type="text" inputmode="search" enterkeyhint="search" id="search" autocomplete="off" style="margin-bottom:12px" />
+  <div class="ha-tabbar">
+    <div class="ha-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="items" class="hy-nostyle on" data-i18n="settings.items"></button>
+      <button type="button" role="tab" data-tab="settings" class="hy-nostyle" data-i18n="settings.tab_settings"></button>
+    </div>
+    <input class="homey-form-input" type="text" inputmode="search" enterkeyhint="search" id="search" autocomplete="off" />
+  </div>
+
+  <div id="tab-items">
   <button class="homey-button-primary-shadow-full" id="addItem" style="margin-bottom:12px">+ <span data-i18n="settings.add_item"></span></button>
   <div id="items"></div>
+  </div>
+
+  <div id="tab-settings" class="hidden">
 
   <div class="ha-section" data-i18n="settings.notifications"></div>
   <div class="ha-card">
@@ -154,6 +171,7 @@
       <button class="homey-button-secondary-small-shadow" id="export" data-i18n="settings.export"></button>
       <button class="homey-button-secondary-small-shadow" id="import" data-i18n="settings.import"></button>
     </div>
+  </div>
   </div>
   </div>
 
@@ -265,13 +283,13 @@
 
   // Choose the icon: standard, the linked device's own Homey icon, or any icon of the app.
   function iconRow(item) {
-    const pick = (value, uri, title) => `<button class="ha-pick${(item.icon || null) === value ? ' sel' : ''}" data-act="icon" data-id="${item.id}" data-icon="${esc(value)}" title="${esc(title)}" aria-label="${esc(title)}">${icon(uri)}</button>`;
+    const pick = (value, uri, title) => `<button class="hy-nostyle ha-pick${(item.icon || null) === value ? ' sel' : ''}" data-act="icon" data-id="${item.id}" data-icon="${esc(value)}" title="${esc(title)}" aria-label="${esc(title)}">${icon(uri)}</button>`;
     const seen = new Set();
     const appIcons = templates.filter(c => !seen.has(c.icon) && seen.add(c.icon)).map(c => pick(c.icon, c.iconUri, c.name)).join('');
     return `<div class="ha-task">
       <label class="homey-form-label" style="margin-top:0">${esc(t('settings.icon'))}</label>
       <div class="ha-icons">
-        <button class="ha-pick text${item.icon ? '' : ' sel'}" data-act="icon" data-id="${item.id}" data-icon="">${esc(t('settings.icon_default'))}</button>
+        <button class="hy-nostyle ha-pick text${item.icon ? '' : ' sel'}" data-act="icon" data-id="${item.id}" data-icon="">${esc(t('settings.icon_default'))}</button>
         ${item.deviceIconUri ? pick('device', item.deviceIconUri, t('settings.icon_device', { device: item.link.name })) : ''}${appIcons}
       </div>
       <p class="ha-sub" style="margin:8px 0 0">${esc(t('settings.icon_hint'))}</p></div>`;
@@ -649,6 +667,15 @@
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
     $('search').placeholder = t('settings.search');
     $('search').addEventListener('input', () => { query = $('search').value.trim(); render(); });
+    // Tabs: items (with search) and settings (notifications, backup).
+    const showTab = tab => {
+      document.querySelectorAll('.ha-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+      $('tab-items').classList.toggle('hidden', tab !== 'items');
+      $('tab-settings').classList.toggle('hidden', tab !== 'settings');
+      $('search').classList.toggle('hidden', tab !== 'items');
+      window.scrollTo(0, 0);
+    };
+    document.querySelectorAll('.ha-tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
     $('items').addEventListener('click', onClick);
     $('addItem').addEventListener('click', openWizard);
     $('items').addEventListener('input', onInput);
