@@ -14,13 +14,14 @@ const ANY = '*';
 const ICON_TTL_MS = 6 * 60 * 60 * 1000; // device icons rarely change
 const ICON_RETRY_MS = 10 * 60 * 1000;
 const ICON_MAX_BYTES = 200 * 1024;
+const REMINDER_MAX_TASKS = 5; // named in the reminder; the rest is counted
 
 class MaintenanceMonitorApp extends Homey.App {
 
   async onInit() {
     // Defaults for the notification settings (only set when missing).
     const defaults = {
-      notify_soon: true, notify_due: true, notify_overdue: true, overdue_after_days: 7,
+      notify_soon: true, notify_due: true, notify_overdue: true, overdue_after_days: 7, notify_time: '09:00', daily_reminder: false,
     };
     for (const [key, value] of Object.entries(defaults)) {
       if (this.homey.settings.get(key) === null) this.homey.settings.set(key, value);
@@ -91,6 +92,34 @@ class MaintenanceMonitorApp extends Homey.App {
       .trigger({
         item: item.name, task: task.name, days, due_date: formatDate(state.dueDate),
       }, { itemId: item.id, taskId: task.id });
+  }
+
+  // Once a day at the notification time: release the date-based notifications and send the daily reminder.
+  async dailyCheck() {
+    const today = this.items.today();
+    if (this.homey.settings.get('reminded_on') === today || !this.items.notifyTimeReached()) return;
+    this.homey.settings.set('reminded_on', today);
+    await this.remind(await this.items.evaluate(), today);
+  }
+
+  // Tasks still due or overdue, except the ones announced today (no double message). One message for all of them.
+  async remind(items, today) {
+    const open = items
+      .flatMap(item => item.tasks.map(task => ({ item, task })))
+      .filter(({ task }) => severity(task.status) >= severity('due') && task.announcedOn !== today)
+      .sort((a, b) => severity(b.task.status) - severity(a.task.status) || (a.task.days ?? 0) - (b.task.days ?? 0));
+    if (!open.length) return;
+    const names = open.slice(0, REMINDER_MAX_TASKS).map(({ item, task }) => `${item.name}: ${task.name}${
+      task.days !== null && task.days < 0 ? ` (${this.homey.__(task.days === -1 ? 'notify.reminder_late_one' : 'notify.reminder_late', { days: -task.days })})` : ''}`);
+    const more = open.length > REMINDER_MAX_TASKS ? this.homey.__('notify.reminder_more', { count: open.length - REMINDER_MAX_TASKS }) : '';
+    const tasks = names.join(', ') + more;
+    if (this.homey.settings.get('daily_reminder') === true) {
+      await this.homey.notifications.createNotification({
+        excerpt: this.homey.__(open.length === 1 ? 'notify.reminder_one' : 'notify.reminder_many', { count: open.length, tasks }),
+      }).catch(err => this.error('Reminder failed:', err.message));
+    }
+    await this.homey.flow.getTriggerCard('daily_reminder').trigger({ count: open.length, tasks })
+      .catch(err => this.error('Reminder trigger failed:', err.message));
   }
 
   // A task marked done by the device itself (test button, consumable replaced, refilled): confirm it in the timeline.
@@ -304,6 +333,7 @@ class MaintenanceMonitorApp extends Homey.App {
     try {
       await this.pollTracking();
       await this.items.tickUsage();
+      await this.dailyCheck();
     } catch (err) {
       this.error('Usage tick failed:', err.message);
     } finally {

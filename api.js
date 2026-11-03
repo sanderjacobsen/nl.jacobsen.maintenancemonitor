@@ -66,7 +66,7 @@ module.exports = {
       app: 'nl.jacobsen.maintenancemonitor',
       version: 2,
       exported: new Date().toISOString(),
-      settings: ['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days']
+      settings: ['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days', 'notify_time', 'daily_reminder']
         .reduce((acc, key) => ({ ...acc, [key]: homey.settings.get(key) }), {}),
       items: homey.app.items.exportItems(),
     };
@@ -78,7 +78,7 @@ module.exports = {
     if (!data || !Array.isArray(data.items)) throw new Error('Invalid backup file');
     if (data.settings) {
       for (const [key, value] of Object.entries(data.settings)) {
-        if (['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days'].includes(key) && value !== null) homey.settings.set(key, value);
+        if (['notify_soon', 'notify_due', 'notify_overdue', 'overdue_after_days', 'notify_time', 'daily_reminder'].includes(key) && value !== null) homey.settings.set(key, value);
       }
     }
     return homey.app.items.importItems(data.items);

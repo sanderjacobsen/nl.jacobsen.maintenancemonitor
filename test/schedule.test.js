@@ -3,7 +3,7 @@
 // Plain node tests for the date/status logic: `npm test`
 const assert = require('assert');
 const {
-  addInterval, daysBetween, evaluateTask, formatDate,
+  addInterval, daysBetween, evaluateTask, formatDate, timeOfDay, cleanTime,
 } = require('../lib/schedule');
 
 assert.strictEqual(addInterval('2026-01-31', 1, 'months'), '2026-02-28');
@@ -39,5 +39,14 @@ assert.strictEqual(evaluateTask({ ...usage, usage: 10 }, '2027-05-01').status, '
 // Due date tag on the flow cards.
 assert.strictEqual(formatDate('2026-10-31'), '31-10-2026');
 assert.strictEqual(formatDate(null), '');
+
+// Time of day for notifications.
+assert.strictEqual(timeOfDay('Europe/Amsterdam', new Date('2026-11-03T08:05:00Z')), '09:05');
+assert.strictEqual(timeOfDay('Europe/Amsterdam', new Date('2026-11-03T23:30:00Z')), '00:30');
+assert.strictEqual(cleanTime('9:00', '09:00'), '09:00');
+assert.strictEqual(cleanTime('19:30', '09:00'), '19:30');
+assert.strictEqual(cleanTime('24:00', '09:00'), '09:00');
+assert.strictEqual(cleanTime(null, '09:00'), '09:00');
+assert.ok('08:59' < '09:00' && '09:00' >= '09:00' && '10:00' >= '09:00');
 
 console.log('schedule tests ok');

@@ -107,6 +107,7 @@ When you link a device, Maintenance Monitor picks the best source automatically:
 - **A task of [item] was done** — tokens: item, task, task type, by the device, next due date (e.g. reset the counter in the device itself)
 - **A task of [item] is due** — same tokens as *due soon*
 - **A task of [item] is overdue** — same tokens as *due soon*
+- **Daily reminder** — every day at the notification time while tasks are due or overdue; tokens: number of tasks, tasks
 
 *[item]* can be a specific item or *All items*.
 
@@ -130,7 +131,7 @@ THEN  Send push notification: "Maintenance: [task] of [item]"
 
 ## Notifications
 
-Maintenance Monitor writes to the Homey timeline when a task becomes *due soon*, *due* or *overdue* — every step only once. Push notifications can be enabled in **Homey → Settings → Notifications → Maintenance Monitor**. Each step can be switched off in the app settings, and you choose after how many days a task counts as *overdue*.
+Maintenance Monitor writes to the Homey timeline when a task becomes *due soon*, *due* or *overdue* — every step only once. Date-based notifications arrive at a time you choose (default 09:00); notifications from usage or a counter arrive right away. Optionally you get one daily reminder at that time while tasks are still due or overdue. Push notifications can be enabled in **Homey → Settings → Notifications → Maintenance Monitor**. Each step can be switched off in the app settings, and you choose after how many days a task counts as *overdue*.
 
 ---
 

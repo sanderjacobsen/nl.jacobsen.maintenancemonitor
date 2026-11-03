@@ -19,7 +19,12 @@
     "due_counter": "🩺 __item__: tijd voor __task__.",
     "overdue_counter": "🩺 __item__: __task__ is al een tijd nodig.",
     "auto_done": "🩺 __item__: __task__ is automatisch afgevinkt.",
-    "reset_failed": "🩺 __item__: __task__ is afgevinkt, maar '__action__' op het apparaat lukte niet. Doe het even in de app van het apparaat."
+    "reset_failed": "🩺 __item__: __task__ is afgevinkt, maar '__action__' op het apparaat lukte niet. Doe het even in de app van het apparaat.",
+    "reminder_one": "🩺 Herinnering: nog 1 taak open: __tasks__.",
+    "reminder_many": "🩺 Herinnering: nog __count__ taken open: __tasks__.",
+    "reminder_more": " en nog __count__",
+    "reminder_late": "__days__ dagen te laat",
+    "reminder_late_one": "1 dag te laat"
   },
   "errors": {
     "task_not_found": "Taak niet gevonden",
@@ -153,7 +158,9 @@
     "icon_default": "Standaard",
     "icon_device": "Pictogram van __device__",
     "icon_hint": "Standaard is het pictogram van het soort onderdeel; bij Overig met een gekoppeld apparaat het pictogram dat dat apparaat in Homey heeft.",
-    "notify_push_hint": "Meldingen komen in de tijdlijn van Homey. Wil je ze ook als pushbericht op je telefoon: Homey-app › Instellingen › Meldingen › Maintenance Monitor › Pushmelding aan."
+    "notify_push_hint": "Meldingen op datum en de dagelijkse herinnering komen op het tijdstip hierboven; meldingen door gebruik of een teller komen direct. Ze staan in de tijdlijn van Homey. Wil je ze ook als pushbericht op je telefoon: Homey-app › Instellingen › Meldingen › Maintenance Monitor › Pushmelding aan.",
+    "notify_time": "Tijdstip voor meldingen",
+    "daily_reminder": "Elke dag herinneren zolang taken nodig of te laat zijn"
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",

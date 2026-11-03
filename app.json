@@ -90,6 +90,40 @@
     "triggers": [
       {
         "title": {
+          "en": "Daily reminder",
+          "nl": "Dagelijkse herinnering"
+        },
+        "hint": {
+          "en": "Fires every day at the notification time while tasks are due or overdue (also when the reminder notification is off). Tasks already announced that day are left out.",
+          "nl": "Gaat elke dag op het tijdstip voor meldingen af zolang er taken nodig of te laat zijn (ook als de herinneringsmelding uit staat). Taken die die dag al gemeld zijn, worden overgeslagen."
+        },
+        "tokens": [
+          {
+            "name": "count",
+            "type": "number",
+            "title": {
+              "en": "Number of tasks",
+              "nl": "Aantal taken"
+            },
+            "example": 3
+          },
+          {
+            "name": "tasks",
+            "type": "string",
+            "title": {
+              "en": "Tasks",
+              "nl": "Taken"
+            },
+            "example": {
+              "en": "Pet feeder: Clean, Robot vacuum: Clean brushes (4 days late)",
+              "nl": "Voerbak: Schoonmaken, Robotstofzuiger: Borstels schoonmaken (4 dagen te laat)"
+            }
+          }
+        ],
+        "id": "daily_reminder"
+      },
+      {
+        "title": {
           "en": "A maintenance task was done",
           "nl": "Een onderhoudstaak is gedaan"
         },

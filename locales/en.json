@@ -19,7 +19,12 @@
     "due_counter": "🩺 __item__: time for __task__.",
     "overdue_counter": "🩺 __item__: __task__ has been due for a while.",
     "auto_done": "🩺 __item__: __task__ was marked done automatically.",
-    "reset_failed": "🩺 __item__: __task__ was marked done, but '__action__' on the device failed. Please do it in the device's own app."
+    "reset_failed": "🩺 __item__: __task__ was marked done, but '__action__' on the device failed. Please do it in the device's own app.",
+    "reminder_one": "🩺 Reminder: 1 task still open: __tasks__.",
+    "reminder_many": "🩺 Reminder: __count__ tasks still open: __tasks__.",
+    "reminder_more": " and __count__ more",
+    "reminder_late": "__days__ days late",
+    "reminder_late_one": "1 day late"
   },
   "errors": {
     "task_not_found": "Task not found",
@@ -153,7 +158,9 @@
     "icon_default": "Default",
     "icon_device": "Icon of __device__",
     "icon_hint": "Default is the icon of the item type; for Other with a linked device, the icon that device has in Homey.",
-    "notify_push_hint": "Notifications appear in the Homey timeline. To also get them as a push message on your phone: Homey app › Settings › Notifications › Maintenance Monitor › turn on push notifications."
+    "notify_push_hint": "Date-based notifications and the daily reminder arrive at the time above; notifications from usage or a counter arrive right away. They appear in the Homey timeline. To also get them as a push message on your phone: Homey app › Settings › Notifications › Maintenance Monitor › turn on push notifications.",
+    "notify_time": "Time for notifications",
+    "daily_reminder": "Remind me every day while tasks are due or overdue"
   },
   "usage": {
     "link": "Link to a Homey device",

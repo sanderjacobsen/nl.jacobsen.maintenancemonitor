@@ -10,7 +10,7 @@
     .ha-icon { display: block; flex: 0 0 auto; width: 40px; height: 40px; background-color: var(--homey-color-mono-90);
       -webkit-mask: var(--icon) left center / contain no-repeat; mask: var(--icon) left center / contain no-repeat; }
     /* Homey's styleguide has no date field: give it the same look as its other inputs. */
-    input.homey-form-input[type='date'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
+    input.homey-form-input[type='date'], input.homey-form-input[type='time'] { all: unset; display: block; box-sizing: border-box; width: calc(100% - 2px); margin: 0 1px;
       background: var(--homey-color-component); padding: var(--homey-su-1); border-radius: var(--homey-border-radius-small);
       font-size: var(--homey-font-size-default); line-height: 24px; color: var(--homey-color-text); box-shadow: 0 0 0 1px var(--homey-color-line); }
     .ha-section { font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); margin: var(--homey-su-3) 2px var(--homey-su-1); }
@@ -50,6 +50,7 @@
     .ha-row:first-child { border-top: none; }
     .ha-row .homey-form-checkbox { margin: 0; }
     .ha-row .homey-form-input { width: 80px !important; }
+    .ha-row #notify_time { width: 96px !important; flex: 0 0 auto; }
     .ha-row.ha-hint { display: block; font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; }
 
     /* icon picker */
@@ -140,6 +141,8 @@
     <div class="ha-row"><label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_due" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_due"></span></label></div>
     <div class="ha-row"><label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_overdue" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_overdue"></span></label></div>
     <div class="ha-row"><span data-i18n="settings.overdue_after"></span><input class="homey-form-input" type="number" inputmode="numeric" id="overdue_after_days" min="1" max="365" /></div>
+    <div class="ha-row"><span data-i18n="settings.notify_time"></span><input class="homey-form-input" type="time" id="notify_time" step="60" /></div>
+    <div class="ha-row"><label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="daily_reminder" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.daily_reminder"></span></label></div>
     <div class="ha-row ha-hint" data-i18n="settings.notify_push_hint"></div>
   </div>
 
@@ -639,6 +642,10 @@
       $(key).addEventListener('change', () => H.set(key, $(key).checked));
     }
     H.get('overdue_after_days', (err, value) => { $('overdue_after_days').value = value || 7; });
+    H.get('notify_time', (err, value) => { $('notify_time').value = value || '09:00'; });
+    $('notify_time').addEventListener('change', () => { if (/^\d{2}:\d{2}$/.test($('notify_time').value)) H.set('notify_time', $('notify_time').value); });
+    H.get('daily_reminder', (err, value) => { $('daily_reminder').checked = value === true; });
+    $('daily_reminder').addEventListener('change', () => H.set('daily_reminder', $('daily_reminder').checked));
     $('overdue_after_days').addEventListener('change', () => H.set('overdue_after_days', Math.max(1, Number($('overdue_after_days').value) || 7)));
     $('search').placeholder = t('settings.search');
     $('search').addEventListener('input', () => { query = $('search').value.trim(); render(); });
