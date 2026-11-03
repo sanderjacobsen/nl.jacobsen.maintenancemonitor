@@ -38,5 +38,9 @@
   "0.9.0": {
     "en": "Choose an icon per item, including the icon the linked device has in Homey ('Other' with a linked device now shows it automatically). Date-based notifications now arrive at a time you choose (default 09:00) instead of just after midnight. New optional daily reminder while tasks are due or overdue, plus a 'Daily reminder' WHEN card. Due date tag on the WHEN cards (e.g. 31-10-2026) and next due date on 'A task was done'.",
     "nl": "Kies per onderdeel een pictogram, ook het pictogram dat het gekoppelde apparaat in Homey heeft ('Overig' met een gekoppeld apparaat toont dat nu vanzelf). Meldingen op datum komen nu op een zelf gekozen tijdstip (standaard 09:00) in plaats van vlak na middernacht. Nieuw: dagelijkse herinnering (optioneel) zolang taken nodig of te laat zijn, plus WANNEER-kaart 'Dagelijkse herinnering'. Tag met de datum op de WANNEER-kaarten (bijv. 31-10-2026) en de volgende datum bij 'Een taak is gedaan'."
+  },
+  "0.9.1": {
+    "en": "Settings page with two tabs, Items and Settings, so notifications and backup are one tap away; the search field stays on top while scrolling. Icon picker tiles no longer grey.",
+    "nl": "Beheerscherm met twee tabbladen, Onderdelen en Instellingen, zodat meldingen en reservekopie met één tik bereikbaar zijn; het zoekveld blijft bovenaan staan tijdens het scrollen. Tegels van de pictogramkiezer niet meer grijs."
   }
 }
