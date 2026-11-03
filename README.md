@@ -27,6 +27,8 @@ Smoke detector · CO detector · Washing machine · Tumble dryer · Dishwasher �
 
 Every type comes with suggested tasks, based on manufacturer advice where available (for example *Smoke detector: test every month, replace after 10 years* or *Robot vacuum: replace the main brush after 300 cleaning hours*). All tasks and intervals can be changed, and you can add your own.
 
+Each item shows the icon of its type. Under *Item settings › Icon* you can pick another icon of the app, or the icon the linked device has in Homey (items of type *Other* with a linked device use the device's icon automatically).
+
 ---
 
 ## Installation
@@ -101,10 +103,10 @@ When you link a device, Maintenance Monitor picks the best source automatically:
 ## Flow Cards
 
 ### Triggers
-- **A task of [item] is due soon** — tokens: item, task, days
-- **A task of [item] was done** — tokens: item, task, task type, by the device (e.g. reset the counter in the device itself)
-- **A task of [item] is due**
-- **A task of [item] is overdue**
+- **A task of [item] is due soon** — tokens: item, task, days, due date (e.g. 31-10-2026; empty for counter/usage tasks)
+- **A task of [item] was done** — tokens: item, task, task type, by the device, next due date (e.g. reset the counter in the device itself)
+- **A task of [item] is due** — same tokens as *due soon*
+- **A task of [item] is overdue** — same tokens as *due soon*
 
 *[item]* can be a specific item or *All items*.
 

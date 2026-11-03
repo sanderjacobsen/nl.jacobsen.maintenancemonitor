@@ -1,20 +1,20 @@
 'use strict';
 
 const {
-  getTemplates, getCategory, getIconUri, localize,
+  getTemplates, getCategory, localize,
 } = require('./lib/templates');
 
 // Items with the computed state of their tasks, plus icon and category name for the settings page.
+// deviceIconUri: the linked device's own Homey icon, offered as a choice in the icon picker.
 async function describeAll(homey) {
   const language = homey.i18n.getLanguage();
-  return (await homey.app.items.evaluate()).map(item => {
-    const category = getCategory(item.category);
-    return {
-      ...item,
-      categoryName: localize(category.name, language),
-      iconUri: getIconUri(category.icon),
-    };
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  const items = await Promise.all((await homey.app.items.evaluate()).map(async item => ({
+    ...item,
+    categoryName: localize(getCategory(item.category).name, language),
+    iconUri: await homey.app.iconFor(item),
+    deviceIconUri: item.link ? await homey.app.getDeviceIcon(item.link.id).catch(() => null) : null,
+  })));
+  return items.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 module.exports = {

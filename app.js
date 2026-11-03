@@ -3,13 +3,17 @@
 const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 const ItemManager = require('./lib/items');
-const { severity } = require('./lib/schedule');
+const { severity, evaluateTask, formatDate } = require('./lib/schedule');
 const { suggestSource } = require('./lib/suggest');
+const { getCategory, getIconUri } = require('./lib/templates');
 
 const CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const USAGE_TICK_MS = 60 * 1000;
 const CAPABILITY_TYPES = ['boolean', 'number', 'enum', 'string'];
 const ANY = '*';
+const ICON_TTL_MS = 6 * 60 * 60 * 1000; // device icons rarely change
+const ICON_RETRY_MS = 10 * 60 * 1000;
+const ICON_MAX_BYTES = 200 * 1024;
 
 class MaintenanceMonitorApp extends Homey.App {
 
@@ -25,6 +29,7 @@ class MaintenanceMonitorApp extends Homey.App {
     this.items = new ItemManager(this);
     this._instances = new Map(); // `${itemId}|${capability}` -> capability instance of the linked device
     this._syncing = Promise.resolve();
+    this._deviceIcons = new Map(); // device id -> { uri, at }
     this._registerFlowCards();
 
     this.homey.setInterval(() => this.checkAll(), CHECK_INTERVAL_MS);
@@ -83,7 +88,9 @@ class MaintenanceMonitorApp extends Homey.App {
       });
     }
     await this.homey.flow.getTriggerCard(`task_${state.status}`)
-      .trigger({ item: item.name, task: task.name, days }, { itemId: item.id, taskId: task.id });
+      .trigger({
+        item: item.name, task: task.name, days, due_date: formatDate(state.dueDate),
+      }, { itemId: item.id, taskId: task.id });
   }
 
   // A task marked done by the device itself (test button, consumable replaced, refilled): confirm it in the timeline.
@@ -110,12 +117,58 @@ class MaintenanceMonitorApp extends Homey.App {
 
   // Every "done" (app, widget, flow or device): flows can follow up, e.g. reset the counter in the device itself.
   async triggerDone({ item, task, automatic }) {
+    const next = evaluateTask(task, this.items.today(), this.items.options());
     await this.homey.flow.getTriggerCard('task_done').trigger(
       {
-        item: item.name, task: task.name, key: task.key || '', automatic: Boolean(automatic),
+        item: item.name, task: task.name, key: task.key || '', automatic: Boolean(automatic), next_due: formatDate(next.dueDate),
       },
       { itemId: item.id, taskId: task.id },
     );
+  }
+
+  // ---------- icons ----------
+
+  // Icon of an item as data URI: chosen app icon, the linked device's own Homey icon, or the category icon.
+  async iconFor(item) {
+    const category = getCategory(item.category);
+    const choice = item.icon || (category.id === 'other' && item.link ? 'device' : null);
+    if (choice === 'device' && item.link) {
+      const uri = await this.getDeviceIcon(item.link.id).catch(() => null);
+      if (uri) return uri;
+    }
+    return getIconUri(choice && choice !== 'device' ? choice : category.icon);
+  }
+
+  // The icon Homey shows for a device: the one picked by the user (iconOverride), else the driver icon.
+  async getDeviceIcon(deviceId) {
+    const cached = this._deviceIcons.get(deviceId);
+    if (cached && Date.now() - cached.at < (cached.uri ? ICON_TTL_MS : ICON_RETRY_MS)) return cached.uri;
+    let uri = null;
+    try {
+      const api = await this.getApi();
+      const device = await api.devices.getDevice({ id: deviceId });
+      const base = String(await this.homey.api.getLocalUrl()).replace(/\/$/, '');
+      const paths = [
+        device.iconOverride ? `/web/img/devices/${encodeURIComponent(device.iconOverride)}.svg` : null,
+        device.iconObj && device.iconObj.url,
+      ].filter(Boolean);
+      for (const p of paths) {
+        uri = await this._fetchSvg(base + p).catch(() => null);
+        if (uri) break;
+      }
+    } catch (err) {
+      this.error(`Could not get the icon of device ${deviceId}:`, err.message);
+    }
+    this._deviceIcons.set(deviceId, { uri, at: Date.now() });
+    return uri;
+  }
+
+  async _fetchSvg(url) {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok || !/svg/.test(res.headers.get('content-type') || '')) return null;
+    const svg = await res.text();
+    if (!svg.includes('<svg') || svg.length > ICON_MAX_BYTES) return null;
+    return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
   }
 
   // ---------- flow cards (choose an item or "item › task") ----------

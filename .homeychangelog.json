@@ -34,5 +34,9 @@
   "0.8.0": {
     "en": "When you mark a task done, Maintenance Monitor can also run an action on the linked device, e.g. reset the brush or filter counter of a robot vacuum: one place to tick it off. Chosen automatically for robot vacuums that offer reset actions. New flow card 'A task of [item] was done'.",
     "nl": "Vink je een taak af, dan kan Maintenance Monitor ook een actie op het gekoppelde apparaat uitvoeren, bijv. de borstel- of filterteller van een robotstofzuiger terugzetten: één plek om af te vinken. Wordt vanzelf gekozen bij robotstofzuigers met resetacties. Nieuwe flowkaart 'Een taak van [onderdeel] is gedaan'."
+  },
+  "0.9.0": {
+    "en": "Choose an icon per item: the icon the linked device has in Homey, or any icon of the app ('Other' with a linked device now shows the device's icon). The WHEN cards have a due date tag (e.g. 31-10-2026); 'A task was done' has the next due date. Tip in the settings on getting notifications as push messages.",
+    "nl": "Kies per onderdeel een pictogram: het pictogram dat het gekoppelde apparaat in Homey heeft, of een pictogram van de app ('Overig' met een gekoppeld apparaat toont nu het pictogram van dat apparaat). De WANNEER-kaarten hebben een tag met de datum (bijv. 31-10-2026); 'Een taak is gedaan' geeft de volgende datum. Tip in de instellingen om meldingen als pushbericht te krijgen."
   }
 }

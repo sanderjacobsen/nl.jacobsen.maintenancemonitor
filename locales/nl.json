@@ -148,7 +148,12 @@
     "rename": "Naam",
     "close": "Sluiten",
     "search": "Zoek op onderdeel, apparaat of taak",
-    "no_results": "Geen onderdelen gevonden voor '__query__'."
+    "no_results": "Geen onderdelen gevonden voor '__query__'.",
+    "icon": "Pictogram",
+    "icon_default": "Standaard",
+    "icon_device": "Pictogram van __device__",
+    "icon_hint": "Standaard is het pictogram van het soort onderdeel; bij Overig met een gekoppeld apparaat het pictogram dat dat apparaat in Homey heeft.",
+    "notify_push_hint": "Meldingen komen in de tijdlijn van Homey. Wil je ze ook als pushbericht op je telefoon: Homey-app › Instellingen › Meldingen › Maintenance Monitor › Pushmelding aan."
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",

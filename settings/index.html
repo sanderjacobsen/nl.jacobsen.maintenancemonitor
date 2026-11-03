@@ -50,6 +50,15 @@
     .ha-row:first-child { border-top: none; }
     .ha-row .homey-form-checkbox { margin: 0; }
     .ha-row .homey-form-input { width: 80px !important; }
+    .ha-row.ha-hint { display: block; font-size: var(--homey-font-size-small); color: var(--homey-color-text-light); line-height: 20px; }
+
+    /* icon picker */
+    .ha-icons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .ha-pick { all: unset; box-sizing: border-box; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      border-radius: var(--homey-border-radius-small); box-shadow: 0 0 0 1px var(--homey-color-line); -webkit-tap-highlight-color: transparent; }
+    .ha-pick .ha-icon { width: 28px; height: 28px; -webkit-mask-position: center; mask-position: center; }
+    .ha-pick.sel { box-shadow: 0 0 0 2px var(--homey-color-blue); }
+    .ha-pick.text { width: auto; padding: 0 12px; font-size: var(--homey-font-size-small); color: var(--homey-color-text); }
 
     /* ---- wizard ---- */
 
@@ -131,6 +140,7 @@
     <div class="ha-row"><label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_due" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_due"></span></label></div>
     <div class="ha-row"><label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="notify_overdue" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.notify_overdue"></span></label></div>
     <div class="ha-row"><span data-i18n="settings.overdue_after"></span><input class="homey-form-input" type="number" inputmode="numeric" id="overdue_after_days" min="1" max="365" /></div>
+    <div class="ha-row ha-hint" data-i18n="settings.notify_push_hint"></div>
   </div>
 
   <div class="ha-section" data-i18n="settings.backup"></div>
@@ -248,6 +258,20 @@
       <label class="homey-form-label" style="margin-top:0">${esc(t('settings.rename'))}</label>
       <div class="ha-grid2"><input class="homey-form-input item-name" type="text" maxlength="60" value="${esc(item.name)}" />
         <button class="homey-button-secondary-small-shadow" data-act="rename">${esc(t('usage.save'))}</button></div></div>`;
+  }
+
+  // Choose the icon: standard, the linked device's own Homey icon, or any icon of the app.
+  function iconRow(item) {
+    const pick = (value, uri, title) => `<button class="ha-pick${(item.icon || null) === value ? ' sel' : ''}" data-act="icon" data-id="${item.id}" data-icon="${esc(value)}" title="${esc(title)}" aria-label="${esc(title)}">${icon(uri)}</button>`;
+    const seen = new Set();
+    const appIcons = templates.filter(c => !seen.has(c.icon) && seen.add(c.icon)).map(c => pick(c.icon, c.iconUri, c.name)).join('');
+    return `<div class="ha-task">
+      <label class="homey-form-label" style="margin-top:0">${esc(t('settings.icon'))}</label>
+      <div class="ha-icons">
+        <button class="ha-pick text${item.icon ? '' : ' sel'}" data-act="icon" data-id="${item.id}" data-icon="">${esc(t('settings.icon_default'))}</button>
+        ${item.deviceIconUri ? pick('device', item.deviceIconUri, t('settings.icon_device', { device: item.link.name })) : ''}${appIcons}
+      </div>
+      <p class="ha-sub" style="margin:8px 0 0">${esc(t('settings.icon_hint'))}</p></div>`;
   }
 
   function linkRow(item) {
@@ -445,7 +469,7 @@
       return `<div class="ha-card" data-item="${item.id}">
         <div class="ha-head">${icon(item.iconUri)}<div><div class="name">${esc(item.name)}</div><div class="ha-sub">${esc(item.categoryName)}${item.link ? ` · ${esc(item.link.name)}` : ''}</div></div>${item.tasks.length ? stateIcon(worst) : ''}</div>
         <div class="ha-task" style="padding-top:0;border-top:none"><button class="homey-button-transparent-small" style="padding-left:0" data-act="toggle-settings" data-id="${item.id}">${esc(t('settings.item_settings'))} ${openSettings.has(item.id) ? '▴' : '▾'}</button></div>
-        ${openSettings.has(item.id) ? `${nameRow(item)}${installRow(item)}${linkRow(item)}
+        ${openSettings.has(item.id) ? `${nameRow(item)}${iconRow(item)}${installRow(item)}${linkRow(item)}
           <div class="ha-task"><button class="homey-button-danger-small-shadow" data-act="delete-item" data-id="${item.id}">${esc(t('settings.delete_item'))}</button></div>` : ''}
         ${tasks}
         <div class="ha-task" data-item="${item.id}" data-task="new">
@@ -480,6 +504,11 @@
         const row = btn.closest('[data-namerow]');
         replaceItem(await api('PUT', `/items/${row.dataset.namerow}`, { name: row.querySelector('.item-name').value }));
         render(); H.alert(t('settings.saved'));
+        return;
+      }
+      if (btn.dataset.act === 'icon') {
+        replaceItem(await api('PUT', `/items/${btn.dataset.id}`, { icon: btn.dataset.icon || null }));
+        render();
         return;
       }
       if (btn.dataset.act === 'delete-item') {

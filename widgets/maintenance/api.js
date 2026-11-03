@@ -1,7 +1,5 @@
 'use strict';
 
-const { getCategory, getIconUri } = require('../../lib/templates');
-
 const ORDER = ['ok', 'soon', 'due', 'overdue'];
 
 module.exports = {
@@ -10,7 +8,7 @@ module.exports = {
   async getTasks({ homey }) {
     const tasks = [];
     for (const item of await homey.app.items.evaluate()) {
-      const iconUri = getIconUri(getCategory(item.category).icon);
+      const iconUri = await homey.app.iconFor(item);
       for (const task of item.tasks) {
         tasks.push({
           itemId: item.id,

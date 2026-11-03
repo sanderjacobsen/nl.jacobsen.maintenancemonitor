@@ -67,6 +67,15 @@
         "nl": "Door het apparaat"
       },
       "example": false
+    },
+    {
+      "name": "next_due",
+      "type": "string",
+      "title": {
+        "en": "Next due date",
+        "nl": "Volgende keer nodig"
+      },
+      "example": "31-01-2027"
     }
   ]
 }

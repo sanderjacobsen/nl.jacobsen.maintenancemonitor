@@ -58,6 +58,15 @@
         "nl": "Dagen"
       },
       "example": 7
+    },
+    {
+      "name": "due_date",
+      "type": "string",
+      "title": {
+        "en": "Due date",
+        "nl": "Datum nodig"
+      },
+      "example": "31-10-2026"
     }
   ]
 }
