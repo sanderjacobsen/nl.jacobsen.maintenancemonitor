@@ -152,7 +152,13 @@ Questions, ideas or bugs? Reply in the [Homey Community topic](https://community
 
 ## Credits
 
-Device pictograms: Athom (Homey), Sure Petcare (Felaqua Connect, SureFeed), Whisker (Litter-Robot 4) and Omlet (Autodoor) Homey apps; water softener pictogram from the AquaCell app.
+Device pictograms come from Homey and other Homey apps; they remain the property of their makers (details in [LICENSE](LICENSE)):
+
+- Homey device icons: Athom B.V.
+- Pet fountain and pet feeder: [Sure Petcare Homey app](https://github.com/koktaildotcom/com.sure-petcare) (MIT, © 2019 koktaildotcom)
+- Litter box: Whisker Homey app (Automated Pet Care Products, LLC)
+- Chicken coop: Omlet Smart Homey app (Bouke Regnerus)
+- Water softener: AquaCell Homey app
 
 ---
 

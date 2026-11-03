@@ -19,3 +19,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Third-party pictograms in assets/icons/
+
+The MIT license above covers the code of Maintenance Monitor. Some device
+pictograms come from other Homey apps and remain the property of their makers:
+
+- pet_fountain.svg, pet_feeder.svg: from the Sure Petcare Homey app
+  (github.com/koktaildotcom/com.sure-petcare), MIT License,
+  Copyright (c) 2019 koktaildotcom. SureFeed and Felaqua are trademarks of Sure Petcare.
+- litter_box.svg: from the Whisker Homey app by Automated Pet Care Products, LLC.
+  Litter-Robot is a trademark of Automated Pet Care Products, LLC.
+- chicken_coop.svg: from the Omlet Smart Homey app by Bouke Regnerus.
+  Omlet is a trademark of Omlet Ltd.
+- water_softener.svg: from the AquaCell Homey app by Sander Jacobsen.
+- house.svg: drawn for this app.
+- All other pictograms: Homey device icons by Athom B.V.
