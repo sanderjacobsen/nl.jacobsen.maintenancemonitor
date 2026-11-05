@@ -86,4 +86,34 @@ const prog = { autoDone: { capability: 'display_program', op: 'contains', value:
 applyAutoDone(prog, null);
 assert.strictEqual(applyAutoDone(prog, 'Katoen 90°C'), true);
 
+// Signal: due while the device reports it, done by itself when it goes away.
+const tank = {
+  type: 'usage', threshold: 1, leadPercent: 10, lastDone: '2026-11-01',
+  source: { capability: 'dreame_water_tank', metric: 'signal', condition: { op: 'in', value: 'low_water,no_water' } },
+};
+assert.strictEqual(applyValue(tank, 'installed', 0), 'change');
+assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'ok');
+assert.strictEqual(applyValue(tank, 'low_water', 1), 'event');
+assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'due');
+assert.strictEqual(applyValue(tank, 'no_water', 2), 'change'); // still the same signal
+assert.strictEqual(applyValue(tank, 'installed', 3), 'reset'); // refilled: the caller marks it done
+assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'ok');
+// Marked done by the user while still empty: quiet until it clears and comes back.
+applyValue(tank, 'no_water', 4);
+resetUsage(tank, 5);
+assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'ok');
+assert.strictEqual(applyValue(tank, 'installed', 6), 'event'); // no second "done"
+assert.strictEqual(applyValue(tank, 'no_water', 7), 'event');
+assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'due');
+// Boolean message and a number below a limit.
+const msg = { type: 'usage', threshold: 1, source: { capability: 'alarm_information', metric: 'signal', condition: { op: 'true' } } };
+assert.strictEqual(applyValue(msg, true, 0), 'event');
+assert.strictEqual(evaluateTask(msg, '2026-11-05').status, 'due');
+const saltSide = { type: 'usage', threshold: 1, source: { capability: 'measure_salt_left', metric: 'signal', condition: { op: 'lt', value: 25 } } };
+applyValue(saltSide, 50, 0);
+assert.strictEqual(evaluateTask(saltSide, '2026-11-05').status, 'ok');
+applyValue(saltSide, 20, 1);
+assert.strictEqual(evaluateTask(saltSide, '2026-11-05').status, 'due');
+assert.strictEqual(tick(saltSide, 999999), null);
+
 console.log('usage tests ok');

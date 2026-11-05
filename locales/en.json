@@ -93,7 +93,8 @@
       "weeks": "Every week",
       "months": "Every month",
       "years": "Every year"
-    }
+    },
+    "signal_sum": "due while the device reports it, marks itself done"
   },
   "settings": {
     "title": "Maintenance Monitor",
@@ -161,7 +162,10 @@
     "notify_push_hint": "Date-based notifications and the daily reminder arrive at the time above; notifications from usage or a counter arrive right away. They appear in the Homey timeline. To also get them as a push message on your phone: Homey app › Settings › Notifications › Maintenance Monitor › turn on push notifications.",
     "notify_time": "Time for notifications",
     "daily_reminder": "Remind me every day while tasks are due or overdue",
-    "tab_settings": "Settings"
+    "tab_settings": "Settings",
+    "suggested": "Suggested",
+    "from_device": "From the device (__device__)",
+    "from_device_hint": "The linked device reports __count__ maintenance signals itself: pick them under + Add task."
   },
   "usage": {
     "link": "Link to a Homey device",
@@ -201,7 +205,16 @@
     "dir_up": "rises to (how full it is)",
     "level_threshold": "Due at",
     "level_at": "due at",
-    "desc_level": "Follows __cap__ (now __value__). When the value jumps back (replaced, refilled or emptied), the task is marked done by itself."
+    "desc_level": "Follows __cap__ (now __value__). When the value jumps back (replaced, refilled or emptied), the task is marked done by itself.",
+    "metric_signal": "Signal from the device",
+    "sig_when": "Due while",
+    "sig_on": "is on",
+    "sig_is": "is",
+    "sig_lt": "is below",
+    "sig_gt": "is above",
+    "desc_signal": "Due while \"__cap__\" __cond__",
+    "sig_now": "now: __value__",
+    "sig_hint": "The task is due as long as the device reports this (notification right away, also outside the notification time) and marks itself done when it is over, e.g. when the tank is refilled."
   },
   "widget": {
     "title": "Maintenance",

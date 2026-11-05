@@ -5,6 +5,7 @@ Test the smoke detectors, clean the air conditioner filters, give the washing ma
 - All in one place: 25 types of items with suggested tasks and intervals (smoke and CO detectors, washing machine, dryer, dishwasher, air conditioner, ventilation, boiler and heat pump, 3D printer, robot vacuum, coffee machine, pet and chicken supplies, cameras, solar panels, car, house and more).
 - By date or by usage: every 3 months, or link a Homey device and count running hours, the number of runs or a device counter. For example: "clean the drum after 30 washes or after 2 months, whichever comes first".
 - Follows what the device knows itself: brush and filter life of a robot vacuum, salt left in a water softener. Replacing or refilling marks the task done, and a smoke detector test can tick off its own task.
+- Signals from the device: water tank empty, dust bag full, a message on the appliance. The app finds them on your linked device; the task is due while the device reports it and done by itself when it is over.
 - Tap Done and the interval starts again; optionally Homey also resets the counter in the device itself.
 - Notifications at a time you choose when a task is due soon, due or overdue, plus an optional daily reminder while something is still open.
 - One overview device with a red dot when something needs attention, so your appliances don't appear twice in your device list.

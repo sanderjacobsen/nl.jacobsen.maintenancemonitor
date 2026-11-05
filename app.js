@@ -4,7 +4,7 @@ const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 const ItemManager = require('./lib/items');
 const { severity, evaluateTask, formatDate } = require('./lib/schedule');
-const { suggestSource } = require('./lib/suggest');
+const { suggestSource, suggestDeviceTasks } = require('./lib/suggest');
 const { getCategory, getIconUri } = require('./lib/templates');
 
 const CHECK_INTERVAL_MS = 60 * 60 * 1000;
@@ -315,6 +315,7 @@ class MaintenanceMonitorApp extends Homey.App {
             units: title(c.units) || null,
             values: Array.isArray(c.values) ? c.values.map(v => ({ id: v.id, title: title(v.title) || v.id })) : null,
             value: c.value,
+            setable: c.setable === true,
           })),
         actions: actionsOf(d.id),
       }))
@@ -322,6 +323,8 @@ class MaintenanceMonitorApp extends Homey.App {
         ...d,
         // How to measure usage of this device (status "In use" > power above X W > on/off; own counters for runs).
         suggest: Object.fromEntries(['hours', 'cycles', 'counter'].map(m => [m, suggestSource(d, m)])),
+        // Maintenance the device reports itself (water tank empty, dust bag full, salt %): offered as tasks.
+        deviceTasks: suggestDeviceTasks(d),
       }))
       .sort((a, b) => (a.zone + a.name).localeCompare(b.zone + b.name));
   }

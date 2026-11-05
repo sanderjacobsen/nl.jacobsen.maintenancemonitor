@@ -226,9 +226,24 @@
     };
   }
 
+  // Signal tasks: "due while Water Tank is Low water / No water".
+  function signalCondition(op, value, c) {
+    if (op === 'true') return t('usage.sig_on');
+    if (op === 'lt' || op === 'gt') return `${t('usage.sig_' + op)} ${value} ${(c && c.units) || ''}`.trim();
+    const ids = String(value ?? '').split(',').map(v => v.trim()).filter(Boolean);
+    const names = ids.map(id => { const v = c && (c.values || []).find(x => String(x.id) === id); return v ? v.title : id; });
+    return `${t('usage.sig_is')} ${names.join(' / ') || '…'}`;
+  }
+
+  function describeSignal(src, dev) {
+    const c = capOf(dev, src.capability);
+    return t('usage.desc_signal', { cap: c ? c.title : src.capability, cond: signalCondition(src.condition && src.condition.op, src.condition && src.condition.value, c) });
+  }
+
   function describeSource(d, dev) {
     const c = capOf(dev, d.srcCap);
     if (!c) return '';
+    if (d.metric === 'signal') return describeSignal({ capability: d.srcCap, condition: { op: d.op, value: d.cmpValue } }, dev);
     if ((d.metric || 'hours') === 'counter') return t('usage.desc_counter', { cap: c.title });
     if (d.metric === 'level') return t('usage.desc_level', { cap: c.title, value: `${c.value ?? '–'} ${c.units || ''}`.trim() });
     let cond = t('usage.is_on');
@@ -244,6 +259,13 @@
   // ---------- texts ----------
   function metaText(task, dev) {
     const auto = (task.autoDone ? ` · ${t('auto.short')}` : '') + (task.resetAction ? ` · ${t('auto.reset_short')}` : '');
+    if (task.type === 'usage' && task.source && task.source.metric === 'signal') {
+      const c = capOf(dev, task.source.capability);
+      const last = task.track ? task.track.last : null;
+      const v = c && (c.values || []).find(x => String(x.id) === String(last));
+      const now = last === null || last === undefined ? '–' : (v ? v.title : String(last));
+      return `${describeSignal(task.source, dev)} · ${t('usage.sig_now', { value: now })}${auto}`;
+    }
     if (task.type === 'counter' || task.type === 'usage') {
       const metric = (task.source && task.source.metric) || 'hours';
       const what = task.type === 'counter' ? t('settings.type_counter') : t('usage.metric_' + metric);
@@ -325,7 +347,10 @@
 
   function taskFromDraft(d, dev) {
     const task = { ...d };
-    if (d.type === 'usage') {
+    if (d.type === 'usage' && d.metric === 'signal') {
+      task.source = { capability: d.srcCap, metric: 'signal', condition: { op: d.op || 'true', value: d.cmpValue }, units: usageUnit(d, dev) };
+      Object.assign(task, { threshold: 1, leadPercent: 0, combine: false });
+    } else if (d.type === 'usage') {
       task.source = {
         capability: d.srcCap, metric: d.metric || 'hours', condition: { op: d.op || 'true', value: d.cmpValue },
         offDelayMin: Number(d.offDelayMin ?? 3), minRunMin: Number(d.minRunMin ?? 1), units: usageUnit(d, dev), direction: d.direction || 'down',
@@ -355,8 +380,30 @@
   function usageFields(d, dev) {
     if (!dev) return `<p class="ha-sub" style="margin-top:12px">${esc(t('usage.no_link'))}</p>`;
     const metric = d.metric || 'hours';
-    const metricOpts = ['hours', 'cycles', 'counter', 'level'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(t('usage.metric_' + m))}</option>`).join('');
+    const metricOpts = ['hours', 'cycles', 'counter', 'level', 'signal'].map(m => `<option value="${m}" ${m === metric ? 'selected' : ''}>${esc(t('usage.metric_' + m))}</option>`).join('');
     let source;
+    if (metric === 'signal') {
+      const caps = dev.capabilities.filter(c => ['boolean', 'enum', 'number', 'string'].includes(c.type) && !c.setable);
+      const cap = capOf(dev, d.srcCap) || caps[0];
+      let cond = '';
+      if (cap && cap.type === 'boolean') cond = `<p class="ha-sub" style="margin-top:8px">${esc(t('usage.sig_on'))}</p>`;
+      else if (cap && cap.type === 'number') {
+        cond = `<div class="ha-inline" style="margin-top:8px"><select class="homey-form-select" data-f="op">${['lt', 'gt'].map(o => `<option value="${o}" ${o === d.op ? 'selected' : ''}>${esc(t('usage.sig_' + o))}</option>`).join('')}</select>
+          <input class="homey-form-input" type="number" inputmode="decimal" data-f="cmpValue" value="${esc(d.cmpValue ?? '')}" /></div>`;
+      } else if (cap && (cap.values || []).length) {
+        const chosen = String(d.cmpValue ?? '').split(',');
+        cond = `<p class="ha-sub" style="margin-top:8px">${esc(t('usage.sig_is'))}</p>${cap.values.map(v => `<label class="homey-form-checkbox" style="margin-top:6px"><input class="homey-form-checkbox-input" type="checkbox" data-sig="${esc(v.id)}" ${chosen.includes(String(v.id)) ? 'checked' : ''} />
+          <span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text">${esc(v.title)}</span></label>`).join('')}`;
+      } else if (cap) {
+        cond = `<input class="homey-form-input" style="margin-top:8px" type="text" data-f="cmpValue" placeholder="${esc(t('usage.equals'))}…" value="${esc(d.cmpValue ?? '')}" />`;
+      }
+      return `<label class="homey-form-label">${esc(t('usage.metric'))}</label>
+        <select class="homey-form-select" data-f="metric">${metricOpts}</select>
+        <label class="homey-form-label">${esc(t('usage.sig_when'))}</label>
+        <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select>
+        ${cond}
+        <p class="ha-sub" style="margin-top:8px">${esc(t('usage.sig_hint'))}</p>`;
+    }
     if (metric === 'level') {
       const caps = dev.capabilities.filter(c => c.type === 'number');
       source = `<label class="homey-form-label">${esc(t('usage.level_cap'))}</label>
@@ -441,7 +488,7 @@
       <label class="homey-form-label">${esc(t('settings.type'))}</label>
       <select class="homey-form-select" data-f="type">${typeOpts}</select>
       ${fields}
-      ${dev ? autoDoneFields(d, dev) : ''}
+      ${dev && !(d.type === 'usage' && d.metric === 'signal') ? autoDoneFields(d, dev) : ''}
       ${dev && (dev.actions || []).length ? `<label class="homey-form-label">${esc(t('auto.reset_title'))}</label>
         <select class="homey-form-select" data-f="raId"><option value="">${esc(t('auto.reset_none'))}</option>${dev.actions.map(a => `<option value="${esc(a.id)}" ${a.id === d.raId ? 'selected' : ''}>${esc(a.title)}</option>`).join('')}</select>` : ''}
       <label class="homey-form-label">${esc(t('settings.note'))}</label>
@@ -472,6 +519,9 @@
       const cat = templates.find(c => c.id === item.category);
       const used = new Set(item.tasks.map(tk => tk.key).filter(Boolean));
       const suggestions = (cat ? cat.tasks : []).filter(tk => !used.has(tk.key));
+      // What the linked device reports itself (water tank, dust bag, salt, a message), unless a task already uses it.
+      const fromDevice = (dev && dev.deviceTasks || []).filter(x => !item.tasks.some(tk => tk.source
+        && tk.source.capability === x.source.capability && tk.source.metric === x.source.metric));
       const worst = item.tasks.reduce((w, tk) => (ORDER.indexOf(tk.status) > ORDER.indexOf(w) ? tk.status : w), 'ok');
       const tasks = item.tasks.map(task => {
         const isEditing = editing && editing.itemId === item.id && editing.taskId === task.id;
@@ -496,8 +546,10 @@
         <div class="ha-task" data-item="${item.id}" data-task="new">
           ${adding ? editForm(editing.draft, item) : `<select class="homey-form-select add-select">
             <option value="">+ ${esc(t('settings.add_task'))}</option>
-            ${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}
-            <option value="custom">${esc(t('settings.custom'))}</option></select>`}
+            ${suggestions.length ? `<optgroup label="${esc(t('settings.suggested'))}">${suggestions.map(tk => `<option value="tpl:${esc(tk.key)}">${esc(tk.name)}</option>`).join('')}</optgroup>` : ''}
+            ${fromDevice.length ? `<optgroup label="${esc(t('settings.from_device', { device: item.link.name }))}">${fromDevice.map(x => `<option value="dev:${esc(x.key)}">${esc(x.name)}</option>`).join('')}</optgroup>` : ''}
+            <option value="custom">${esc(t('settings.custom'))}</option></select>
+            ${fromDevice.length ? `<p class="ha-sub" style="margin:6px 0 0">${esc(t('settings.from_device_hint', { count: fromDevice.length }))}</p>` : ''}`}
         </div>
       </div>`;
     }).join('') + `<div class="ha-card ha-legend">${ORDER.map(s => `<span>${stateIcon(s)}${esc(t('status.' + s))}</span>`).join('')}</div>`;
@@ -587,8 +639,26 @@
     editing.draft[f] = ev.target.value; // typing: keep focus
   }
 
+  // Default condition of a signal: boolean on, number below, otherwise the values that ask for attention.
+  function signalDefaults(dev, capId) {
+    const tasks = (dev && dev.deviceTasks || []).filter(x => x.source.metric === 'signal');
+    const sug = tasks.find(x => x.source.capability === capId) || (!capId && tasks[0]);
+    if (sug) return { srcCap: sug.source.capability, op: sug.source.condition.op, cmpValue: sug.source.condition.value ?? '' };
+    const c = capOf(dev, capId) || (dev && dev.capabilities.find(x => ['boolean', 'enum', 'number', 'string'].includes(x.type) && !x.setable));
+    if (!c) return {};
+    return { srcCap: c.id, op: c.type === 'boolean' ? 'true' : c.type === 'number' ? 'lt' : (c.values || []).length ? 'in' : 'equals', cmpValue: '' };
+  }
+
   function onChange(ev) {
     const el = ev.target;
+    if (el.dataset.sig !== undefined && editing) {
+      const d = editing.draft;
+      const set = new Set(String(d.cmpValue ?? '').split(',').filter(Boolean));
+      if (el.checked) set.add(el.dataset.sig); else set.delete(el.dataset.sig);
+      Object.assign(d, { op: 'in', cmpValue: [...set].join(',') });
+      render();
+      return;
+    }
     const f = el.dataset.f;
     if (f && editing) {
       const d = editing.draft;
@@ -596,18 +666,29 @@
       const item = items.find(i => i.id === editing.itemId);
       const dev = linkedDevice(item);
       if (f === 'type' && d.type === 'usage' && !d.srcCap) Object.assign(d, { combine: true }, autoSource(dev, d.metric || 'hours', 10));
-      if (f === 'metric') Object.assign(d, d.metric === 'level' ? MM.levelSource(dev, d.level) : autoSource(dev, d.metric, 10));
+      if (f === 'metric') Object.assign(d, d.metric === 'level' ? MM.levelSource(dev, d.level) : d.metric === 'signal' ? { ...signalDefaults(dev), combine: false } : autoSource(dev, d.metric, 10));
       if (['srcCap', 'cmpValue'].includes(f)) d.auto = false;
-      if (f === 'srcCap' && d.metric !== 'level') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
+      if (f === 'srcCap' && d.metric === 'signal') Object.assign(d, signalDefaults(dev, d.srcCap));
+      else if (f === 'srcCap' && d.metric !== 'level') { const c = capOf(dev, d.srcCap); d.op = !c || c.type === 'boolean' ? 'true' : c.type === 'number' ? 'gt' : 'equals'; d.cmpValue = d.op === 'gt' ? 10 : ''; }
       if (f === 'adOn' && d.adOn && !d.adCap) { const c = dev && dev.capabilities.find(x => x.type === 'boolean'); if (c) Object.assign(d, { adCap: c.id, adOp: 'true' }); }
       if (f === 'adCap') { const c = capOf(dev, d.adCap); d.adOp = c && c.type === 'boolean' ? 'true' : 'equals'; d.adValue = ''; }
-      if (['type', 'metric', 'srcCap', 'combine', 'unit', 'adOn', 'adCap', 'adOp', 'adValue'].includes(f)) render();
+      if (['type', 'metric', 'srcCap', 'combine', 'unit', 'adOn', 'adCap', 'adOp', 'adValue', 'op'].includes(f)) render();
       return;
     }
     if (!el.classList.contains('add-select') || !el.value) return;
     const item = items.find(i => i.id === el.closest('[data-item]').dataset.item);
     let draft = { name: '', type: 'date', every: 3, unit: 'months', leadDays: 7, lastDone: today(), threshold: 100, leadPercent: 10 };
-    if (el.value.startsWith('tpl:')) {
+    if (el.value.startsWith('dev:')) {
+      const dev = linkedDevice(item);
+      const sug = (dev && dev.deviceTasks || []).find(x => x.key === el.value.slice(4));
+      if (sug) {
+        const src = sug.source;
+        Object.assign(draft, {
+          name: sug.name, type: 'usage', threshold: sug.threshold, leadPercent: sug.leadPercent, combine: false,
+          metric: src.metric, srcCap: src.capability, op: src.condition ? src.condition.op : 'true', cmpValue: src.condition ? src.condition.value ?? '' : '', direction: src.direction || 'down',
+        });
+      }
+    } else if (el.value.startsWith('tpl:')) {
       const cat = templates.find(c => c.id === item.category);
       const tpl = cat.tasks.find(tk => tk.key === el.value.slice(4));
       draft = { ...draft, ...tpl };

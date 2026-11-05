@@ -140,6 +140,18 @@ function MaintenanceWizard(root, deps) {
         tk.type = 'date';
       }
     }
+    // What the device reports itself (water tank, dust bag, a message, salt %) as extra tasks; signals are ticked.
+    tasks = tasks.filter(tk => !tk.fromDevice);
+    for (const x of (dev && dev.deviceTasks) || []) {
+      if (tasks.some(tk => tk.type === 'usage' && tk.srcCap === x.source.capability && tk.metric === x.source.metric)) continue;
+      const src = x.source;
+      tasks.push({
+        key: null, custom: true, fromDevice: true, use: src.metric === 'signal', open: false, name: x.name, type: 'usage',
+        metric: src.metric, srcCap: src.capability, op: src.condition ? src.condition.op : 'true', cmpValue: src.condition ? src.condition.value ?? '' : '',
+        direction: src.direction || 'down', threshold: x.threshold, leadPercent: x.leadPercent, combine: false,
+        every: 1, unit: 'years', leadDays: 7, last: 'today', lastDate: today,
+      });
+    }
   }
 
   function unitLabel(tk) {
@@ -218,6 +230,7 @@ function MaintenanceWizard(root, deps) {
   function summaryOf(tk) {
     const auto = (MM.autoDoneFor(linked(), tk) ? ` · ${tr('auto.short')}` : '')
       + (tk.level && MM.findResetAction(linked(), tk.level.match) ? ` · ${tr('auto.reset_short')}` : '');
+    if (tk.type === 'usage' && tk.metric === 'signal') return `${tr('usage.metric_signal')} · ${tr('pair.signal_sum')}`;
     if (tk.type === 'usage') {
       const what = tr('usage.metric_' + (tk.metric || 'hours'));
       const amount = tk.metric === 'level' ? `${tr('usage.level_at')} ${tk.threshold} ${unitLabel(tk)}` : `${tr('usage.threshold').toLowerCase()} ${tk.threshold} ${unitLabel(tk)}`;
@@ -269,7 +282,7 @@ function MaintenanceWizard(root, deps) {
         <span class="homey-form-checkbox-text">${esc(tk.name || tr('pair.custom_name'))}</span>
       </label>
       <p class="wz-sum">${esc(summaryOf(tk))}</p>
-      ${tk.use && !tk.open ? `<button class="homey-button-secondary-small-shadow wz-edit-btn" data-open="${i}">${esc(tr('settings.edit'))}</button>` : ''}
+      ${tk.use && !tk.open && !tk.fromDevice ? `<button class="homey-button-secondary-small-shadow wz-edit-btn" data-open="${i}">${esc(tr('settings.edit'))}</button>` : ''}
       ${editor}
     </div>`;
   }

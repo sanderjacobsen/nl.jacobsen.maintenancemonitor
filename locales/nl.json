@@ -93,7 +93,8 @@
       "weeks": "Elke week",
       "months": "Elke maand",
       "years": "Elk jaar"
-    }
+    },
+    "signal_sum": "nodig zolang het apparaat dit meldt, vinkt zichzelf af"
   },
   "settings": {
     "title": "Maintenance Monitor",
@@ -161,7 +162,10 @@
     "notify_push_hint": "Meldingen op datum en de dagelijkse herinnering komen op het tijdstip hierboven; meldingen door gebruik of een teller komen direct. Ze staan in de tijdlijn van Homey. Wil je ze ook als pushbericht op je telefoon: Homey-app › Instellingen › Meldingen › Maintenance Monitor › Pushmelding aan.",
     "notify_time": "Tijdstip voor meldingen",
     "daily_reminder": "Elke dag herinneren zolang taken nodig of te laat zijn",
-    "tab_settings": "Instellingen"
+    "tab_settings": "Instellingen",
+    "suggested": "Voorgesteld",
+    "from_device": "Van het apparaat (__device__)",
+    "from_device_hint": "Het gekoppelde apparaat meldt zelf __count__ onderhoudssignalen: kies ze bij + Taak toevoegen."
   },
   "usage": {
     "link": "Koppelen aan Homey-apparaat",
@@ -201,7 +205,16 @@
     "dir_up": "stijgt tot (hoe vol het is)",
     "level_threshold": "Aan de beurt bij",
     "level_at": "aan de beurt bij",
-    "desc_level": "Volgt __cap__ (nu __value__). Springt de waarde terug (vervangen, bijgevuld of geleegd), dan wordt de taak vanzelf afgevinkt."
+    "desc_level": "Volgt __cap__ (nu __value__). Springt de waarde terug (vervangen, bijgevuld of geleegd), dan wordt de taak vanzelf afgevinkt.",
+    "metric_signal": "Signaal van het apparaat",
+    "sig_when": "Nodig zolang",
+    "sig_on": "aan staat",
+    "sig_is": "is",
+    "sig_lt": "lager is dan",
+    "sig_gt": "hoger is dan",
+    "desc_signal": "Nodig zolang \"__cap__\" __cond__",
+    "sig_now": "nu: __value__",
+    "sig_hint": "De taak is nodig zolang het apparaat dit meldt (melding direct, ook buiten het meldtijdstip) en vinkt zichzelf af als het over is, bijv. als de tank weer gevuld is."
   },
   "widget": {
     "title": "Onderhoud",

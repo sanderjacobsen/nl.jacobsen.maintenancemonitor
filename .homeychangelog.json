@@ -46,5 +46,9 @@
   "1.0.0": {
     "en": "First public release: all maintenance in one place, by date or by usage of your Homey devices, notifications at a time you choose, daily reminder, widget and Flow cards.",
     "nl": "Eerste openbare versie: al het onderhoud op één plek, op datum of op gebruik van je Homey-apparaten, meldingen op een zelf gekozen tijdstip, dagelijkse herinnering, widget en flowkaarten."
+  },
+  "1.1.0": {
+    "en": "New: tasks driven by a signal from the device, e.g. a robot vacuum's water tank empty or dust bag full, a message on a washing machine, salt running low. Due as long as the device reports it, done by itself when it is over. The app finds these signals on your linked device and offers them under + Add task and in the wizard.",
+    "nl": "Nieuw: taken op een signaal van het apparaat, bijv. watertank van de robotstofzuiger leeg of stofzak vol, een melding op de wasmachine, zout bijna op. Nodig zolang het apparaat het meldt, vinkt zichzelf af als het over is. De app vindt deze signalen op je gekoppelde apparaat en biedt ze aan bij + Taak toevoegen en in de wizard."
   }
 }
