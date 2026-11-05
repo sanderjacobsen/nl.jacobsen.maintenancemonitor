@@ -237,13 +237,15 @@
 
   function describeSignal(src, dev) {
     const c = capOf(dev, src.capability);
-    return t('usage.desc_signal', { cap: c ? c.title : src.capability, cond: signalCondition(src.condition && src.condition.op, src.condition && src.condition.value, c) });
+    const hold = Number(src.holdMin ?? 10);
+    return t('usage.desc_signal', { cap: c ? c.title : src.capability, cond: signalCondition(src.condition && src.condition.op, src.condition && src.condition.value, c) })
+      + (hold > 0 ? ` ${t('usage.sig_hold_short', { min: hold })}` : '');
   }
 
   function describeSource(d, dev) {
     const c = capOf(dev, d.srcCap);
     if (!c) return '';
-    if (d.metric === 'signal') return describeSignal({ capability: d.srcCap, condition: { op: d.op, value: d.cmpValue } }, dev);
+    if (d.metric === 'signal') return describeSignal({ capability: d.srcCap, condition: { op: d.op, value: d.cmpValue }, holdMin: d.holdMin }, dev);
     if ((d.metric || 'hours') === 'counter') return t('usage.desc_counter', { cap: c.title });
     if (d.metric === 'level') return t('usage.desc_level', { cap: c.title, value: `${c.value ?? '–'} ${c.units || ''}`.trim() });
     let cond = t('usage.is_on');
@@ -336,7 +338,7 @@
       Object.assign(d, {
         metric: task.source.metric, srcCap: task.source.capability, op: task.source.condition && task.source.condition.op,
         cmpValue: task.source.condition && task.source.condition.value, offDelayMin: task.source.offDelayMin, minRunMin: task.source.minRunMin,
-        direction: task.source.direction || 'down',
+        direction: task.source.direction || 'down', holdMin: task.source.holdMin ?? 10,
       });
     }
     Object.assign(d, autoDraft(task.autoDone), { raId: task.resetAction ? task.resetAction.id : '' });
@@ -348,7 +350,9 @@
   function taskFromDraft(d, dev) {
     const task = { ...d };
     if (d.type === 'usage' && d.metric === 'signal') {
-      task.source = { capability: d.srcCap, metric: 'signal', condition: { op: d.op || 'true', value: d.cmpValue }, units: usageUnit(d, dev) };
+      task.source = {
+        capability: d.srcCap, metric: 'signal', condition: { op: d.op || 'true', value: d.cmpValue }, units: usageUnit(d, dev), holdMin: Number(d.holdMin ?? 10),
+      };
       Object.assign(task, { threshold: 1, leadPercent: 0, combine: false });
     } else if (d.type === 'usage') {
       task.source = {
@@ -362,7 +366,7 @@
     delete task.raId;
     // Template hints (usage/level suggestions) are not task fields.
     if (typeof task.usage === 'object') delete task.usage;
-    ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'direction', 'adOn', 'adCap', 'adOp', 'adValue', 'level',
+    ['metric', 'srcCap', 'op', 'cmpValue', 'offDelayMin', 'minRunMin', 'direction', 'holdMin', 'adOn', 'adCap', 'adOp', 'adValue', 'level',
       'status', 'dueDate', 'days', 'progress', 'amountStatus'].forEach(k => delete task[k]);
     return task;
   }
@@ -402,6 +406,8 @@
         <label class="homey-form-label">${esc(t('usage.sig_when'))}</label>
         <select class="homey-form-select" data-f="srcCap">${caps.map(c => `<option value="${esc(c.id)}" ${cap && c.id === cap.id ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select>
         ${cond}
+        <label class="homey-form-label">${esc(t('usage.sig_hold'))}</label>
+        <div class="ha-inline days"><input class="homey-form-input" type="number" inputmode="numeric" min="0" data-f="holdMin" value="${d.holdMin ?? 10}" /><span>${esc(t('usage.minutes'))}</span></div>
         <p class="ha-sub" style="margin-top:8px">${esc(t('usage.sig_hint'))}</p>`;
     }
     if (metric === 'level') {

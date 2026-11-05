@@ -50,5 +50,9 @@
   "1.1.0": {
     "en": "New: tasks driven by a signal from the device, e.g. a robot vacuum's water tank empty or dust bag full, a message on a washing machine, salt running low. Due as long as the device reports it, done by itself when it is over. The app finds these signals on your linked device and offers them under + Add task and in the wizard.",
     "nl": "Nieuw: taken op een signaal van het apparaat, bijv. watertank van de robotstofzuiger leeg of stofzak vol, een melding op de wasmachine, zout bijna op. Nodig zolang het apparaat het meldt, vinkt zichzelf af als het over is. De app vindt deze signalen op je gekoppelde apparaat en biedt ze aan bij + Taak toevoegen en in de wizard."
+  },
+  "1.1.1": {
+    "en": "Signals from the device have a wait time (default 10 minutes): the task only becomes due when the signal lasts that long, so emptying a tank yourself stays quiet.",
+    "nl": "Signalen van het apparaat hebben een wachttijd (standaard 10 minuten): de taak wordt pas nodig als het signaal zo lang aanhoudt, zodat zelf een tank legen stil blijft."
   }
 }

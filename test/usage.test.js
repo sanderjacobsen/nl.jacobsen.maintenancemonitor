@@ -89,7 +89,9 @@ assert.strictEqual(applyAutoDone(prog, 'Katoen 90°C'), true);
 // Signal: due while the device reports it, done by itself when it goes away.
 const tank = {
   type: 'usage', threshold: 1, leadPercent: 10, lastDone: '2026-11-01',
-  source: { capability: 'dreame_water_tank', metric: 'signal', condition: { op: 'in', value: 'low_water,no_water' } },
+  source: {
+    capability: 'dreame_water_tank', metric: 'signal', holdMin: 0, condition: { op: 'in', value: 'low_water,no_water' },
+  },
 };
 assert.strictEqual(applyValue(tank, 'installed', 0), 'change');
 assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'ok');
@@ -106,14 +108,28 @@ assert.strictEqual(applyValue(tank, 'installed', 6), 'event'); // no second "don
 assert.strictEqual(applyValue(tank, 'no_water', 7), 'event');
 assert.strictEqual(evaluateTask(tank, '2026-11-05').status, 'due');
 // Boolean message and a number below a limit.
-const msg = { type: 'usage', threshold: 1, source: { capability: 'alarm_information', metric: 'signal', condition: { op: 'true' } } };
+const msg = { type: 'usage', threshold: 1, source: { capability: 'alarm_information', metric: 'signal', holdMin: 0, condition: { op: 'true' } } };
 assert.strictEqual(applyValue(msg, true, 0), 'event');
 assert.strictEqual(evaluateTask(msg, '2026-11-05').status, 'due');
-const saltSide = { type: 'usage', threshold: 1, source: { capability: 'measure_salt_left', metric: 'signal', condition: { op: 'lt', value: 25 } } };
+const saltSide = { type: 'usage', threshold: 1, source: { capability: 'measure_salt_left', metric: 'signal', holdMin: 0, condition: { op: 'lt', value: 25 } } };
 applyValue(saltSide, 50, 0);
 assert.strictEqual(evaluateTask(saltSide, '2026-11-05').status, 'ok');
 applyValue(saltSide, 20, 1);
 assert.strictEqual(evaluateTask(saltSide, '2026-11-05').status, 'due');
 assert.strictEqual(tick(saltSide, 999999), null);
+
+// Wait time (default 10 min): emptying the dirty water tank yourself stays quiet, a lasting signal becomes due.
+const dirty = { type: 'usage', threshold: 1, source: { capability: 'dreame_dirty_water_tank', metric: 'signal', condition: { op: 'in', value: 'not_installed_or_full' } } };
+applyValue(dirty, 'installed', 0);
+assert.strictEqual(applyValue(dirty, 'not_installed_or_full', 0), 'change');
+assert.strictEqual(evaluateTask(dirty, '2026-11-05').status, 'ok');
+assert.strictEqual(tick(dirty, 5 * M), null);
+assert.strictEqual(applyValue(dirty, 'installed', 6 * M), 'change'); // back within 10 min: no "done"
+assert.strictEqual(evaluateTask(dirty, '2026-11-05').status, 'ok');
+applyValue(dirty, 'not_installed_or_full', 20 * M);
+assert.strictEqual(tick(dirty, 29 * M), null);
+assert.strictEqual(tick(dirty, 30 * M), 'event');
+assert.strictEqual(evaluateTask(dirty, '2026-11-05').status, 'due');
+assert.strictEqual(applyValue(dirty, 'installed', 40 * M), 'reset');
 
 console.log('usage tests ok');

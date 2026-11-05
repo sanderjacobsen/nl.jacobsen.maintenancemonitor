@@ -214,7 +214,9 @@
     "sig_gt": "hoger is dan",
     "desc_signal": "Nodig zolang \"__cap__\" __cond__",
     "sig_now": "nu: __value__",
-    "sig_hint": "De taak is nodig zolang het apparaat dit meldt (melding direct, ook buiten het meldtijdstip) en vinkt zichzelf af als het over is, bijv. als de tank weer gevuld is."
+    "sig_hint": "De taak wordt nodig als het apparaat dit langer dan de wachttijd meldt (melding direct, ook buiten het meldtijdstip) en vinkt zichzelf af als het over is, bijv. als de tank weer gevuld is. Zelf even een tank legen blijft zo stil.",
+    "sig_hold": "Wachttijd (het signaal moet zo lang aanhouden)",
+    "sig_hold_short": "(langer dan __min__ min)"
   },
   "widget": {
     "title": "Onderhoud",
